@@ -1,22 +1,20 @@
 class Map {
     private int[][] map;
-    private boolean[][] occupied;
+    private Minion[][] minions;
 
     public Map(int row, int col) {
         this.map = new int[row][col];
-        this.occupied = new boolean[row][col];
+        this.minions = new Minion[row][col];
     }
 
     public void createMap() {
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
-                if ((i == 0 && j >= 1 && j <= 7) || (i == 1 && j >= 3 && j <= 7) || (i == 2 && j >= 5 && j <= 7) || (i == 3 && j == 7)) {
+                if ((i == 0 && j >= 2 && j <= 7) || (i == 1 && j >= 4 && j <= 7) || (i == 2 && j >= 6 && j <= 7)) {
                     map[i][j] = 0;
-                } else if((i == 8 && j == 0) || (i == 9 && j <= 2) || (i == 10 && j <= 4) || (i == 11 && j <= 6)) {
+                } else if((i == 8 && j <= 1) || (i == 9 && j <= 3) || (i == 10 && j <= 5)) {
                     map[i][j] = 0;
-                } else {
-                    map[i][j] = 1;
-                }
+                } else map[i][j] = 1;
             }
         }
     }
@@ -26,54 +24,58 @@ class Map {
     }
 
     public boolean isMinionHere(int row, int col) {
-        return occupied[row][col];
+        return minions[row][col] != null;
     }
 
-    public void placeMinion(int row, int col) {
-        occupied[row][col] = true;
+    public void placeMinion(int row, int col, Minion minion) {
+        minions[row][col] = minion;
+    }
+
+    public Minion getMinionAt(int row, int col) {
+        return minions[row][col];
+    }
+
+    public void removeMinion(int row, int col) {
+        minions[row][col] = null;
     }
 
     public void printMap() {
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
-                if (occupied[i][j]) {
-                    System.out.print("M ");
+                if (minions[i][j] != null) {
+                    System.out.print(minions[i][j].getOwner().getName() + " ");
                 } else {
-                    System.out.print(map[i][j] + " ");
+                    System.out.print(map[i][j] == 0 ? "X " : "- ");
                 }
             }
             System.out.println();
         }
     }
 
+
     public static void main(String[] args) {
-        Map m = new Map(11, 8);
-        m.createMap();
+        Map gameMap = new Map(11, 8);
+        gameMap.createMap();
 
-        MinionType warrior = new MinionType("Warrior", 5);
-        Minion minion = new Minion("Minion1", warrior, 100);
+        Player player1 = new Player("1");
+        Player player2 = new Player("2");
 
-        if (minion.spawn(5, 5, m)) {
-            m.placeMinion(5, 5);
-            System.out.println("Minion spawned at (5,5)");
-        } else {
-            System.out.println("Failed to spawn minion at (5,5)");
+        MinionType warrior = new MinionType("Warrior", 0);
+
+        Minion minionP1 = new Minion("P1Minion", warrior, 10, player1);
+        Minion minionP2 = new Minion("P2Minion", warrior, 10, player2);
+
+        if (minionP1.spawn(3, 3, gameMap)) {
+            System.out.println("P1 Minion spawned at (3,3)");
+        }
+        if (minionP2.spawn(3, 1, gameMap)) {
+            System.out.println("P2 Minion spawned at (3,1)");
         }
 
-        m.printMap();
-        System.out.println();
-        minion.move("up");
-        System.out.println(minion.getRow() + " ," + minion.getCol());
-        System.out.println();
-        minion.move("upleft");
-        System.out.println(minion.getRow() + " ," + minion.getCol());System.out.println();
-        minion.move("down");
-        System.out.println(minion.getRow() + " ," + minion.getCol());System.out.println();
-        minion.move("downleft");
-        System.out.println(minion.getRow() + " ," + minion.getCol());System.out.println();
-        minion.move("upright");
-        System.out.println(minion.getRow() + " ," + minion.getCol());System.out.println();
-        minion.move("downright");
-        System.out.println(minion.getRow() + " ," + minion.getCol());
+        gameMap.printMap();
+
+        minionP1.shoot(3, 1, gameMap,10);
+
+        gameMap.printMap();
     }
 }

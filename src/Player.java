@@ -1,16 +1,20 @@
 public class Player {
-    //    String name;
-    //    String type;
+    private String name;
     private double budget;
     private int numofMinion;
     private int numofArea;
 
-    public Player(double budget, int numofMinion, int numofArea) {
+    public Player(String name) {
+        //double budget, int numofMinion, int numofArea
         //        this.type = type;
-        //        this.name = name;
+        this.name = name;
         this.budget = budget;
         this.numofMinion = 0;
         this.numofArea = 5;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public double getBudget() {
