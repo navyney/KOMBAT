@@ -15,16 +15,7 @@ public class Player {
         this.budget = budget;
         this.minion = new ArrayList<Minion>();
         this.area = new ArrayList<Hex>();
-    }
-
-    public double getBudget() {
-        return budget;
-    }
-
-    public void setBudget(double budget) {
-        this.budget = budget;
-    }
-
+      
     public int getNumofMinion() {
         return minion.size();
     }
