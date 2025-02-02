@@ -64,10 +64,10 @@ public class Player {
         }
 
         if (hex.owner() == 0) { // ถ้าไม่มีเจ้าของ
-            if (this.budget >= 1.0) { // ตรวจสอบเงิน (สมมติว่าซื้อ Hex ราคา 1.0)
-                hex.setOwner(this.name.equals("1") ? 1 : 2); // กำหนดเจ้าของเป็น Player1 หรือ Player2
+            if (this.budget >= 1.0) { // ตรวจสอบเงิน สมมติHex ราคา 1
+                hex.setOwner(this.name.equals("1") ? 1 : 2);
                 this.area.add(hex);
-                this.budget -= 1.0; // หักเงิน
+                this.budget -= 1.0;
                 System.out.println(this.name + " has bought area at (" + r + "," + c + ")");
             } else {
                 System.out.println("Not enough budget to buy area!");

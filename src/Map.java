@@ -173,38 +173,33 @@ class Map {
 //        Minion minionP1 = new Minion("P1Minion", warrior, 10, player1, gameMap);
 //        Minion minionP2 = new Minion("P2Minion", warrior, 10, player2, gameMap);
 //
-//        // Player1 ซื้อพื้นที่
-//        player1.buyArea(3, 3, gameMap);
-//        player1.buyArea(3, 3, gameMap); // พยายามซื้อพื้นที่เดิม
 //
-//        // Player2 ซื้อพื้นที่
+//        player1.buyArea(3, 3, gameMap);
+//        player1.buyArea(3, 3, gameMap);
+//
+//
 //        player2.buyArea(3, 1, gameMap);
 //        gameMap.printMap();
 //
 //        System.out.println();
 //
-//        // Player1 พยายามวาง Minion ในพื้นที่ของตัวเอง
 //        if (minionP1.spawn(3, 3)) {
 //            System.out.println("P1 Minion spawned at (3,3)");
 //        }
 //
-//        // Player2 พยายามวาง Minion ในพื้นที่ของตัวเอง
 //        if (minionP2.spawn(3, 1)) {
 //            System.out.println("P2 Minion spawned at (3,1)");
 //        }
 //
-//        // Player1 พยายามวาง Minion ในพื้นที่ของ Player2
 //        if (minionP1.spawn(3, 1)) {
 //            System.out.println("P1 Minion spawned at (3,1)");
 //        }
 //
-//        // แสดงจำนวนพื้นที่และ Minion ที่ผู้เล่นมี
 //        System.out.println("Player1 areas: " + player1.getNumofArea());
 //        System.out.println("Player1 minions: " + player1.getNumofMinion());
 //        System.out.println("Player2 areas: " + player2.getNumofArea());
 //        System.out.println("Player2 minions: " + player2.getNumofMinion());
 //
-//        // แสดงแผนที่
 //        gameMap.printMap();
 //    }
 
