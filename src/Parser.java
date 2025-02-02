@@ -1,3 +1,3 @@
 public interface Parser {
-    Statement parse() throws SyntaxError, LexicalError, EvalError;
+    Strategy parse() throws SyntaxError, LexicalError, EvalError;
 }

@@ -1,5 +1,7 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 import static java.lang.Character.isDigit;
 
@@ -14,8 +16,8 @@ public class StatementParser implements Parser {
     }
 
     @Override
-    public Statement parse() throws SyntaxError, LexicalError, EvalError {
-        Statement result = parseStrategy();
+    public Strategy parse() throws SyntaxError, LexicalError, EvalError {
+        Strategy result = parseStrategy();
 
         // reject if there is remaining token
         if (tkz.hasNextToken())
@@ -23,11 +25,15 @@ public class StatementParser implements Parser {
         return result;
     }
 
-    private Statement parseStrategy() throws SyntaxError, LexicalError, EvalError {
-        Statement strategy = parseStatement();
+    private Strategy parseStrategy() throws SyntaxError, LexicalError, EvalError {
+        Statement s = parseStatement();
+        List<Statement> ls = new ArrayList<>();
+        ls.add(s);
         while (tkz.hasNextToken()) {
-            parseStatement();
+            Statement ws = parseStatement();
+            ls.add(ws);
         }
+        Strategy strategy = new Strategy(ls);
         return strategy;
     }
 
@@ -63,17 +69,19 @@ public class StatementParser implements Parser {
 
     private Statement parseAssignStatement() throws SyntaxError, LexicalError {
         if(!hsIdentifiers.contains(tkz.peek())) {
-            tkz.consume();
+            String identifier = tkz.consume();
             tkz.consume("=");
             Expr val = parseExpression();
-            return null;
+            AssignStatment a = new AssignStatment(val, identifier);
+            return a;
         }
         else{
-            throw new SyntaxError("cannot be used as identify" + tkz.leftString());
+            throw new SyntaxError("cannot be used as identify");
         }
     }
 
     private Statement parseActionCommand() throws SyntaxError, LexicalError {
+
         if(tkz.peek("shoot")){
             Statement s = parseAttackCommand();
             return s;
@@ -82,57 +90,49 @@ public class StatementParser implements Parser {
             Statement s = parseMoveCommand();
             return s;
         }
-        else{
-            tkz.consume("done");
-            return null;
+        else{//done
+            Statement s = new DoneCommand();
+            tkz.consume();
+            return s;
         }
     }
 
-    private Statement parseMoveCommand() throws SyntaxError, LexicalError {
+    private MoveCommand parseMoveCommand() throws SyntaxError, LexicalError {
         tkz.consume("move");
-        Statement s = parseDirection();
-        return s;
+        MoveCommand m = new MoveCommand(parseDirection());
+        return m;
     }
 
     private Statement parseAttackCommand() throws SyntaxError, LexicalError {
         tkz.consume("shoot");
-        Statement s = parseDirection();
+        Direction d = parseDirection();
         Expr val = parseExpression();
-        return s;
+        AttackCommand a = new AttackCommand(d,val);
+        return a;
     }
 
-    private Statement parseDirection() throws SyntaxError, LexicalError {
-        if(tkz.peek("up")){
-            tkz.consume("up");
-        }
-        else if(tkz.peek("down")){
-            tkz.consume("down");
-        }
-        else if(tkz.peek("upleft")){
-            tkz.consume("upleft");
-        }
-        else if(tkz.peek("upright")){
-            tkz.consume("upright");
-        }
-        else if(tkz.peek("downleft")){
-            tkz.consume("downleft");
-        }
-        else if(tkz.peek("downright")){
-            tkz.consume("downright");
-        }
-        else{
-            throw new SyntaxError("invalid direction");
-        }
-        return null;
+    private Direction parseDirection() throws SyntaxError, LexicalError {
+        switch (tkz.consume()) {
+            case "up": return Direction.UP;
+            case "upright": return Direction.UPRIGHT;
+            case "downright": return Direction.DOWNRIGHT;
+            case "down": return Direction.DOWN;
+            case "downleft": return Direction.DOWNLEFT;
+            case "upleft": return Direction.UPLEFT;
+        };
+        throw new SyntaxError("invalid direction");
     }
 
     private Statement parseBlockStatement() throws SyntaxError, LexicalError, EvalError {
         tkz.consume("{");
-        while(!tkz.peek("}")) {
-            Statement s = parseStatement();
+        List<Statement> ls = new ArrayList<>();
+        while (!tkz.peek("}")) {
+            Statement ws = parseStatement();
+            ls.add(ws);
         }
         tkz.consume("}");
-        return null;
+        Statement s = new BlockStatement(ls);
+        return s;
     }
 
     private Statement parseIfStatement() throws SyntaxError, LexicalError, EvalError {
@@ -141,10 +141,10 @@ public class StatementParser implements Parser {
         Expr val = parseExpression();
         tkz.consume(")");
         tkz.consume("then");
-            Statement s = parseStatement();
+            Statement trueStatement = parseStatement();
             tkz.consume("else");
-            Statement s1 = parseStatement();
-
+            Statement falseStatement = parseStatement();
+        Statement s = new IfStatement(val, trueStatement, falseStatement);
         return s;
 
     }
@@ -154,7 +154,8 @@ public class StatementParser implements Parser {
         tkz.consume("(");
         Expr val = parseExpression();
         tkz.consume(")");
-        Statement s = parseStatement();
+        Statement StatementInWhile = parseStatement();
+        Statement s = new WhileStatement(val, StatementInWhile);
         return s;
     }
 
@@ -215,7 +216,8 @@ public class StatementParser implements Parser {
         }
         else{
             tkz.consume("nearby");
-            Statement s = parseDirection();
+            parseDirection();
+
         }
         return null;
     }

@@ -1,0 +1,17 @@
+public class AttackCommand extends Statement{
+    Direction direction;
+    Expr expression;
+
+    public AttackCommand(Direction direction, Expr expression) {
+        this.direction = direction;
+        this.expression = expression;
+    }
+
+    @Override
+    public EvalResultStatus evaluator(Minion minion) throws EvalError {
+
+        long damage = expression.eval(minion);
+        minion.attack(direction.ordinal() + 1,damage);//ordinal is position ของ Enum
+        return EvalResultStatus.SHOOT;
+    }
+}

@@ -1,8 +1,6 @@
-import java.util.Map;
-
-    interface Node {
+interface Node {
         void prettyPrint(StringBuilder s);
     }
     interface Expr extends Node {
-        long eval(Map<String, Long> bindings) throws EvalError;
+        long eval(Minion minion) throws EvalError;
     }

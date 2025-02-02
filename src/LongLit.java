@@ -1,8 +1,6 @@
-import java.util.Map;
-
 record LongLit(long val) implements Expr {
     public long eval(
-            Map<String, Long> bindings) {
+            Minion minion) {
         return val;
     }
 
