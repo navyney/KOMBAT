@@ -17,6 +17,17 @@ class Minion {
         this.map = map;
     }
 
+    //for debug
+    public boolean isOwnedBy(Player player) {
+        if (this.owner == player) {
+            return true;
+        } else {
+            System.out.println("Hex at (" + getRow() + "," + getCol() + ") is NOT owned by Player " + player.getName());
+            return false;
+        }
+    }
+
+
     public int getRow() {
         return this.row+1;
     }
@@ -40,47 +51,117 @@ class Minion {
     public boolean spawn(int r, int c) {
         this.row = r-1;
         this.col = c-1;
-        if (!map.isWall(this.row, this.col) && !map.isMinionHere(this.row, this.col)) {
-            map.placeMinion(this.row, this.col, this);
-            return true;
+
+        HexHex hex = (HexHex) map.getHexAt(r, c);
+
+        if (hex == null) {
+            System.out.println("Invalid area!");
+            return false;
         }
-        return false;
+
+        if (hex.owner() == (this.owner.getName().equals("1") ? 1 : 2)) {
+            if (!map.isWall(this.row, this.col) && !map.isMinionHere(this.row, this.col)) {
+                map.placeMinion(this.row, this.col, this);
+                owner.addMinion(this);
+                return true;
+            } else {
+                System.out.println("Cannot spawn minion here!");
+                return false;
+            }
+        } else {
+            System.out.println("You do not own this area!");
+            return false;
+        }
+
+//        if (!map.isWall(this.row, this.col) && !map.isMinionHere(this.row, this.col)) {
+//            map.placeMinion(this.row, this.col, this);
+//            return true;
+//        }
+//        return false;
     }
+
+//    public void move(int direction) {
+//        int newRow = this.row;
+//        int newCol = this.col;
+//
+//        if( direction==1 ){ //up
+//            newRow -= 1;
+//        } else if(direction == 2 ) { //upright
+//            newCol += 1;
+//        } else if(direction ==3 ) { //downright
+//            newCol += 1;
+//            newRow += 1;
+//        } else if(direction==4) { //down
+//            newRow += 1;
+//        } else if(direction == 5 ) { //downleft
+//            newRow -= 1;
+//        } else if(direction == 6 ) { //upleft
+//            newRow -= 1;
+//            newCol -= 1;
+//        } else {
+//            throw new IllegalArgumentException("Invalid direction");
+//        }
+//
+//        if (!map.isWall(newRow, newCol) && !map.isMinionHere(newRow, newCol)) {
+//            map.removeMinion(this.row, this.col);
+//
+//            this.row = newRow;
+//            this.col = newCol;
+//
+//            map.placeMinion(this.row, this.col, this);
+//        } else {
+//            System.out.println("Can't move to (" + (newRow + 1) + "," + (newCol + 1) + ")!");
+//        }
+//    }
 
     public void move(int direction) {
         int newRow = this.row;
         int newCol = this.col;
 
-        if( direction==1 ){ //up
+        if (direction == 1) { // up
             newRow -= 1;
-        } else if(direction == 2 ) { //upright
+        } else if (direction == 2) { // upright
             newCol += 1;
-        } else if(direction ==3 ) { //downright
+        } else if (direction == 3) { // downright
             newCol += 1;
             newRow += 1;
-        } else if(direction==4) { //down
+        } else if (direction == 4) { // down
             newRow += 1;
-        } else if(direction == 5 ) { //downleft
+        } else if (direction == 5) { // downleft
             newRow -= 1;
-        } else if(direction == 6 ) { //upleft
+        } else if (direction == 6) { // upleft
             newRow -= 1;
             newCol -= 1;
         } else {
             throw new IllegalArgumentException("Invalid direction");
         }
 
-        if (!map.isWall(newRow, newCol) && !map.isMinionHere(newRow, newCol)) {
-            map.removeMinion(this.row, this.col);
-
-            this.row = newRow;
-            this.col = newCol;
-
-            map.placeMinion(this.row, this.col, this);
-        } else {
-            System.out.println("Can't move to (" + (newRow + 1) + "," + (newCol + 1) + ")!");
+        // เช็คขอบเขตแผนที่
+        if (newRow < 0 || newRow >= map.getRows() || newCol < 0 || newCol >= map.getCols()) {
+            System.out.println("Out of bounds! Cannot move.");
+            return;
         }
 
+        HexHex hex = (HexHex) map.getHexAt(newRow + 1, newCol + 1);
+
+        // เช็คว่าเป็นเจ้าของพื้นที่หรือไม่
+        if (hex == null || hex.owner() != (this.owner.getName().equals("1") ? 1 : 2)) {
+            System.out.println("You do not own this area! Cannot move to (" + (newRow + 1) + "," + (newCol + 1) + ")");
+            return;
+        }
+
+        // เช็คว่าไม่ใช่กำแพงและไม่มีมินเนี่ยนอยู่
+        if (!map.isWall(newRow, newCol) && !map.isMinionHere(newRow, newCol)) {
+            map.removeMinion(this.row, this.col);
+            this.row = newRow;
+            this.col = newCol;
+            map.placeMinion(this.row, this.col, this);
+            System.out.println("Moved to (" + (this.row + 1) + "," + (this.col + 1) + ")");
+        } else {
+            System.out.println("Cannot move to (" + (newRow + 1) + "," + (newCol + 1) + ")");
+        }
     }
+
 
     public void takeDamage(long damage) {
         if (type.getDefense() > 0) {
@@ -92,6 +173,8 @@ class Minion {
             System.out.println(this.owner.getName() + " Minion HP: " + this.stringGetHp());
         }
         if (hp <= 0) {
+            owner.getMinion().remove(this);
+            map.removeMinion(this.row, this.col);
             System.out.println(name + " has been destroyed!");
         }
     }

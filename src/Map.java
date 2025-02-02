@@ -1,6 +1,9 @@
+import java.util.*;
+
 class Map {
     private int[][] map;
     private Minion[][] minions;
+    private List<Hex> allHexes = new ArrayList<>();
 
     public Map(int row, int col) {
         this.map = new int[row][col];
@@ -14,7 +17,10 @@ class Map {
                     map[i][j] = 0;
                 } else if((i == 8 && j <= 1) || (i == 9 && j <= 3) || (i == 10 && j <= 5)) {
                     map[i][j] = 0;
-                } else map[i][j] = 1;
+                } else {
+                    map[i][j] = 1;
+                }
+                allHexes.add(new HexHex(i + 1, j + 1, false, 0));
             }
         }
     }
@@ -39,13 +45,52 @@ class Map {
         minions[row][col] = null;
     }
 
+    public Hex getHexAt(int row, int col) {
+        for (Hex hex : allHexes) { // สมมติว่ามี List<Hex> allHexes ในคลาส Map
+            if (hex.getRow() == row && hex.getCol() == col) {
+                return hex;
+            }
+        }
+        return null;
+    }
+
+//    public void printMap() {
+//        for (int i = 0; i < map.length; i++) {
+//            for (int j = 0; j < map[i].length; j++) {
+//                if (minions[i][j] != null) {
+//                    System.out.print(minions[i][j].getOwner().getName() + " ");
+//                } else {
+//                    System.out.print(map[i][j] == 0 ? "X " : "- ");
+//                }
+//            }
+//            System.out.println();
+//        }
+//    }
+
     public void printMap() {
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
                 if (minions[i][j] != null) {
-                    System.out.print(minions[i][j].getOwner().getName() + " ");
+                    // แสดง Minion ของผู้เล่น (I สำหรับ Player1, L สำหรับ Player2)
+                    String ownerName = minions[i][j].getOwner().getName();
+                    if (ownerName.equals("1")) {
+                        System.out.print("I ");
+                    } else if (ownerName.equals("2")) {
+                        System.out.print("L ");
+                    }
+                } else if (map[i][j] == 0) {
+                    // แสดงกำแพง (X)
+                    System.out.print("X ");
                 } else {
-                    System.out.print(map[i][j] == 0 ? "X " : "- ");
+                    // ตรวจสอบว่า Hex นี้มีเจ้าของหรือไม่
+                    HexHex hex = (HexHex) getHexAt(i + 1, j + 1); // แปลงจาก index 0-based เป็น 1-based
+                    if (hex != null && hex.owner() != 0) {
+                        // แสดงเจ้าของพื้นที่ (1 หรือ 2)
+                        System.out.print(hex.owner() + " ");
+                    } else {
+                        // แสดงพื้นที่ว่าง (-)
+                        System.out.print("- ");
+                    }
                 }
             }
             System.out.println();
@@ -65,8 +110,13 @@ class Map {
         Map gameMap = new Map(11, 8);
         gameMap.createMap();
 
-        Player player1 = new Player("1", 5);
+        Player player1 = new Player("1", 50);
         Player player2 = new Player("2", 5);
+
+        player1.buyArea(3, 3, gameMap);
+        player1.buyArea(2, 2, gameMap);
+
+        player2.buyArea(3, 1, gameMap);
 
         MinionType warrior = new MinionType("Warrior", 0);
 
@@ -95,11 +145,67 @@ class Map {
         System.out.println();
         gameMap.printMap();
         System.out.println();
+        System.out.println("Player1 areas: " + player1.getNumofArea());
+        System.out.println("Player1 minions: " + player1.getNumofMinion());
+        System.out.println("Player2 areas: " + player2.getNumofArea());
+        System.out.println("Player2 minions: " + player2.getNumofMinion());
 
         minionP1.shoot(5, 10);
         System.out.println();
 
         gameMap.printMap();
+        System.out.println();
+        System.out.println("Player1 areas: " + player1.getNumofArea());
+        System.out.println("Player1 minions: " + player1.getNumofMinion());
+        System.out.println("Player2 areas: " + player2.getNumofArea());
+        System.out.println("Player2 minions: " + player2.getNumofMinion());
     }
+
+//    public static void main(String[] args) {
+//        Map gameMap = new Map(11, 8);
+//        gameMap.createMap();
+//
+//        Player player1 = new Player("1", 5);
+//        Player player2 = new Player("2", 5);
+//
+//        MinionType warrior = new MinionType("Warrior", 0);
+//
+//        Minion minionP1 = new Minion("P1Minion", warrior, 10, player1, gameMap);
+//        Minion minionP2 = new Minion("P2Minion", warrior, 10, player2, gameMap);
+//
+//        // Player1 ซื้อพื้นที่
+//        player1.buyArea(3, 3, gameMap);
+//        player1.buyArea(3, 3, gameMap); // พยายามซื้อพื้นที่เดิม
+//
+//        // Player2 ซื้อพื้นที่
+//        player2.buyArea(3, 1, gameMap);
+//        gameMap.printMap();
+//
+//        System.out.println();
+//
+//        // Player1 พยายามวาง Minion ในพื้นที่ของตัวเอง
+//        if (minionP1.spawn(3, 3)) {
+//            System.out.println("P1 Minion spawned at (3,3)");
+//        }
+//
+//        // Player2 พยายามวาง Minion ในพื้นที่ของตัวเอง
+//        if (minionP2.spawn(3, 1)) {
+//            System.out.println("P2 Minion spawned at (3,1)");
+//        }
+//
+//        // Player1 พยายามวาง Minion ในพื้นที่ของ Player2
+//        if (minionP1.spawn(3, 1)) {
+//            System.out.println("P1 Minion spawned at (3,1)");
+//        }
+//
+//        // แสดงจำนวนพื้นที่และ Minion ที่ผู้เล่นมี
+//        System.out.println("Player1 areas: " + player1.getNumofArea());
+//        System.out.println("Player1 minions: " + player1.getNumofMinion());
+//        System.out.println("Player2 areas: " + player2.getNumofArea());
+//        System.out.println("Player2 minions: " + player2.getNumofMinion());
+//
+//        // แสดงแผนที่
+//        gameMap.printMap();
+//    }
 
 }
