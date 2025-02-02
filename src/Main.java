@@ -61,7 +61,7 @@ public class Main {
                 }
                 """) );
         try{
-            p.parse();
+            Strategy s = p.parse();
         }
         catch(Exception e){
             System.out.println(e);
@@ -69,13 +69,16 @@ public class Main {
 
 
         StatementParser q = new StatementParser(new ExprTokenizer("""
-                done done done {{{{}}}} {} {{}{}}
+                x = 20
+                if(x-20) then {done} else {move down}
+                move up
                 """) );
-        try{
-            q.parse();
-        }
-        catch(Exception e){
-            System.out.println(e);
-        }
+            Strategy s = q.parse();
+        Minion m = new Minion(0,0,"minion1");
+        System.out.println(m.getCol() + " " + m.getRow());
+        s.evaluator(m);
+        System.out.println(m.getCol() + " " + m.getRow());
+
     }
 }
+
