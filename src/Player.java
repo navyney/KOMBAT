@@ -1,43 +1,59 @@
+import java.util.ArrayList;
+
 public class Player {
-    private String name;
+    //    String name;
+    //    String type;
+    private double maxBudget;
     private double budget;
-    private int numofMinion;
-    private int numofArea;
+    private ArrayList<Minion> minion;
+    private ArrayList<Hex> area;
 
-    public Player(String name) {
-        //double budget, int numofMinion, int numofArea
+    public Player(double maxBudget, double budget) {
         //        this.type = type;
-        this.name = name;
+        //        this.name = name;
+        this.maxBudget = maxBudget;
         this.budget = budget;
-        this.numofMinion = 0;
-        this.numofArea = 5;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public double getBudget() {
-        return budget;
-    }
-
-    public void setBudget(double budget) {
-        this.budget = budget;
-    }
-
+        this.minion = new ArrayList<Minion>();
+        this.area = new ArrayList<Hex>();
+      
     public int getNumofMinion() {
-        return numofMinion;
-    }
-
-    public void setNumofMinion(int numofMinion) {
-        this.numofMinion = numofMinion;
+        return minion.size();
     }
 
     public int getNumofArea() {
-        return numofArea;
+        return area.size();
     }
 
-    public void setNumofArea(int numofArea) {
-        this.numofArea = numofArea;
+    public double getMaxBudget() {
+        return maxBudget;
     }
+
+    public void setMaxBudget(double maxBudget) {
+        this.maxBudget = maxBudget;
+    }
+
+    public ArrayList<Minion> getMinion() {
+        return minion;
+    }
+
+    public ArrayList<Hex> getArea() {
+        return area;
+    }
+
+    public void spawnMinion(int r, int c) {
+        // อย่าลืมเช็คเงินก่อน spawn และหักเงินหลัง spawn
+        Minion m = new Minion(r,c);
+        minion.add(m);
+    }
+
+    public void buyArea(int r, int c) {
+        // อย่าลืมเช็คเงินก่อน buy และหักเงินหลัง buy
+        Hex h = new Hex(r,c,false,1);
+        area.add(h);
+    }
+
+    public void done(){
+        System.out.println("Player has ended their turn.");
+    }
+    //eiei
 }
