@@ -27,8 +27,9 @@ public class HexHex implements Hex {
     @Override
     public int owner() {
         /*
-        if() { return 1;
-        }else if() return -1;
+        if owner = เรา { return 1;
+        }else if ฝั่งตรงข้าม return -1;
+        } else ไม่มีเจ้าของ return 0;
          */
         return own;
     }

@@ -52,35 +52,54 @@ class Map {
         }
     }
 
+    public int getRows() {
+        return map.length;
+    }
+
+    public int getCols() {
+        return map[0].length;
+    }
+
     //try spawn move and shoot (each player has only one minion for now)
     public static void main(String[] args) {
         Map gameMap = new Map(11, 8);
         gameMap.createMap();
 
-        Player player1 = new Player("1");
-        Player player2 = new Player("2");
+        Player player1 = new Player("1", 5);
+        Player player2 = new Player("2", 5);
 
         MinionType warrior = new MinionType("Warrior", 0);
 
-        Minion minionP1 = new Minion("P1Minion", warrior, 10, player1);
-        Minion minionP2 = new Minion("P2Minion", warrior, 10, player2);
+        Minion minionP1 = new Minion("P1Minion", warrior, 10, player1, gameMap);
+        Minion minionP2 = new Minion("P2Minion", warrior, 10, player2, gameMap);
 
-        if (minionP1.spawn(3, 3, gameMap)) {
+        if (minionP1.spawn(3, 3)) {
             System.out.println("P1 Minion spawned at (3,3)");
         }
-        if (minionP2.spawn(3, 1, gameMap)) {
+        if (minionP2.spawn(3, 1)) {
             System.out.println("P2 Minion spawned at (3,1)");
         }
 
         System.out.println();
-        minionP1.move("upleft", gameMap);
-        System.out.println(minionP1.getRow() + " ," + minionP1.getCol());System.out.println();
+        minionP1.move(6);
+        System.out.println(minionP1.getRow() + " ," + minionP1.getCol());
 
+//        System.out.println();
+//        minionP1.move(2);
+//        System.out.println(minionP1.getRow() + " ," + minionP1.getCol());System.out.println();
+//
+//        System.out.println();
+//        minionP1.move(1);
+//        System.out.println(minionP1.getRow() + " ," + minionP1.getCol());System.out.println();
 
+        System.out.println();
         gameMap.printMap();
+        System.out.println();
 
-        minionP1.shoot(3, 1, gameMap,10);
+        minionP1.shoot(5, 10);
+        System.out.println();
 
         gameMap.printMap();
     }
+
 }
