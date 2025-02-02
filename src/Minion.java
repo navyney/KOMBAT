@@ -1,83 +1,107 @@
-import java.util.HashMap;
-
-public class Minion {
-    private int row,col,z=0,Int,random;
-    private int attackFactor,defenseFactor;
-    private double budget,maxbudget;
+class Minion {
     private String name;
-    private HashMap<String,Long> hmIdentifier = new HashMap<>();
+    private MinionType type;
+    private int hp;
+    private int row, col;
+    private Player owner;
 
-    public Minion(int row, int col, String name) {
-        this.row = row;
-        this.col = col;
+    public Minion(String name, MinionType type, int hp, Player owner) {
         this.name = name;
+        this.type = type;
+        this.hp = hp;
+        this.owner = owner;
     }
-    public void assign(String identifier,long val){
-        hmIdentifier.put(identifier,val);
+
+    public int getRow() {
+        return this.row+1;
     }
-    public long getValueIdentifier(String identifier){
-        return hmIdentifier.get(identifier);
+
+    public int getCol() {
+        return this.col+1;
     }
-    public void move(int direction){
-        if(direction==1){
-            row+=1;
-        }//up
-        else if(direction==2){
-            col+=1;
-            row+=1;
-        }//upright
-        else if(direction==3){
-            col+=1;
-            row-=1;
-        }//downright
-        else if(direction==4){
-            row-=1;
-        }//down
-        else if(direction==5){
-            col-=1;
-            row-=1;
-        }//downleft
-        else if(direction==6){
-            col-=1;
-            row+=1;
-        }//upleft
-        else{
-            throw new IllegalArgumentException("Invalid direction");
+
+    public Player getOwner() {
+        return owner;
+    }
+
+
+    public boolean spawn(int r, int c, Map map) {
+        this.row = r-1;
+        this.col = c-1;
+        if (!map.isWall(this.row, this.col) && !map.isMinionHere(this.row, this.col)) {
+            map.placeMinion(this.row, this.col, this);
+            return true;
+        }
+        return false;
+    }
+
+    public void move(String direction, Map map) {
+        int newRow = this.row;
+        int newCol = this.col;
+
+        if ("up".equals(direction)) {
+            newRow -= 1;
+        } else if ("down".equals(direction)) {
+            newRow += 1;
+        } else if ("upleft".equals(direction)) {
+            newRow -= 1;
+            newCol -= 1;
+        } else if ("downleft".equals(direction)) {
+            newCol -= 1;
+        } else if ("upright".equals(direction)) {
+            newCol += 1;
+        } else if ("downright".equals(direction)) {
+            newCol += 1;
+            newRow += 1;
+        }
+
+        if (!map.isWall(newRow, newCol) && !map.isMinionHere(newRow, newCol)) {
+            map.removeMinion(this.row, this.col);
+
+            this.row = newRow;
+            this.col = newCol;
+
+            map.placeMinion(this.row, this.col, this);
+        } else {
+            System.out.println("Can't move to (" + (newRow + 1) + "," + (newCol + 1) + ")!");
         }
     }
-    public int getCol(){
-        return col;
-    }
-    public int getRow(){
-        return row;
-    }
-    public void attack(int direction,long damage){
-        if(direction==1){
-            z+=damage;
-            System.out.print("up " + z);
-        }//up
-        else if(direction==2){
-            z+=damage;
-            System.out.print("upright " + z);
-        }//upright
-        else if(direction==3){
-            z+=damage;
-            System.out.println("downright " + z);
-        }//downright
-        else if(direction==4){
-            z+=damage;
-            System.out.println("down " + z);
-        }//down
-        else if(direction==5){
-            z+=damage;
-            System.out.println("downleft " + z);
-        }//downleft
-        else if(direction==6){
-            z+=damage;
-            System.out.println("upright " + z);
-        }//upleft
-        else{
-            throw new IllegalArgumentException("Invalid direction");
+
+
+    public void takeDamage(int damage) {
+        if (type.getDefense() > 0) {
+            int reducedDamage = Math.max(0, damage - type.getDefense());
+            this.hp -= reducedDamage;
+            System.out.println(this.owner.getName() + " Minion HP: " + this.stringGetHp());
+        } else {
+            this.hp -= damage;
+            System.out.println(this.owner.getName() + " Minion HP: " + this.stringGetHp());
         }
+        if (hp <= 0) {
+            System.out.println(name + " has been destroyed!");
+        }
+    }
+
+    public void shoot(int targetRow, int targetCol, Map map, int damage) {
+        int tr = targetRow-1;
+        int tc = targetCol-1;
+        Minion target = map.getMinionAt(tr, tc);
+        if (target != null) {
+            System.out.println(name + " shoots at " + target.name);
+            target.takeDamage(damage);
+            if (target.getHp() <= 0) {
+                map.removeMinion(tr, tc);
+            }
+        } else {
+            System.out.println("No valid target at (" + tr + ", " + tc + ")");
+        }
+    }
+
+    private int getHp() {
+        return hp;
+    }
+
+    private String stringGetHp() {
+        return String.valueOf(hp);
     }
 }
