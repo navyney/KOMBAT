@@ -12,6 +12,14 @@ class Minion {
         this.owner = owner;
     }
 
+    public int getRow() {
+        return this.row+1;
+    }
+
+    public int getCol() {
+        return this.col+1;
+    }
+
     public Player getOwner() {
         return owner;
     }
@@ -26,6 +34,39 @@ class Minion {
         }
         return false;
     }
+
+    public void move(String direction, Map map) {
+        int newRow = this.row;
+        int newCol = this.col;
+
+        if ("up".equals(direction)) {
+            newRow -= 1;
+        } else if ("down".equals(direction)) {
+            newRow += 1;
+        } else if ("upleft".equals(direction)) {
+            newRow -= 1;
+            newCol -= 1;
+        } else if ("downleft".equals(direction)) {
+            newCol -= 1;
+        } else if ("upright".equals(direction)) {
+            newCol += 1;
+        } else if ("downright".equals(direction)) {
+            newCol += 1;
+            newRow += 1;
+        }
+
+        if (!map.isWall(newRow, newCol) && !map.isMinionHere(newRow, newCol)) {
+            map.removeMinion(this.row, this.col);
+
+            this.row = newRow;
+            this.col = newCol;
+
+            map.placeMinion(this.row, this.col, this);
+        } else {
+            System.out.println("Can't move to (" + (newRow + 1) + "," + (newCol + 1) + ")!");
+        }
+    }
+
 
     public void takeDamage(int damage) {
         if (type.getDefense() > 0) {

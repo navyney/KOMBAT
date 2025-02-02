@@ -52,7 +52,7 @@ class Map {
         }
     }
 
-
+    //try spawn move and shoot (each player has only one minion for now)
     public static void main(String[] args) {
         Map gameMap = new Map(11, 8);
         gameMap.createMap();
@@ -71,6 +71,11 @@ class Map {
         if (minionP2.spawn(3, 1, gameMap)) {
             System.out.println("P2 Minion spawned at (3,1)");
         }
+
+        System.out.println();
+        minionP1.move("upleft", gameMap);
+        System.out.println(minionP1.getRow() + " ," + minionP1.getCol());System.out.println();
+
 
         gameMap.printMap();
 
