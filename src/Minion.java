@@ -72,8 +72,10 @@ class Minion {
         if (type.getDefense() > 0) {
             int reducedDamage = Math.max(0, damage - type.getDefense());
             this.hp -= reducedDamage;
+            System.out.println(this.owner.getName() + " Minion HP: " + this.stringGetHp());
         } else {
             this.hp -= damage;
+            System.out.println(this.owner.getName() + " Minion HP: " + this.stringGetHp());
         }
         if (hp <= 0) {
             System.out.println(name + " has been destroyed!");
@@ -87,7 +89,6 @@ class Minion {
         if (target != null) {
             System.out.println(name + " shoots at " + target.name);
             target.takeDamage(damage);
-            System.out.println(target.owner.getName() + " Minion HP: " + target.stringGetHp());
             if (target.getHp() <= 0) {
                 map.removeMinion(tr, tc);
             }
