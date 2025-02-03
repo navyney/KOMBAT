@@ -228,11 +228,11 @@ class Minion {
         }
     }
 
-    private int getHp() {
+    public int getHp() {
         return hp;
     }
 
-    private String stringGetHp() {
+    public String stringGetHp() {
         return String.valueOf(hp);
     }
 
@@ -240,7 +240,7 @@ class Minion {
         return this.name;
     }
 
-    public void done() {
-
+    public Map getMap() {
+        return this.map;
     }
 }

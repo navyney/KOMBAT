@@ -5,18 +5,18 @@ class Map {
     private Minion[][] minions;
     private List<Hex> allHexes = new ArrayList<>();
 
-    private static ConfigFile config = new ConfigFile(
-            100, 100, 1000, 100,
-            90, 23456, 5, 69, 47);
+//    private static ConfigFile config = new ConfigFile(
+//            100, 100, 1000, 100,
+//            90, 23456, 5, 69, 47);
 
     public Map(int row, int col) {
         this.map = new int[row][col];
         this.minions = new Minion[row][col];
     }
 
-    public static ConfigFile getConfig() {
-        return config;
-    }
+//    public static ConfigFile getConfig() {
+//        return config;
+//    }
 
     public void createMap() {
         for (int i = 0; i < map.length; i++) {

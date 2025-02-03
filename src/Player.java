@@ -7,7 +7,7 @@ public class Player {
     private double budget;
     private ArrayList<Minion> minion = new ArrayList<>();
     private ArrayList<Hex> area;
-    private ConfigFile config = Map.getConfig();
+    private ConfigFile config = Main.getConfig();
     private int turnCount = 0;
 
     public Player(String name) {

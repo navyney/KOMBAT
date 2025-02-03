@@ -64,7 +64,6 @@ public class ExprTokenizer implements Tokenizer {
                 s.append(src.charAt(pos));
 
         }
-
         else if (c == '+' || c == '-' || c == '*' || c == '/' || c == '%' || c == '^'|| c == '(' || c == ')' || c == '=' || c == '{' || c == '}') {
             s.append(c);  pos++;
         }

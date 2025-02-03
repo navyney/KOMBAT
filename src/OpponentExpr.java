@@ -11,7 +11,7 @@ public class OpponentExpr implements Expr{
             if(minion.onMap(row-dis,col) && !minion.getOwner().getMinion().contains(minion.getMap().getMinionAt(row-dis,col))){
                 return dis*10+1;
             }
-            else if(minion.onMap(row,col+dis) && !minion.getOwner().getMinion().contains(minion.getMap().getMinionAt(row,col+dis))){
+            else if(minion.onMap(row-dis,col+dis) && !minion.getOwner().getMinion().contains(minion.getMap().getMinionAt(row-dis,col+dis))){
                 return dis*10+2;
             }
             else if(minion.onMap(row+dis,col+dis) && !minion.getOwner().getMinion().contains(minion.getMap().getMinionAt(row+dis,col+dis))){
@@ -20,7 +20,7 @@ public class OpponentExpr implements Expr{
             else if(minion.onMap(row+dis,col) && !minion.getOwner().getMinion().contains(minion.getMap().getMinionAt(row+dis,col))){
                 return dis*10+4;
             }
-            else if(minion.onMap(row,col-dis) && !minion.getOwner().getMinion().contains(minion.getMap().getMinionAt(row,col-dis))){
+            else if(minion.onMap(row+dis,col-dis) && !minion.getOwner().getMinion().contains(minion.getMap().getMinionAt(row+dis,col-dis))){
                 return dis*10+5;
             }
             else if(minion.onMap(row-dis,col-dis) && !minion.getOwner().getMinion().contains(minion.getMap().getMinionAt(row-dis,col-dis))){
