@@ -2,7 +2,7 @@ public class HexHex implements Hex {
     private int row;
     private int col;
     private boolean haveminion;
-    private int own;
+    private int own; // 0 = ไม่มีเจ้าของ, 1 = Player1, 2 = Player2
 
     public HexHex(int row, int col, boolean haveminion, int own) {
         this.row = row;
@@ -11,10 +11,12 @@ public class HexHex implements Hex {
         this.own = own;
     }
 
+    @Override
     public int getRow() {
         return row;
     }
 
+    @Override
     public int getCol() {
         return col;
     }
@@ -26,10 +28,11 @@ public class HexHex implements Hex {
 
     @Override
     public int owner() {
-        /*
-        if() { return 1;
-        }else if() return -1;
-         */
         return own;
+    }
+
+    @Override
+    public void setOwner(int owner) {
+        this.own = owner;
     }
 }

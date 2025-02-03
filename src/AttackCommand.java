@@ -11,7 +11,7 @@ public class AttackCommand extends Statement{
     public EvalResultStatus evaluator(Minion minion) throws EvalError {
 
         long damage = expression.eval(minion);
-        minion.attack(direction.ordinal() + 1,damage);//ordinal is position ของ Enum
+        minion.shoot(direction.ordinal() + 1,damage);//ordinal is position ของ Enum
         return EvalResultStatus.SHOOT;
     }
 }
