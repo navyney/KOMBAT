@@ -210,15 +210,19 @@ public class StatementParser implements Parser {
     private Expr parseInfoExpression() throws SyntaxError, LexicalError {
         if(tkz.peek("ally")){
             tkz.consume("ally");
+            Expr ally = new AllyExpr();
+            return ally;
         }
         else if(tkz.peek("opponent")){
             tkz.consume("opponent");
+            Expr opponent = new OpponentExpr();
+            return opponent;
         }
         else{
             tkz.consume("nearby");
-            parseDirection();
-
+            Direction d = parseDirection();
+            Expr nearby = new NearbyExpr(d);
+            return nearby;
         }
-        return null;
     }
 }
