@@ -108,7 +108,11 @@ class Map {
     //try spawn move and shoot (each player has only one minion for now)
     public static void main(String[] args) {
         Map gameMap = new Map(11, 8);
+        ConfigFile config = new ConfigFile(
+                100, 1000, 1000, 100,
+                90, 23456, 5, 69, 47);
         gameMap.createMap();
+
 
         Player player1 = new Player("1", 50);
         Player player2 = new Player("2", 5);

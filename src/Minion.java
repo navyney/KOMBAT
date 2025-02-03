@@ -39,6 +39,10 @@ class Minion {
         return owner;
     }
 
+    public boolean onMap(int r, int c) {
+        return this.map.isMinionHere(r, c);
+    }
+
     public void assign(String identifier,long val){
         hmIdentifier.put(identifier,val);
     }
@@ -135,7 +139,6 @@ class Minion {
             throw new IllegalArgumentException("Invalid direction");
         }
 
-        // เช็คขอบเขตแผนที่
         if (newRow < 0 || newRow >= map.getRows() || newCol < 0 || newCol >= map.getCols()) {
             System.out.println("Out of bounds! Cannot move.");
             return;
@@ -143,13 +146,11 @@ class Minion {
 
         HexHex hex = (HexHex) map.getHexAt(newRow + 1, newCol + 1);
 
-        // เช็คว่าเป็นเจ้าของพื้นที่หรือไม่
         if (hex == null || hex.owner() != (this.owner.getName().equals("1") ? 1 : 2)) {
             System.out.println("You do not own this area! Cannot move to (" + (newRow + 1) + "," + (newCol + 1) + ")");
             return;
         }
 
-        // เช็คว่าไม่ใช่กำแพงและไม่มีมินเนี่ยนอยู่
         if (!map.isWall(newRow, newCol) && !map.isMinionHere(newRow, newCol)) {
             map.removeMinion(this.row, this.col);
             this.row = newRow;
@@ -160,7 +161,6 @@ class Minion {
             System.out.println("Cannot move to (" + (newRow + 1) + "," + (newCol + 1) + ")");
         }
     }
-
 
     public void takeDamage(long damage) {
         if (type.getDefense() > 0) {
@@ -179,6 +179,10 @@ class Minion {
     }
 
     public void shoot(int direction, long damage) {
+        if (owner.getBudget() < damage) { // ตรวจสอบเงิน
+            System.out.println("Not enough budget to shoot!");
+            return;
+        }
         int targetRow = this.row;
         int targetCol = this.col;
 
@@ -210,15 +214,15 @@ class Minion {
         if (target != null) {
             System.out.println(name + " shoots at " + target.name);
             target.takeDamage(damage);
+            owner.setBudget(owner.getBudget() - damage);
 
-            if (target.getHp() <= 0) {
-                map.removeMinion(targetRow, targetCol);
-            }
+//            if (target.getHp() <= 0) {
+//                map.removeMinion(targetRow, targetCol);
+//            }
         } else {
             System.out.println("No target to shoot at (" + (targetRow + 1) + "," + (targetCol + 1) + ")");
         }
     }
-
 
     private int getHp() {
         return hp;
@@ -230,5 +234,9 @@ class Minion {
 
     public String getName() {
         return this.name;
+    }
+
+    public void done() {
+
     }
 }

@@ -7,12 +7,14 @@ public class Player {
     private double budget;
     private ArrayList<Minion> minion = new ArrayList<>();
     private ArrayList<Hex> area;
+    private ConfigFile config;
+    private int turnCount = 0;
 
     public Player(String name, double budget) {
         //        this.type = type;
         this.name = name;
-        this.maxBudget = maxBudget;
-        this.budget = budget;
+        this.budget = config.init_budget();
+        this.maxBudget = config.max_budget();
         this.minion = new ArrayList<Minion>();
         this.area = new ArrayList<Hex>();
     }
@@ -63,11 +65,11 @@ public class Player {
             return;
         }
 
-        if (hex.owner() == 0) { // ถ้าไม่มีเจ้าของ
-            if (this.budget >= 1.0) { // ตรวจสอบเงิน สมมติHex ราคา 1
+        if (hex.owner() == 0) {
+            if (this.budget >= config.hex_purchase_cost()) {
                 hex.setOwner(this.name.equals("1") ? 1 : 2);
                 this.area.add(hex);
-                this.budget -= 1.0;
+                this.budget -= config.hex_purchase_cost();
                 System.out.println(this.name + " has bought area at (" + r + "," + c + ")");
             } else {
                 System.out.println("Not enough budget to buy area!");
@@ -86,10 +88,16 @@ public class Player {
             return false;
         }
 
+        if (this.budget < config.spawn_cost()) {
+            System.out.println("Not enough budget to spawn minion!");
+            return false;
+        }
+
         // try to spawn Minion ในตำแหน่งที่กำหนด
         boolean success = minion.spawn(r, c);
 
         if (success) {
+            this.budget -= config.spawn_cost();
             System.out.println("Minion " + minion.getName() + " spawned successfully at (" + r + "," + c + ")");
         } else {
             System.out.println("Failed to spawn minion at (" + r + "," + c + ")");
@@ -98,9 +106,49 @@ public class Player {
         return success;
     }
 
-
-    public void done(){
-        System.out.println("Player has ended their turn.");
+    public void addTurnBudget() {
+        this.budget += config.turn_budget();
+        this.budget = Math.min(this.budget, config.max_budget());
     }
+
+    public void calculateInterest() {
+        double b = config.interest_pct(); // อัตราดอกเบี้ยฐาน
+        double m = this.budget; // งบประมาณปัจจุบัน
+        double t = this.turnCount; // จำนวนเทิร์นปัจจุบัน
+
+        // interest rate = b * log10(m) * ln(t)
+        double r = b * Math.log10(m) * Math.log(t);
+
+        // interest = m * (r / 100)
+        double interest = m * (r / 100.0);
+
+        this.budget += interest;
+
+        this.budget = Math.min(this.budget, config.max_budget());
+
+        System.out.println(this.name + " earned interest: " + interest + ", new budget: " + this.budget);
+    }
+
+//    // คำนวณดอกเบี้ย current*interest/100
+//    public void calculateInterest() {
+//        double interest = this.budget * (config.interest_pct() / 100.0);
+//        this.budget += interest;
+//        this.budget = Math.min(this.budget, config.max_budget()); // ไม่ให้เกินงบประมาณสูงสุด
+//    }
+
+    public void incrementTurnCount() {
+        this.turnCount++;
+    }
+
+    // Getter สำหรับ budget
+    public double getBudget() {
+        return budget;
+    }
+
+    // Getter สำหรับ turnCount
+    public int getTurnCount() {
+        return turnCount;
+    }
+
     //eiei
 }
