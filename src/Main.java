@@ -74,11 +74,13 @@ public class Main {
                 move up
                 """) );
             Strategy s = q.parse();
-        Minion m = new Minion(0,0,"minion1");
+            Player p1 = new Player(100,0);
+            MinionType mt1 = new MinionType("12",12);
+        Minion m = new Minion("1",mt1,10,p1);
         System.out.println(m.getCol() + " " + m.getRow());
         s.evaluator(m);
         System.out.println(m.getCol() + " " + m.getRow());
-
+        Map mapp = new Map(8,8);
     }
 }
 

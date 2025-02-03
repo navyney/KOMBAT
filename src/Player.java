@@ -15,7 +15,7 @@ public class Player {
         this.budget = budget;
         this.minion = new ArrayList<Minion>();
         this.area = new ArrayList<Hex>();
-      
+    }
     public int getNumofMinion() {
         return minion.size();
     }
