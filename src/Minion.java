@@ -27,6 +27,10 @@ class Minion {
         }
     }
 
+    public MinionType getType() {
+        return type;
+    }
+
     public int getRow() {
         return this.row+1;
     }
