@@ -126,7 +126,7 @@ public class Player {
 
         this.budget = Math.min(this.budget, config.max_budget());
 
-        System.out.println(this.name + " earned interest: " + interest + ", new budget: " + this.budget);
+        System.out.println(this.name + " earned interest: " + (int)(interest) + ", new budget: " + (int)(this.budget));
     }
 
 //    // คำนวณดอกเบี้ย current*interest/100
@@ -145,6 +145,10 @@ public class Player {
         return budget;
     }
 
+    public int getIntBudget() {
+        return (int)(this.budget);
+    }
+
     // Getter สำหรับ turnCount
     public int getTurnCount() {
         return turnCount;
@@ -152,6 +156,11 @@ public class Player {
 
     public double setBudget(double budget) {
         return this.budget = budget;
+    }
+
+    //dummy done()
+    public void done() {
+        System.out.println(this.name + " has finished!");
     }
 
     //eiei
