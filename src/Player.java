@@ -7,10 +7,10 @@ public class Player {
     private double budget;
     private ArrayList<Minion> minion = new ArrayList<>();
     private ArrayList<Hex> area;
-    private ConfigFile config;
+    private ConfigFile config = Map.getConfig();
     private int turnCount = 0;
 
-    public Player(String name, double budget) {
+    public Player(String name) {
         //        this.type = type;
         this.name = name;
         this.budget = config.init_budget();
@@ -148,6 +148,10 @@ public class Player {
     // Getter สำหรับ turnCount
     public int getTurnCount() {
         return turnCount;
+    }
+
+    public double setBudget(double budget) {
+        return this.budget = budget;
     }
 
     //eiei

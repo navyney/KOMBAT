@@ -5,9 +5,17 @@ class Map {
     private Minion[][] minions;
     private List<Hex> allHexes = new ArrayList<>();
 
+    private static ConfigFile config = new ConfigFile(
+            100, 100, 1000, 100,
+            90, 23456, 5, 69, 47);
+
     public Map(int row, int col) {
         this.map = new int[row][col];
         this.minions = new Minion[row][col];
+    }
+
+    public static ConfigFile getConfig() {
+        return config;
     }
 
     public void createMap() {
@@ -108,14 +116,11 @@ class Map {
     //try spawn move and shoot (each player has only one minion for now)
     public static void main(String[] args) {
         Map gameMap = new Map(11, 8);
-        ConfigFile config = new ConfigFile(
-                100, 1000, 1000, 100,
-                90, 23456, 5, 69, 47);
         gameMap.createMap();
 
 
-        Player player1 = new Player("1", 50);
-        Player player2 = new Player("2", 5);
+        Player player1 = new Player("1");
+        Player player2 = new Player("2");
 
         player1.buyArea(3, 3, gameMap);
         player1.buyArea(2, 2, gameMap);
