@@ -129,13 +129,6 @@ public class Player {
         System.out.println(this.name + " earned interest: " + (int)(interest) + ", new budget: " + (int)(this.budget));
     }
 
-//    // คำนวณดอกเบี้ย current*interest/100
-//    public void calculateInterest() {
-//        double interest = this.budget * (config.interest_pct() / 100.0);
-//        this.budget += interest;
-//        this.budget = Math.min(this.budget, config.max_budget()); // ไม่ให้เกินงบประมาณสูงสุด
-//    }
-
     public void incrementTurnCount() {
         this.turnCount++;
     }
