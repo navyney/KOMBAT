@@ -123,10 +123,10 @@ class Map {
         Minion minionP1 = new Minion("P1Minion", warrior, 10, player1, gameMap);
         Minion minionP2 = new Minion("P2Minion", warrior, 10, player2, gameMap);
 
-        if (minionP1.spawn(3, 3)) {
+        if (player1.spawnMinion(minionP1, 3, 3)) {
             System.out.println("P1 Minion spawned at (3,3)");
         }
-        if (minionP2.spawn(3, 1)) {
+        if (player2.spawnMinion(minionP2,3, 1)) {
             System.out.println("P2 Minion spawned at (3,1)");
         }
 

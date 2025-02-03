@@ -79,6 +79,26 @@ public class Player {
         }
     }
 
+    public boolean spawnMinion(Minion minion, int r, int c) {
+        // check that the Minion belong to this Player or not
+        if (minion.getOwner() != this) {
+            System.out.println("This minion does not belong to you!");
+            return false;
+        }
+
+        // try to spawn Minion ในตำแหน่งที่กำหนด
+        boolean success = minion.spawn(r, c);
+
+        if (success) {
+            System.out.println("Minion " + minion.getName() + " spawned successfully at (" + r + "," + c + ")");
+        } else {
+            System.out.println("Failed to spawn minion at (" + r + "," + c + ")");
+        }
+
+        return success;
+    }
+
+
     public void done(){
         System.out.println("Player has ended their turn.");
     }

@@ -27,7 +27,6 @@ class Minion {
         }
     }
 
-
     public int getRow() {
         return this.row+1;
     }
@@ -229,4 +228,7 @@ class Minion {
         return String.valueOf(hp);
     }
 
+    public String getName() {
+        return this.name;
+    }
 }
