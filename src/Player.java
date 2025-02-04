@@ -8,7 +8,7 @@ public class Player {
     private ArrayList<Hex> area;
     private ConfigFile config = Main.getConfig();
     private int turnCount = 0;
-    private int spawnRemaining ;
+    private int spawnRemaining = config.max_spawns();
 
     public Player(String name) {
         this.name = name;
@@ -23,7 +23,7 @@ public class Player {
     }
 
     public int getSpawnRemaining() {
-        this.spawnRemaining = config.max_spawns()-getNumofMinion();
+        this.spawnRemaining -= getNumofMinion();
         return this.spawnRemaining ;
     }
 
