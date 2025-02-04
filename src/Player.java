@@ -69,7 +69,8 @@ public class Player {
         if (this.budget < config.buy_minion_cost()) {
             System.out.println("Not enough money to buy minion");
         } else {
-            this.minion.add(m);
+            setBudget(this.getBudget() - config.buy_minion_cost()) ;
+            addMinion(m);
         }
     }
 
@@ -91,7 +92,7 @@ public class Player {
             if (this.budget >= config.hex_purchase_cost()) {
                 hex.setOwner(this.name.equals("1") ? 1 : 2);
                 this.area.add(hex);
-                this.budget -= config.hex_purchase_cost();
+                setBudget(this.getBudget() - config.hex_purchase_cost()) ;
                 System.out.println(this.name + " has bought area at (" + r + "," + c + ")");
             } else {
                 System.out.println("Not enough budget to buy area!");
@@ -135,7 +136,7 @@ public class Player {
 
     public void addTurnBudget() {
         this.budget += config.turn_budget();
-        this.budget = Math.min(this.budget, config.max_budget());
+        setBudget(Math.min(this.budget, config.max_budget())) ;
     }
 
     public void calculateInterest() {
@@ -165,11 +166,11 @@ public class Player {
         }
 
         m = this.budget ;
-        this.budget += interest;
+        this.budget += interest ; // ควร + config.turn_budget() ตรงนี้เลยหรือไม่ TT
 
-        this.budget = Math.min(this.budget, config.max_budget());
+        setBudget(Math.min(this.budget, config.max_budget())) ;
 
-        System.out.println(this.name + " earned interest: " + (int)(interest) + ", new budget: " + (int)(this.budget));
+        System.out.println(this.name + " earned interest: " + (int)(interest) + ", new budget: " + getIntBudget());
     }
 
     public void incrementTurnCount() {
@@ -178,7 +179,7 @@ public class Player {
 
     // Getter สำหรับ budget
     public double getBudget() {
-        return budget;
+        return this.budget;
     }
 
     public int getIntBudget() {
