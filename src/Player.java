@@ -99,7 +99,7 @@ public class Player {
         boolean success = minion.spawn(r, c);
 
         if (success) {
-            this.budget -= config.spawn_cost();
+            setBudget(this.getBudget() - config.spawn_cost()) ;
             System.out.println("Minion " + minion.getName() + " spawned successfully at (" + r + "," + c + ")");
         } else {
             System.out.println("Failed to spawn minion at (" + r + "," + c + ")");

@@ -125,6 +125,7 @@ class Minion {
             this.row = newRow;
             this.col = newCol;
             map.placeMinion(this.row, this.col, this);
+            owner.setBudget(owner.getBudget() - config.move_cost());
             System.out.println("Moved to (" + (this.row + 1) + "," + (this.col + 1) + ")");
         } else {
             System.out.println("Cannot move to (" + (newRow + 1) + "," + (newCol + 1) + ")");
