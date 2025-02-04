@@ -8,6 +8,7 @@ public class Player {
     private ArrayList<Hex> area;
     private ConfigFile config = Main.getConfig();
     private int turnCount = 0;
+    private int spawnRemaining ;
 
     public Player(String name) {
         this.name = name;
@@ -19,6 +20,11 @@ public class Player {
 
     public String getName() {
         return this.name;
+    }
+
+    public int getSpawnRemaining() {
+        this.spawnRemaining = config.max_spawns()-getNumofMinion();
+        return this.spawnRemaining ;
     }
 
     public int getNumofMinion() {
@@ -38,6 +44,11 @@ public class Player {
     }
 
     public void addMinion(Minion m) {
+        if (this.getSpawnRemaining() == 0) {
+            System.out.println("The number of minions has reached its limit.");
+            return ;
+        }
+
         this.minion.add(m);
     }
 
@@ -89,10 +100,17 @@ public class Player {
         // check that the Minion belong to this Player or not
         if (minion.getOwner() != this) {
             System.out.println("This minion does not belong to you!");
+            return ;
+        }
+
+        if (this.getSpawnRemaining() == 0) {
+            System.out.println("The number of minions has reached its limit.");
+            return ;
         }
 
         if (this.budget < config.spawn_cost()) {
             System.out.println("Not enough budget to spawn minion!");
+            return ;
         }
 
         // try to spawn Minion ในตำแหน่งที่กำหนด
@@ -159,7 +177,7 @@ public class Player {
         return (int)(this.budget);
     }
 
-    // Getter สำหรับ turnCount
+    // dummy for testing
     public int getTurnCount() {
         return turnCount;
     }
