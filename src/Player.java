@@ -2,16 +2,14 @@ import java.util.ArrayList;
 
 public class Player {
     String name;
-    //    String type;
     private double maxBudget;
     private double budget;
-    private ArrayList<Minion> minion = new ArrayList<>();
+    private ArrayList<Minion> minion ;
     private ArrayList<Hex> area;
     private ConfigFile config = Main.getConfig();
     private int turnCount = 0;
 
     public Player(String name) {
-        //        this.type = type;
         this.name = name;
         this.budget = config.init_budget();
         this.maxBudget = config.max_budget();
@@ -57,6 +55,12 @@ public class Player {
 //        area.add(h);
 //    }
 
+    public void setArea(int r, int c, Map map) {
+        HexHex hex = (HexHex) map.getHexAt(r, c);
+        hex.setOwner(this.name.equals("1") ? 1 : 2);
+        this.area.add(hex);
+    }
+
     public void buyArea(int r, int c, Map map) {
         // ตรวจสอบว่า Hex นั้นมีเจ้าของหรือไม่
         HexHex hex = (HexHex) map.getHexAt(r, c);
@@ -81,16 +85,14 @@ public class Player {
         }
     }
 
-    public boolean spawnMinion(Minion minion, int r, int c) {
+    public void spawnMinion(Minion minion, int r, int c) {
         // check that the Minion belong to this Player or not
         if (minion.getOwner() != this) {
             System.out.println("This minion does not belong to you!");
-            return false;
         }
 
         if (this.budget < config.spawn_cost()) {
             System.out.println("Not enough budget to spawn minion!");
-            return false;
         }
 
         // try to spawn Minion ในตำแหน่งที่กำหนด
@@ -103,7 +105,6 @@ public class Player {
             System.out.println("Failed to spawn minion at (" + r + "," + c + ")");
         }
 
-        return success;
     }
 
     public void addTurnBudget() {
@@ -115,13 +116,29 @@ public class Player {
         double b = config.interest_pct(); // อัตราดอกเบี้ยฐาน
         double m = this.budget; // งบประมาณปัจจุบัน
         double t = this.turnCount; // จำนวนเทิร์นปัจจุบัน
+        double r ;
+        double interest = 0 ;
 
-        // interest rate = b * log10(m) * ln(t)
-        double r = b * Math.log10(m) * Math.log(t);
+        if (true) {
+            if (m == 0 || m == 1) {
+                m = 2 ;
+                r = b * Math.log10(m) * Math.log(t);
+            } else {
+                // interest rate = b * log10(m) * ln(t)
+                r = b * Math.log10(m) * Math.log(t);
+            }
+            m = this.budget ;
+        }
 
-        // interest = m * (r / 100)
-        double interest = m * (r / 100.0);
+        if (m==0) {
+            m = 1 ;
+            interest = m * (r / 100.0);
+        } else {
+            // interest = m * (r / 100)
+            interest = m * (r / 100.0);
+        }
 
+        m = this.budget ;
         this.budget += interest;
 
         this.budget = Math.min(this.budget, config.max_budget());
