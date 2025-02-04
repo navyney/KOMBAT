@@ -23,7 +23,8 @@ public class Player {
     }
 
     public int getSpawnRemaining() {
-        this.spawnRemaining -= getNumofMinion();
+        //spawnRemaining ไม่น่าจะลบจาก จำนวนมินเนี่ยน ได้ เพราะผู้เล่นอาจจะแค่ซื้อมินเนี่ยนไว้แต่ไม่ได้ลง
+        //this.spawnRemaining -= getNumofMinion();
         return this.spawnRemaining ;
     }
 
@@ -48,10 +49,10 @@ public class Player {
     }
 
     public void addMinion(Minion m) {
-        if (this.getSpawnRemaining() == 0) {
-            System.out.println("The number of minions has reached its limit.");
-            return ;
-        }
+//        if (this.getSpawnRemaining() == 0) {
+//            System.out.println("The number of minions has reached its limit.");
+//            return ;
+//        }
 
         this.minion.add(m);
     }
@@ -64,11 +65,13 @@ public class Player {
         return area;
     }
 
-//    public void buyArea(int r, int c) {
-//        // อย่าลืมเช็คเงินก่อน buy และหักเงินหลัง buy
-//        Hex h = new HexHex(r,c,false,1);
-//        area.add(h);
-//    }
+    public void buyMinion(Minion m) {
+        if (this.budget < config.buy_minion_cost()) {
+            System.out.println("Not enough money to buy minion");
+        } else {
+            this.minion.add(m);
+        }
+    }
 
     public void setArea(int r, int c, Map map) {
         HexHex hex = (HexHex) map.getHexAt(r, c);

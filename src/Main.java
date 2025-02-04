@@ -3,7 +3,8 @@ public class Main {
 
     private static ConfigFile config = new ConfigFile(
             100, 100, 1000, 100,
-            90, 23456, 5, 69, 47, 50);
+            90, 23456, 5, 69,
+            47, 50, 75);
 
     public static ConfigFile getConfig() {
         return config;
