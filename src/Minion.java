@@ -8,6 +8,7 @@ class Minion {
     private Player owner;
     private HashMap<String,Long> hmIdentifier = new HashMap<>();
     private Map map;
+    private ConfigFile config = Main.getConfig();
 
     public Minion(String name, MinionType type, int hp, Player owner, Map map) {
         this.name = name;
@@ -122,6 +123,11 @@ class Minion {
 //    }
 
     public void move(int direction) {
+
+        if (owner.getBudget() < config.move_cost()){
+            return;
+        }
+
         int newRow = this.row;
         int newCol = this.col;
 
