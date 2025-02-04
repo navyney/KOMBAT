@@ -27,6 +27,10 @@ public class Player {
         return this.spawnRemaining ;
     }
 
+    public void setSpawnRemaining() {
+        this.spawnRemaining -= 1;
+    }
+
     public int getNumofMinion() {
         return this.minion.size();
     }
@@ -118,6 +122,7 @@ public class Player {
 
         if (success) {
             setBudget(this.getBudget() - config.spawn_cost()) ;
+            this.setSpawnRemaining();
             System.out.println("Minion " + minion.getName() + " spawned successfully at (" + r + "," + c + ")");
         } else {
             System.out.println("Failed to spawn minion at (" + r + "," + c + ")");
