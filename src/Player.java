@@ -13,7 +13,7 @@ public class Player {
     //private GameState gameState;
     private int lastBuyAreaTurn = -1;
     private int lastBuyMinionTurn = -1;
-    private int LastSpawnMinionTurn = -1;
+    private int lastSpawnMinionTurn = -1;
 
     public Player(String name) {
         this.name = name;
@@ -71,7 +71,7 @@ public class Player {
     }
 
     public boolean canSpawnMinion() {
-        return GameState.getCurrent_turns() != lastBuyMinionTurn;
+        return GameState.getCurrent_turns() != lastSpawnMinionTurn;
     }
 
     public void addMinion(Minion m) {
@@ -172,7 +172,7 @@ public class Player {
         if (success) {
             setBudget(this.getBudget() - config.spawn_cost()) ;
             this.setSpawnRemaining();
-            LastSpawnMinionTurn = GameState.getCurrent_turns();
+            lastSpawnMinionTurn = GameState.getCurrent_turns();
             System.out.println("Minion " + minion.getName() + " spawned successfully at (" + r + "," + c + ")");
         } else {
             System.out.println("Failed to spawn minion at (" + r + "," + c + ")");
