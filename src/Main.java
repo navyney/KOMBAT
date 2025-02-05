@@ -18,29 +18,37 @@ public class Main {
         Map gameMap = new Map(11, 8);
         gameMap.createMap();
 
-        // เริ่มเกม
-        for (int turn = 1; turn <= config.max_turns(); turn++) {
-            System.out.println("--- Turn " + turn + " ---");
-
-            System.out.println(player1.getName()+"'s budget : " + player1.getIntBudget());
-
-            // ตัวอย่างการใช้งาน
-            MinionType warrior = new MinionType("Warrior", 0,null);
-            player1.setArea(5, 5, gameMap); // ซื้อพื้นที่
-            gameMap.printMap();
-            player1.buyArea(4,4,gameMap);
-            gameMap.printMap();
-            Minion minionP1 = new Minion(warrior, 10, player1, gameMap);
-            player1.spawnMinion(minionP1, 5, 5); // spawn Minion
-            gameMap.printMap();
-//            minionP1.shoot(1, 50); // ยิง
-
-            // จบเทิร์น
-            player1.done();
-
-            // คำนวณดอกเบี้ย
-            player1.calculateInterest();
-        }
+        MinionType warrior = new MinionType("Warrior", 0,null);
+        player1.setArea(5, 5, gameMap);
+        Minion minionP1 = new Minion(warrior, 10, player1, gameMap);
+        player1.spawnMinion(minionP1, 5, 5);
+        gameMap.printMap();
+        minionP1.move(1);
+        gameMap.printMap();
+//
+//        // เริ่มเกม
+//        for (int turn = 1; turn <= config.max_turns(); turn++) {
+//            System.out.println("--- Turn " + turn + " ---");
+//
+//            System.out.println(player1.getName()+"'s budget : " + player1.getIntBudget());
+//
+//            // ตัวอย่างการใช้งาน
+//            MinionType warrior = new MinionType("Warrior", 0,null);
+//            player1.setArea(5, 5, gameMap); // ซื้อพื้นที่
+//            gameMap.printMap();
+//            player1.buyArea(4,4,gameMap);
+//            gameMap.printMap();
+//            Minion minionP1 = new Minion(warrior, 10, player1, gameMap);
+//            player1.spawnMinion(minionP1, 5, 5); // spawn Minion
+//            gameMap.printMap();
+////            minionP1.shoot(1, 50); // ยิง
+//
+//            // จบเทิร์น
+//            player1.done();
+//
+//            // คำนวณดอกเบี้ย
+//            player1.calculateInterest();
+//        }
         */
 
         Map gameMap = new Map(11, 8);
