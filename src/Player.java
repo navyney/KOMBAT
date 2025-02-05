@@ -157,4 +157,15 @@ public class Player {
     }
 
     //eiei
+
+    public void setArea(int r, int c, Map map) {
+
+        HexHex hex = (HexHex) map.getHexAt(r, c);
+        if (hex.owner() == 0) {
+
+            hex.setOwner(this.name.equals("1") ? 1 : 2);
+            this.area.add(hex);
+
+        }
+    }
 }
