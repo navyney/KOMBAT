@@ -12,34 +12,46 @@ public class Main {
 
     public static void main(String[] args) {
 
-        Player player1 = new Player("Player1");
         Map gameMap = new Map(11, 8);
+        GameState gameState = new GameState();
+        gameState.setConfig(config);
+
         gameMap.createMap();
+        gameMap.printMap();
+
+        Player player1 = new Player("Player1");
+        MinionType Orc = new MinionType("Orc", 10 , null);
+        Minion m = new Minion(Orc, config.init_hp(), player1, gameMap);
+        player1.addMinion(m);
+        player1.setArea(0,0,gameMap);
+        player1.buyArea(0,0,gameMap);
+        //player1.spawnMinion(m,0,0);
+
 
         // เริ่มเกม
-        for (int turn = 1; turn <= config.max_turns(); turn++) {
-            System.out.println("--- Turn " + turn + " ---");
-
-            // อัปเดตจำนวนเทิร์นของผู้เล่น
-            player1.incrementTurnCount();
-            System.out.println(player1.getName()+"'s budget : " + player1.getIntBudget());
-
-            // ตัวอย่างการใช้งาน
-            MinionType warrior = new MinionType("Warrior", 0);
-            player1.buyArea(5, 5, gameMap); // ซื้อพื้นที่
-            Minion minionP1 = new Minion("P1Minion", warrior, 10, player1, gameMap);
-            player1.spawnMinion(minionP1, 5, 5); // spawn Minion
-            minionP1.shoot(1, 50); // ยิง
-
-            // จบเทิร์น
-            player1.done();
-
-            // เพิ่มงบประมาณเมื่อเริ่มเทิร์นใหม่
-            player1.addTurnBudget();
-
-            // คำนวณดอกเบี้ย
-            player1.calculateInterest();
-        }
+//        for (int turn = 1; turn <= config.max_turns(); turn++) {
+//            System.out.println("--- Turn " + turn + " ---");
+//
+//            // อัปเดตจำนวนเทิร์นของผู้เล่น
+//            player1.incrementTurnCount();
+//            System.out.println(player1.getName()+"'s budget : " + player1.getIntBudget());
+//
+//            // ตัวอย่างการใช้งาน
+//            MinionType warrior = new MinionType("Warrior", 0);
+//            player1.buyArea(5, 5, gameMap); // ซื้อพื้นที่
+//            Minion minionP1 = new Minion("P1Minion", warrior, 10, player1, gameMap);
+//            player1.spawnMinion(minionP1, 5, 5); // spawn Minion
+//            minionP1.shoot(1, 50); // ยิง
+//
+//            // จบเทิร์น
+//            player1.done();
+//
+//            // เพิ่มงบประมาณเมื่อเริ่มเทิร์นใหม่
+//            player1.addTurnBudget();
+//
+//            // คำนวณดอกเบี้ย
+//            player1.calculateInterest();
+//        }
     }
 }
 
