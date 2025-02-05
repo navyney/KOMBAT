@@ -10,8 +10,8 @@ class Minion {
     private Map map;
     private ConfigFile config = Main.getConfig();
 
-    public Minion(String name, MinionType type, int hp, Player owner, Map map) {
-        this.name = name;
+    public Minion(MinionType type, int hp, Player owner, Map map) {
+        this.name = type.getTypeName();
         this.type = type;
         this.hp = hp;
         this.owner = owner;
@@ -67,7 +67,7 @@ class Minion {
             return false;
         }
 
-        if (hex.owner() == (this.owner.getName().equals("1") ? 1 : 2)) {
+        if (hex.owner() == (this.owner.getName().equals("Player1") ? 1 : 2)) {
             if (!map.isWall(this.row, this.col) && !map.isMinionHere(this.row, this.col)) {
                 map.placeMinion(this.row, this.col, this);
                 owner.addMinion(this);
@@ -115,11 +115,6 @@ class Minion {
 
         HexHex hex = (HexHex) map.getHexAt(newRow + 1, newCol + 1);
 
-        if (hex == null || hex.owner() != (this.owner.getName().equals("1") ? 1 : 2)) {
-            System.out.println("You do not own this area! Cannot move to (" + (newRow + 1) + "," + (newCol + 1) + ")");
-            return;
-        }
-
         if (!map.isWall(newRow, newCol) && !map.isMinionHere(newRow, newCol)) {
             map.removeMinion(this.row, this.col);
             this.row = newRow;
@@ -134,8 +129,12 @@ class Minion {
 
     public void takeDamage(long damage) {
         if (type.getDefense() > 0) {
-            long reducedDamage = Math.max(0, damage - type.getDefense());
-            this.hp -= reducedDamage;
+            long reducedDamage = damage - type.getDefense();
+            if (reducedDamage < 0) {
+                this.hp += reducedDamage;
+            } else {
+                this.hp -= reducedDamage;
+            }
             System.out.println(this.owner.getName() + " Minion HP: " + this.stringGetHp());
         } else {
             this.hp -= damage;
@@ -190,6 +189,7 @@ class Minion {
 //                map.removeMinion(targetRow, targetCol);
 //            }
         } else {
+            owner.setBudget(owner.getBudget() - damage);
             System.out.println("No target to shoot at (" + (targetRow + 1) + "," + (targetCol + 1) + ")");
         }
     }
