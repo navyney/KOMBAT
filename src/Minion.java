@@ -115,11 +115,6 @@ class Minion {
 
         HexHex hex = (HexHex) map.getHexAt(newRow + 1, newCol + 1);
 
-//        if (hex == null || hex.owner() != (this.owner.getName().equals("Player1") ? 1 : 2)) {
-//            System.out.println("You do not own this area! Cannot move to (" + (newRow + 1) + "," + (newCol + 1) + ")");
-//            return;
-//        }
-
         if (!map.isWall(newRow, newCol) && !map.isMinionHere(newRow, newCol)) {
             map.removeMinion(this.row, this.col);
             this.row = newRow;

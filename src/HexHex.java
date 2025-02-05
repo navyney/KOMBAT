@@ -34,6 +34,7 @@ public class HexHex implements Hex {
 
     @Override
     public void setOwner(int owner) {
+
         this.own = owner;
     }
 }
