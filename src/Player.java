@@ -13,6 +13,7 @@ public class Player {
     //private GameState gameState;
     private int lastBuyAreaTurn = -1;
     private int lastBuyMinionTurn = -1;
+    private int LastSpawnMinionTurn = -1;
 
     public Player(String name) {
         this.name = name;
@@ -66,6 +67,10 @@ public class Player {
     }
 
     public boolean canBuyMinion() {
+        return GameState.getCurrent_turns() != lastBuyMinionTurn;
+    }
+
+    public boolean canSpawnMinion() {
         return GameState.getCurrent_turns() != lastBuyMinionTurn;
     }
 
@@ -141,6 +146,10 @@ public class Player {
     }
 
     public void spawnMinion(Minion minion, int r, int c) {
+        if (!canSpawnMinion()) {
+            System.out.println("You already bought this turn. Wait for next turn!");
+            return;
+        }
         // check that the Minion belong to this Player or not
         if (minion.getOwner() != this) {
             System.out.println("This minion does not belong to you!");
@@ -163,6 +172,7 @@ public class Player {
         if (success) {
             setBudget(this.getBudget() - config.spawn_cost()) ;
             this.setSpawnRemaining();
+            LastSpawnMinionTurn = GameState.getCurrent_turns();
             System.out.println("Minion " + minion.getName() + " spawned successfully at (" + r + "," + c + ")");
         } else {
             System.out.println("Failed to spawn minion at (" + r + "," + c + ")");
