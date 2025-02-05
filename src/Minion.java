@@ -11,7 +11,7 @@ class Minion {
     private ConfigFile config = Main.getConfig();
 
     public Minion(MinionType type, int hp, Player owner, Map map) {
-        //this.name = name;
+        //this.name = type.getTypeName();
         this.type = type;
         this.hp = hp;
         this.owner = owner;
