@@ -4,10 +4,10 @@ import java.util.Map;
 public class MinionType {
     private String name;
     private int defense;
-    private Statement strategy; // Strategy ของมินเนี่ยน
+    private Strategy strategy; // Strategy ของมินเนี่ยน
     private static Map<String, MinionType> minionTypes = new HashMap<>();
 
-    public MinionType(String name, int defense, Statement strategy) {
+    public MinionType(String name, int defense, Strategy strategy) {
         this.name = name;
         this.defense = defense;
         this.strategy = strategy;
@@ -17,7 +17,7 @@ public class MinionType {
 //        this(name, defense, null); // เรียก Constructor หลัก
 //    }
 
-    public static void addMinionType(String name, int defense, Statement strategy) {
+    public static void addMinionType(String name, int defense, Strategy strategy) {
         MinionType type = new MinionType(name, defense, strategy);
         minionTypes.put(name, type);
     }
@@ -48,7 +48,7 @@ public class MinionType {
         return defense;
     }
 
-    public Statement getStrategy() {
+    public Strategy getStrategy() {
         return strategy;
     }
 }
