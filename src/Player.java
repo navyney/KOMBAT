@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Player {
     String name;
@@ -6,7 +8,7 @@ public class Player {
     private double budget;
     private ArrayList<Minion> minion ;
     private ArrayList<Hex> area;
-    private ConfigFile config = Main.getConfig();
+    private final ConfigFile config = Main.getConfig();
     private int spawnRemaining = config.max_spawns();
     private GameState gameState;
     private int lastBuyAreaTurn = -1;
@@ -22,6 +24,15 @@ public class Player {
 
     public String getName() {
         return this.name;
+    }
+
+    public Minion getMinionByName(String name) {
+        for (Minion m : minion) {
+            if (m.getName().equals(name)) {
+                return m;
+            }
+        }
+        return null;
     }
 
     public int getSpawnRemaining() {
