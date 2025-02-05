@@ -10,8 +10,8 @@ class Minion {
     private Map map;
     private ConfigFile config = Main.getConfig();
 
-    public Minion(String name, MinionType type, int hp, Player owner, Map map) {
-        this.name = name;
+    public Minion(MinionType type, int hp, Player owner, Map map) {
+        //this.name = name;
         this.type = type;
         this.hp = hp;
         this.owner = owner;
@@ -134,8 +134,12 @@ class Minion {
 
     public void takeDamage(long damage) {
         if (type.getDefense() > 0) {
-            long reducedDamage = Math.max(0, damage - type.getDefense());
-            this.hp -= reducedDamage;
+            long reducedDamage = damage - type.getDefense();
+            if (reducedDamage < 0) {
+                this.hp += reducedDamage;
+            } else {
+                this.hp -= reducedDamage;
+            }
             System.out.println(this.owner.getName() + " Minion HP: " + this.stringGetHp());
         } else {
             this.hp -= damage;
