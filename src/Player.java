@@ -10,7 +10,7 @@ public class Player {
     private ArrayList<Hex> area;
     private final ConfigFile config = Main.getConfig();
     private int spawnRemaining = config.max_spawns();
-    private GameState gameState;
+    //private GameState gameState;
     private int lastBuyAreaTurn = -1;
     private int lastBuyMinionTurn = -1;
 
@@ -62,11 +62,11 @@ public class Player {
     }
 
     public boolean canBuyArea() {
-        return gameState.getCurrent_turns() != lastBuyAreaTurn;
+        return GameState.getCurrent_turns() != lastBuyAreaTurn;
     }
 
     public boolean canBuyMinion() {
-        return gameState.getCurrent_turns() != lastBuyMinionTurn;
+        return GameState.getCurrent_turns() != lastBuyMinionTurn;
     }
 
     public void addMinion(Minion m) {
@@ -96,7 +96,7 @@ public class Player {
         } else {
             setBudget(this.getBudget() - config.buy_minion_cost()) ;
             addMinion(m);
-            lastBuyMinionTurn = gameState.getCurrent_turns();
+            lastBuyMinionTurn = GameState.getCurrent_turns();
         }
     }
 
@@ -123,7 +123,7 @@ public class Player {
                 hex.setOwner(this.name.equals("1") ? 1 : 2);
                 this.area.add(hex);
                 setBudget(this.getBudget() - config.hex_purchase_cost()) ;
-                lastBuyAreaTurn = gameState.getCurrent_turns();
+                lastBuyAreaTurn = GameState.getCurrent_turns();
                 System.out.println(this.name + " has bought area at (" + r + "," + c + ")");
             } else {
                 System.out.println("Not enough budget to buy area!");
@@ -173,7 +173,7 @@ public class Player {
     public void calculateInterest() {
         double b = config.interest_pct(); // อัตราดอกเบี้ยฐาน
         double m = this.budget; // งบประมาณปัจจุบัน
-        double t = gameState.getCurrent_turns(); // จำนวนเทิร์นปัจจุบัน
+        double t = GameState.getCurrent_turns(); // จำนวนเทิร์นปัจจุบัน
         double r ;
         double interest = 0 ;
 
@@ -232,4 +232,15 @@ public class Player {
     }
 
     //eiei
+
+//    public void setArea(int r, int c, Map map) {
+//
+//        HexHex hex = (HexHex) map.getHexAt(r, c);
+//        if (hex.owner() == 0) {
+//
+//            hex.setOwner(this.name.equals("1") ? 1 : 2);
+//            this.area.add(hex);
+//
+//        }
+//    }
 }
