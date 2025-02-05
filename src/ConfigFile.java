@@ -7,7 +7,9 @@ public record ConfigFile(
         int max_budget,
         int interest_pct,
         int max_turns,
-        int max_spawns
+        int max_spawns,
+        int move_cost,
+        int buy_minion_cost
 ) {
     public int spawn_cost() {
         return spawn_cost;
@@ -43,6 +45,14 @@ public record ConfigFile(
 
     public int max_spawns() {
         return max_spawns;
+    }
+
+    public int move_cost() {
+        return move_cost;
+    }
+
+    public int buy_minion_cost() {
+        return buy_minion_cost;
     }
 
 }

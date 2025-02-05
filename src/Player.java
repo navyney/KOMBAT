@@ -2,16 +2,15 @@ import java.util.ArrayList;
 
 public class Player {
     String name;
-    //    String type;
     private double maxBudget;
     private double budget;
-    private ArrayList<Minion> minion = new ArrayList<>();
+    private ArrayList<Minion> minion ;
     private ArrayList<Hex> area;
     private ConfigFile config = Main.getConfig();
     private int turnCount = 0;
+    private int spawnRemaining = config.max_spawns();
 
     public Player(String name) {
-        //        this.type = type;
         this.name = name;
         this.budget = config.init_budget();
         this.maxBudget = config.max_budget();
@@ -21,6 +20,16 @@ public class Player {
 
     public String getName() {
         return this.name;
+    }
+
+    public int getSpawnRemaining() {
+        //spawnRemaining ไม่น่าจะลบจาก จำนวนมินเนี่ยน ได้ เพราะผู้เล่นอาจจะแค่ซื้อมินเนี่ยนไว้แต่ไม่ได้ลง
+        //this.spawnRemaining -= getNumofMinion();
+        return this.spawnRemaining ;
+    }
+
+    public void setSpawnRemaining() {
+        this.spawnRemaining -= 1;
     }
 
     public int getNumofMinion() {
@@ -40,6 +49,11 @@ public class Player {
     }
 
     public void addMinion(Minion m) {
+//        if (this.getSpawnRemaining() == 0) {
+//            System.out.println("The number of minions has reached its limit.");
+//            return ;
+//        }
+
         this.minion.add(m);
     }
 
@@ -51,11 +65,20 @@ public class Player {
         return area;
     }
 
-//    public void buyArea(int r, int c) {
-//        // อย่าลืมเช็คเงินก่อน buy และหักเงินหลัง buy
-//        Hex h = new HexHex(r,c,false,1);
-//        area.add(h);
-//    }
+    public void buyMinion(Minion m) {
+        if (this.budget < config.buy_minion_cost()) {
+            System.out.println("Not enough money to buy minion");
+        } else {
+            setBudget(this.getBudget() - config.buy_minion_cost()) ;
+            addMinion(m);
+        }
+    }
+
+    public void setArea(int r, int c, Map map) {
+        HexHex hex = (HexHex) map.getHexAt(r, c);
+        hex.setOwner(this.name.equals("1") ? 1 : 2);
+        this.area.add(hex);
+    }
 
     public void buyArea(int r, int c, Map map) {
         // ตรวจสอบว่า Hex นั้นมีเจ้าของหรือไม่
@@ -69,7 +92,7 @@ public class Player {
             if (this.budget >= config.hex_purchase_cost()) {
                 hex.setOwner(this.name.equals("1") ? 1 : 2);
                 this.area.add(hex);
-                this.budget -= config.hex_purchase_cost();
+                setBudget(this.getBudget() - config.hex_purchase_cost()) ;
                 System.out.println(this.name + " has bought area at (" + r + "," + c + ")");
             } else {
                 System.out.println("Not enough budget to buy area!");
@@ -81,52 +104,73 @@ public class Player {
         }
     }
 
-    public boolean spawnMinion(Minion minion, int r, int c) {
+    public void spawnMinion(Minion minion, int r, int c) {
         // check that the Minion belong to this Player or not
         if (minion.getOwner() != this) {
             System.out.println("This minion does not belong to you!");
-            return false;
+            return ;
+        }
+
+        if (this.getSpawnRemaining() == 0) {
+            System.out.println("The number of minions has reached its limit.");
+            return ;
         }
 
         if (this.budget < config.spawn_cost()) {
             System.out.println("Not enough budget to spawn minion!");
-            return false;
+            return ;
         }
 
         // try to spawn Minion ในตำแหน่งที่กำหนด
         boolean success = minion.spawn(r, c);
 
         if (success) {
-            this.budget -= config.spawn_cost();
+            setBudget(this.getBudget() - config.spawn_cost()) ;
+            this.setSpawnRemaining();
             System.out.println("Minion " + minion.getName() + " spawned successfully at (" + r + "," + c + ")");
         } else {
             System.out.println("Failed to spawn minion at (" + r + "," + c + ")");
         }
 
-        return success;
     }
 
     public void addTurnBudget() {
         this.budget += config.turn_budget();
-        this.budget = Math.min(this.budget, config.max_budget());
+        setBudget(Math.min(this.budget, config.max_budget())) ;
     }
 
     public void calculateInterest() {
         double b = config.interest_pct(); // อัตราดอกเบี้ยฐาน
         double m = this.budget; // งบประมาณปัจจุบัน
         double t = this.turnCount; // จำนวนเทิร์นปัจจุบัน
+        double r ;
+        double interest = 0 ;
 
-        // interest rate = b * log10(m) * ln(t)
-        double r = b * Math.log10(m) * Math.log(t);
+        if (true) {
+            if (m == 0 || m == 1) {
+                m = 2 ;
+                r = b * Math.log10(m) * Math.log(t);
+            } else {
+                // interest rate = b * log10(m) * ln(t)
+                r = b * Math.log10(m) * Math.log(t);
+            }
+            m = this.budget ;
+        }
 
-        // interest = m * (r / 100)
-        double interest = m * (r / 100.0);
+        if (m==0) {
+            m = 1 ;
+            interest = m * (r / 100.0);
+        } else {
+            // interest = m * (r / 100)
+            interest = m * (r / 100.0);
+        }
 
-        this.budget += interest;
+        m = this.budget ;
+        this.budget += interest ; // ควร + config.turn_budget() ตรงนี้เลยหรือไม่ TT
 
-        this.budget = Math.min(this.budget, config.max_budget());
+        setBudget(Math.min(this.budget, config.max_budget())) ;
 
-        System.out.println(this.name + " earned interest: " + (int)(interest) + ", new budget: " + (int)(this.budget));
+        System.out.println(this.name + " earned interest: " + (int)(interest) + ", new budget: " + getIntBudget());
     }
 
     public void incrementTurnCount() {
@@ -135,14 +179,14 @@ public class Player {
 
     // Getter สำหรับ budget
     public double getBudget() {
-        return budget;
+        return this.budget;
     }
 
     public int getIntBudget() {
         return (int)(this.budget);
     }
 
-    // Getter สำหรับ turnCount
+    // dummy for testing
     public int getTurnCount() {
         return turnCount;
     }

@@ -8,6 +8,7 @@ class Minion {
     private Player owner;
     private HashMap<String,Long> hmIdentifier = new HashMap<>();
     private Map map;
+    private ConfigFile config = Main.getConfig();
 
     public Minion(String name, MinionType type, int hp, Player owner, Map map) {
         this.name = name;
@@ -56,8 +57,8 @@ class Minion {
     }
 
     public boolean spawn(int r, int c) {
-        this.row = r-1;
-        this.col = c-1;
+        this.row = r - 1;
+        this.col = c - 1;
 
         HexHex hex = (HexHex) map.getHexAt(r, c);
 
@@ -79,49 +80,13 @@ class Minion {
             System.out.println("You do not own this area!");
             return false;
         }
-
-//        if (!map.isWall(this.row, this.col) && !map.isMinionHere(this.row, this.col)) {
-//            map.placeMinion(this.row, this.col, this);
-//            return true;
-//        }
-//        return false;
     }
 
-//    public void move(int direction) {
-//        int newRow = this.row;
-//        int newCol = this.col;
-//
-//        if( direction==1 ){ //up
-//            newRow -= 1;
-//        } else if(direction == 2 ) { //upright
-//            newCol += 1;
-//        } else if(direction ==3 ) { //downright
-//            newCol += 1;
-//            newRow += 1;
-//        } else if(direction==4) { //down
-//            newRow += 1;
-//        } else if(direction == 5 ) { //downleft
-//            newRow -= 1;
-//        } else if(direction == 6 ) { //upleft
-//            newRow -= 1;
-//            newCol -= 1;
-//        } else {
-//            throw new IllegalArgumentException("Invalid direction");
-//        }
-//
-//        if (!map.isWall(newRow, newCol) && !map.isMinionHere(newRow, newCol)) {
-//            map.removeMinion(this.row, this.col);
-//
-//            this.row = newRow;
-//            this.col = newCol;
-//
-//            map.placeMinion(this.row, this.col, this);
-//        } else {
-//            System.out.println("Can't move to (" + (newRow + 1) + "," + (newCol + 1) + ")!");
-//        }
-//    }
-
     public void move(int direction) {
+        if (owner.getBudget() < config.move_cost()){
+            return;
+        }
+
         int newRow = this.row;
         int newCol = this.col;
 
@@ -160,6 +125,7 @@ class Minion {
             this.row = newRow;
             this.col = newCol;
             map.placeMinion(this.row, this.col, this);
+            owner.setBudget(owner.getBudget() - config.move_cost());
             System.out.println("Moved to (" + (this.row + 1) + "," + (this.col + 1) + ")");
         } else {
             System.out.println("Cannot move to (" + (newRow + 1) + "," + (newCol + 1) + ")");
@@ -183,10 +149,11 @@ class Minion {
     }
 
     public void shoot(int direction, long damage) {
-        if (owner.getBudget() < damage) { // ตรวจสอบเงิน
+        if (owner.getBudget() < damage) {
             System.out.println("Not enough budget to shoot!");
             return;
         }
+
         int targetRow = this.row;
         int targetCol = this.col;
 
@@ -219,7 +186,6 @@ class Minion {
             System.out.println(name + " shoots at " + target.name);
             target.takeDamage(damage);
             owner.setBudget(owner.getBudget() - damage);
-
 //            if (target.getHp() <= 0) {
 //                map.removeMinion(targetRow, targetCol);
 //            }
