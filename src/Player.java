@@ -7,8 +7,10 @@ public class Player {
     private ArrayList<Minion> minion ;
     private ArrayList<Hex> area;
     private ConfigFile config = Main.getConfig();
-    private int turnCount = 0;
     private int spawnRemaining = config.max_spawns();
+    private GameState gameState;
+    private int lastBuyAreaTurn = -1;
+    private int lastBuyMinionTurn = -1;
 
     public Player(String name) {
         this.name = name;
@@ -48,6 +50,14 @@ public class Player {
         this.maxBudget = maxBudget;
     }
 
+    public boolean canBuyArea() {
+        return gameState.getCurrent_turns() != lastBuyAreaTurn;
+    }
+
+    public boolean canBuyMinion() {
+        return gameState.getCurrent_turns() != lastBuyMinionTurn;
+    }
+
     public void addMinion(Minion m) {
 //        if (this.getSpawnRemaining() == 0) {
 //            System.out.println("The number of minions has reached its limit.");
@@ -65,12 +75,17 @@ public class Player {
         return area;
     }
 
-    public void buyMinion(Minion m) {
+    public void buyMinion(MinionType type,Minion m) {
+        if (!canBuyMinion()) {
+            System.out.println("You already bought this turn. Wait for next turn!");
+            return;
+        }
         if (this.budget < config.buy_minion_cost()) {
             System.out.println("Not enough money to buy minion");
         } else {
             setBudget(this.getBudget() - config.buy_minion_cost()) ;
             addMinion(m);
+            lastBuyMinionTurn = gameState.getCurrent_turns();
         }
     }
 
@@ -81,6 +96,10 @@ public class Player {
     }
 
     public void buyArea(int r, int c, Map map) {
+        if (!canBuyArea()) {
+            System.out.println("You already bought this turn. Wait for next turn!");
+            return;
+        }
         // ตรวจสอบว่า Hex นั้นมีเจ้าของหรือไม่
         HexHex hex = (HexHex) map.getHexAt(r, c);
         if (hex == null) {
@@ -93,6 +112,7 @@ public class Player {
                 hex.setOwner(this.name.equals("1") ? 1 : 2);
                 this.area.add(hex);
                 setBudget(this.getBudget() - config.hex_purchase_cost()) ;
+                lastBuyAreaTurn = gameState.getCurrent_turns();
                 System.out.println(this.name + " has bought area at (" + r + "," + c + ")");
             } else {
                 System.out.println("Not enough budget to buy area!");
@@ -142,7 +162,7 @@ public class Player {
     public void calculateInterest() {
         double b = config.interest_pct(); // อัตราดอกเบี้ยฐาน
         double m = this.budget; // งบประมาณปัจจุบัน
-        double t = this.turnCount; // จำนวนเทิร์นปัจจุบัน
+        double t = gameState.getCurrent_turns(); // จำนวนเทิร์นปัจจุบัน
         double r ;
         double interest = 0 ;
 
@@ -173,9 +193,9 @@ public class Player {
         System.out.println(this.name + " earned interest: " + (int)(interest) + ", new budget: " + getIntBudget());
     }
 
-    public void incrementTurnCount() {
-        this.turnCount++;
-    }
+//    public void incrementTurnCount() {
+//        this.turnCount++;
+//    }
 
     // Getter สำหรับ budget
     public double getBudget() {
@@ -186,10 +206,10 @@ public class Player {
         return (int)(this.budget);
     }
 
-    // dummy for testing
-    public int getTurnCount() {
-        return turnCount;
-    }
+//    // dummy for testing
+//    public int getTurnCount() {
+//        return turnCount;
+//    }
 
     public double setBudget(double budget) {
         return this.budget = budget;
