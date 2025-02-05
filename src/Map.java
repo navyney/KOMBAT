@@ -100,4 +100,7 @@ class Map {
         return map[0].length;
     }
 
+    public Map getGameMap() {
+        return new Map(11, 8);
+    }
 }

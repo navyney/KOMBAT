@@ -1,0 +1,394 @@
+* commit 43bad885487e9ddc245260ae71f8867126531554
+| Author: navyney <141761309+navyney@users.noreply.github.com>
+| Date:   Wed Feb 5 21:36:13 2025 +0700
+| 
+|     added canSpawnMinion() bc Minion can spawn only once for each turn
+| 
+* commit 2bfcbc1fceeeee0943c68824a1ad15979f2ad5fc
+| Author: navyney <141761309+navyney@users.noreply.github.com>
+| Date:   Wed Feb 5 21:34:09 2025 +0700
+| 
+|     added canSpawnMinion() bc Minion can spawn only once for each turn
+|   
+*   commit f047385b781bc600671c9f42c3067aa601afe5e7
+|\  Merge: 70b9fb0 5ecd9dd
+| | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | Date:   Wed Feb 5 21:30:15 2025 +0700
+| | 
+| |     Can work together laew (GameState not done yet, remaining thing : loop)
+| |     
+| |     Can work together laew (GameState not done yet, remaining thing : loop)
+| | 
+| * commit 5ecd9dd424c78c5e3c64924d1c26f0f6fa350cfc
+| | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | Date:   Wed Feb 5 21:25:52 2025 +0700
+| | 
+| |     edit tester
+| |   
+| *   commit 2035dcd738805ffe87ba54502e2be9e074a2fe1f
+| |\  Merge: 2c2fde5 2988706
+| | | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | | Date:   Wed Feb 5 21:27:26 2025 +0700
+| | | 
+| | |     Merge pull request #20 from navyney/GameState
+| | |     
+| | |     Game state
+| | |   
+| | *   commit 29887067820e949635123c31cc8eae2b46bb5807
+| | |\  Merge: 98801d4 2c2fde5
+| | |/  Author: navyney <141761309+navyney@users.noreply.github.com>
+| |/|   Date:   Wed Feb 5 21:27:14 2025 +0700
+| | |   
+| | |       Merge branch 'editPlayerMinionType' into GameState
+| | | 
+| * | commit 2c2fde51bdcd097b17f8d045641547c04974a613
+| | | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | | Date:   Wed Feb 5 20:59:05 2025 +0700
+| | | 
+| | |     edit Staement to Strategy bc i เมา
+| | | 
+| * | commit 0bdaa04c4f167bb8441c30001061157b44ed4ab7
+| | | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | | Date:   Wed Feb 5 20:54:53 2025 +0700
+| | | 
+| | |     edit Staement to Strategy bc i เมา
+| | | 
+| | * commit 98801d489c52c53b8bc577f5317efc5d46f60fde
+| | | Author: PhuriphatYoosuwan <phuriphat_yoosuwan@cmu.ac.th>
+| | | Date:   Wed Feb 5 21:22:28 2025 +0700
+| | | 
+| | |     Parse Eval Player Minion Map Hex Can work together
+| | |   
+| | *   commit 7dcc35052c53462eb45edca513772e1853e6100e
+| | |\  Merge: 9297b9f 7a9bd45
+| | |/  Author: Phuriphat <141811087+PhuriphatYoosuwan@users.noreply.github.com>
+| |/|   Date:   Wed Feb 5 20:30:10 2025 +0700
+| | |   
+| | |       Merge pull request #19 from navyney/editPlayerMinionType
+| | |       
+| | |       Edit player minion type
+| | | 
+| * | commit 7a9bd45714f9683eac46ed6191d9a210fd23e247
+| | | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | | Date:   Wed Feb 5 20:25:34 2025 +0700
+| | | 
+| | |     edit checking who own this Area to make it work with KhaoKlong's code and remove addTurnBudget() because there is no longer used anymore
+| | | 
+| * | commit 40412a038eefa80bda4984fe34ecf902d564c4ef
+| |\| Merge: 7f2c033 9297b9f
+| | | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | | Date:   Wed Feb 5 17:57:34 2025 +0700
+| | | 
+| | |     Merge pull request #18 from navyney/GameState
+| | |     
+| | |     Game state
+| | | 
+| | * commit 9297b9fe92ef18a899f35c361399c6c19e1ee716
+| | | Author: PhuriphatYoosuwan <phuriphat_yoosuwan@cmu.ac.th>
+| | | Date:   Wed Feb 5 17:56:30 2025 +0700
+| | | 
+| | |     GameState Test V2
+| | |   
+| | *   commit d7f1ecc580507dc531e1f4271b5ede005fbaceda
+| | |\  Merge: ebe8ff4 7f2c033
+| | |/  Author: Phuriphat <141811087+PhuriphatYoosuwan@users.noreply.github.com>
+| |/|   Date:   Wed Feb 5 16:41:19 2025 +0700
+| | |   
+| | |       Merge pull request #17 from navyney/editPlayerMinionType
+| | |       
+| | |       added getMinionByName(String name)
+| | | 
+| * | commit 7f2c03388a56dd597b521dd8c0e0a316a86b012d
+| | | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | | Date:   Wed Feb 5 16:37:01 2025 +0700
+| | | 
+| | |     added getMinionByName(String name)
+| | |   
+| | *   commit ebe8ff4cd095d22e5dcb8586d2f1938f45a051a6
+| | |\  Merge: 82a8666 1d97085
+| | |/  Author: Phuriphat <141811087+PhuriphatYoosuwan@users.noreply.github.com>
+| |/|   Date:   Wed Feb 5 16:08:07 2025 +0700
+| | |   
+| | |       Merge pull request #16 from navyney/editPlayerMinionType
+| | |       
+| | |       เพิ่มให้มันตรวจจับได้ว่าเทิร์นนี้มีการซื้อที่ ซื้อมินเนี่ยนไปแล้วหรือ…
+| | | 
+| * | commit 1d97085f30cb44f81ea0f8456ebe23c838b3b846
+|/ /  Author: navyney <141761309+navyney@users.noreply.github.com>
+| |   Date:   Wed Feb 5 16:04:04 2025 +0700
+| |   
+| |       เพิ่มให้มันตรวจจับได้ว่าเทิร์นนี้มีการซื้อที่ ซื้อมินเนี่ยนไปแล้วหรือยัง หากยังก็สามารถซื้อได้ ถ้าทำไปแล้ว ก็ซื้อไม่ได้แล้ว แล้วก็เพิ่มการเก็บ MinionType ใน Class Miniontype
+| |   
+| *   commit 82a8666a7d0af53cf4d25dafd306291dd832946e
+| |\  Merge: e0e662f 70b9fb0
+| |/  Author: Phuriphat <141811087+PhuriphatYoosuwan@users.noreply.github.com>
+|/|   Date:   Wed Feb 5 14:37:37 2025 +0700
+| |   
+| |       Merge pull request #15 from navyney/main
+| |       
+| |       Merge with main
+| | 
+* | commit 70b9fb0ca04cfe4b3bf1c693475e8c4ad72e56a3
+| | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | Date:   Wed Feb 5 03:49:17 2025 +0700
+| | 
+| |     ลืมใส่ให้มันลดเงินเมื่อซื้อมินเนี่ยน จะไปนอนละ เลิก push ละ but still งงว่า turn_budget เอาไว้ add ให้ budget หลังคำนวณและเพิ่มดอกเบี้ยเข้าไปแล้ว หรอ
+| | 
+* | commit 19b0cf067d57a2dd6a90a961647cbf54168094e9
+| | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | Date:   Wed Feb 5 03:37:29 2025 +0700
+| | 
+| |     changed how to calculatedInterestRate for If player budget = 0 or 1 we will calculate as 2 (FOR NOW. IF THERE IS ANY CHANGE, ILL EDIT IT LATER), added setArea(), เปลี่ยนการลดเงินเป็นการใช้ setBudget() ในการลดเงินทั้งหมด, เพิ่ม spawnRemaining getSpawnRemaining() , เพิ่มbuy_minion_cost , เพิ่มการเช็คก่อนจะ spawnMinion() ให้มีการ check spawnRemaining ก่อนว่าถึง max (=0) หรือยัง, create setSpawnRemaining() to reduce spawnRemaining when spawn minion
+| | 
+* | commit cadc1ed708499ac84b8d47359047a16b9ef69a13
+| | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | Date:   Wed Feb 5 03:11:44 2025 +0700
+| | 
+| |     changed how to calculatedInterestRate for If player budget = 0 or 1 we will calculate as 2 (FOR NOW. IF THERE IS ANY CHANGE, ILL EDIT IT LATER), added setArea(), เปลี่ยนการลดเงินเป็นการใช้ setBudget() ในการลดเงินทั้งหมด, เพิ่ม spawnRemaining getSpawnRemaining() เพิ่มการเช็คก่อน addMinion()และspawnMinion() ให้มีการ check spawnRemaining ก่อนว่าถึง max (=0) หรือยัง, create setSpawnRemaining() to reduce spawnRemaining when spawn minion
+| | 
+* | commit c5e2c244dc94f58d349a00994ec93572de6ecd02
+| | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | Date:   Wed Feb 5 03:05:59 2025 +0700
+| | 
+| |     changed how to calculatedInterestRate for If player budget = 0 or 1 we will calculate as 2 (FOR NOW. IF THERE IS ANY CHANGE, ILL EDIT IT LATER), added setArea(), เปลี่ยนการลดเงินเป็นการใช้ setBudget() ในการลดเงินทั้งหมด, เพิ่ม spawnRemaining getSpawnRemaining() เพิ่มการเช็คก่อน addMinion()และspawnMinion() ให้มีการ check spawnRemaining ก่อนว่าถึง max (=0) หรือยัง
+| | 
+* | commit b7b2505eb7438cc1e1e33421b512aad4872c2b5d
+| | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | Date:   Wed Feb 5 03:02:32 2025 +0700
+| | 
+| |     changed how to calculatedInterestRate for If player budget = 0 or 1 we will calculate as 2 (FOR NOW. IF THERE IS ANY CHANGE, ILL EDIT IT LATER), added setArea(), เปลี่ยนการลดเงินเป็นการใช้ setBudget() ในการลดเงินทั้งหมด, เพิ่ม spawnRemaining getSpawnRemaining() เพิ่มการเช็คก่อน addMinion()และspawnMinion() ให้มีการ check spawnRemaining ก่อนว่าถึง max (=0) หรือยัง
+| | 
+* | commit 85d8ec322e4ef0afd874fa566857596ecd4ff152
+| | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | Date:   Wed Feb 5 02:51:01 2025 +0700
+| | 
+| |     changed how to calculatedInterestRate for If player budget = 0 or 1 we will calculate as 2 (FOR NOW. IF THERE IS ANY CHANGE, ILL EDIT IT LATER), added setArea(), เปลี่ยนการลดเงินเป็นการใช้ setBudget() ในการลดเงินทั้งหมด
+| | 
+* | commit 1e6a96d7eb2e3a3bb56656836c2bac68f85461b8
+| | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | Date:   Wed Feb 5 02:28:44 2025 +0700
+| | 
+| |     changed how to calculatedInterestRate for If player budget = 0 or 1 we will calculate as 2 (FOR NOW. IF THERE IS ANY CHANGE, ILL EDIT IT LATER), added setArea()
+| | 
+* | commit aef29906c7c72b6d100e03442e976ca116b099fc
+| | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | Date:   Tue Feb 4 23:59:15 2025 +0700
+| | 
+| |     added move_cost to ConfigFile
+| | 
+| * commit e0e662f1acef835fc1b8341f4203e5da50808f91
+|/  Author: PhuriphatYoosuwan <phuriphat_yoosuwan@cmu.ac.th>
+|   Date:   Wed Feb 5 14:35:40 2025 +0700
+|   
+|       GameState Test
+| 
+* commit 307e12a440a93b8d6efa7dfd1b1cdc20fb00ab14
+| Author: navyney <141761309+navyney@users.noreply.github.com>
+| Date:   Mon Feb 3 19:20:59 2025 +0700
+| 
+|     edit direction in Ally Opponent Nearby
+|     add function in Minion ( getMap() ) to support Jump's code
+|   
+*   commit 6d59cff772289e161f3c24feb82b87fc5944d684
+|\  Merge: fa467d8 a97303d
+| | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | Date:   Mon Feb 3 17:30:10 2025 +0700
+| | 
+| |     Merge pull request #14 from navyney/upgradeMinion
+| |     
+| |     upgradeMinion
+| |   
+| *   commit a97303d2be58e75d4e1773229a139bd3d17847d8
+| |\  Merge: 023e485 fa467d8
+| |/  Author: navyney <141761309+navyney@users.noreply.github.com>
+|/|   Date:   Mon Feb 3 17:25:42 2025 +0700
+| |   
+| |       Merge remote-tracking branch 'origin/main' into upgradeMinion
+| |       
+| |       # Conflicts:
+| |       #       src/Main.java
+| |       #       src/Player.java
+| |   
+* |   commit fa467d85564f2b36b89807e8cca056d9d17a2212
+|\ \  Merge: 8dab6c6 3fa2b82
+| | | Author: Vualerie <105138944+Vualerie@users.noreply.github.com>
+| | | Date:   Mon Feb 3 17:04:57 2025 +0700
+| | | 
+| | |     Merge pull request #13 from navyney/infoExpr
+| | |     
+| | |     Info Expr complete wait for some function in Minion
+| | | 
+| * | commit 3fa2b82d5b04519904e8cfd00a871e19fc9c5536
+|/ /  Author: Sirawit Seetong <sirawit_se@cmu.ac.th>
+| |   Date:   Mon Feb 3 17:00:49 2025 +0700
+| |   
+| |       Info Expr complete wait for some function in Minion
+| | 
+| * commit 023e485e763b5a6e44fe157d563bc9b585d2123d
+| | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | Date:   Mon Feb 3 17:22:33 2025 +0700
+| | 
+| |     try about budget calculating
+| | 
+| * commit 81ae1564165ee198051eb9a619bda9ba2e554e9d
+| | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | Date:   Mon Feb 3 17:13:47 2025 +0700
+| | 
+| |     try about budget calculating
+| | 
+| * commit ac6168282d92e6263a462fb09a499c1dc49efb74
+| | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | Date:   Mon Feb 3 16:49:43 2025 +0700
+| | 
+| |     added getType()
+| | 
+| * commit 1ede521cf5de59a0895f19793e8851c7b99aa84c
+| | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | Date:   Mon Feb 3 16:39:21 2025 +0700
+| | 
+| |     now can use the default value from Config
+| | 
+| * commit 10f2cc01203f7e638e8721d2cb388d12196f1373
+| | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | Date:   Mon Feb 3 16:26:14 2025 +0700
+| | 
+| |     add onMap() try to calculate about bueget thing e.g. added interestCalculate
+| | 
+| * commit 4b884d6a56165bac1c2ed071ac5937d1fd82a52c
+| | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | Date:   Mon Feb 3 13:22:06 2025 +0700
+| | 
+| |     added spawnMinion() in Class Player to call spawn() in Class Minion
+| | 
+| * commit 15df42d7573fcebedc01943cf6ee672349e53e9c
+| | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | Date:   Mon Feb 3 02:04:24 2025 +0700
+| | 
+| |     can buy area, spawn, shoot, move, can show number of area that you owned, number of minion that spawned
+| | 
+| * commit da0bce74a9f6753c29ba95ccdd338eb7f43c5205
+| | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | Date:   Mon Feb 3 02:02:05 2025 +0700
+| | 
+| |     can buy area, spawn, shoot, move, can show number of area that you owned, number of minion that spawned
+| | 
+| * commit 3265680f07105353e2446dad1d8e86460a24d957
+|/  Author: navyney <141761309+navyney@users.noreply.github.com>
+|   Date:   Mon Feb 3 00:37:06 2025 +0700
+|   
+|       edit minion map
+|   
+*   commit 8dab6c67834fa0e2580af43da96bbe7f9ce1e5eb
+|\  Merge: 8bcd806 d366656
+| | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | Date:   Sun Feb 2 17:42:22 2025 +0700
+| | 
+| |     Merge pull request #12 from navyney/HexHexHex
+| |     
+| |     HexHex added
+| | 
+| * commit d3666567c97baf78e1d2ad20de08b1e17a4ca4fa
+|/  Author: PhuriphatYoosuwan <phuriphat_yoosuwan@cmu.ac.th>
+|   Date:   Sun Feb 2 17:40:56 2025 +0700
+|   
+|       HexHex added
+|   
+*   commit 8bcd8068cd73ab8a236b3b34cbd1ae0b815f3db0
+|\  Merge: c7b4f2b aa53705
+| | Author: Vualerie <105138944+Vualerie@users.noreply.github.com>
+| | Date:   Sun Feb 2 17:04:31 2025 +0700
+| | 
+| |     Merge pull request #11 from navyney/parser
+| |     
+| |     parser & eval
+| |   
+| *   commit aa537055b3d18c6051e24f198b2dee883f753d20
+| |\  Merge: f41d301 c7b4f2b
+| |/  Author: Vualerie <105138944+Vualerie@users.noreply.github.com>
+|/|   Date:   Sun Feb 2 17:04:16 2025 +0700
+| |   
+| |       Merge branch 'main' into parser
+| |   
+* |   commit c7b4f2b61aede9f1243d54400d6600f9509f7560
+|\ \  Merge: 32442fe 3eb0a2d
+| | | Author: Phuriphat <141811087+PhuriphatYoosuwan@users.noreply.github.com>
+| | | Date:   Sun Feb 2 16:55:48 2025 +0700
+| | | 
+| | |     player is done by hippotamus
+| | |     
+| | |     Class Player .exe
+| | |   
+| * |   commit 3eb0a2d5f9fdb636c87f1c32aaff2bc9044dde80
+| |\ \  Merge: 960cd7a 32442fe
+| |/ /  Author: Phuriphat <141811087+PhuriphatYoosuwan@users.noreply.github.com>
+|/| |   Date:   Sun Feb 2 16:54:53 2025 +0700
+| | |   
+| | |       Merge branch 'main' into Player
+| | |   
+* | |   commit 32442fe474f85ea80813389a533ed24c82ad9b3c
+|\ \ \  Merge: ae67b4e d1961d3
+| | | | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | | | Date:   Sun Feb 2 16:49:52 2025 +0700
+| | | | 
+| | | |     Merge pull request #9 from navyney/Minion-by-navy
+| | | |     
+| | | |     Minion-by-navy
+| | | | 
+| * | | commit d1961d3368e552cd7ecfb23fec1b35970bd3b7a2
+| | | | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | | | Date:   Sun Feb 2 15:02:06 2025 +0700
+| | | | 
+| | | |     try spawn then move and shoot minion
+| | | |     ps1. each player has only one minion
+| | | |     ps2. edit pint minion's hp which is shooted to print before telling that it has been destroyed
+| | | | 
+| * | | commit 5f80c75fa28405d64fe1b2423d2d23ea2a5a78ef
+| | | | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | | | Date:   Sun Feb 2 14:52:16 2025 +0700
+| | | | 
+| | | |     try spawn then move and shoot minion ps. each player has only one minion
+| | | | 
+| * | | commit 8484383f5a1f87f676d2b4e589c57d9b28c06c69
+| | | | Author: navyney <141761309+navyney@users.noreply.github.com>
+| | | | Date:   Sun Feb 2 14:08:01 2025 +0700
+| | | | 
+| | | |     try shoot and takedamage
+| | | | 
+| * | | commit ec35290bdae1c5278aed2f16f65da56a61037ff5
+|/ / /  Author: navyney <141761309+navyney@users.noreply.github.com>
+| | |   Date:   Sun Feb 2 00:42:56 2025 +0700
+| | |   
+| | |       minion can spawn and move laew TT
+| | | 
+| * | commit 960cd7aadee675277341bcbfaea5bb323a160b4d
+|/ /  Author: PhuriphatYoosuwan <phuriphat_yoosuwan@cmu.ac.th>
+| |   Date:   Sun Feb 2 16:31:22 2025 +0700
+| |   
+| |       test player.exe
+| |   
+* |   commit ae67b4ee2e48d238e0190edf2e2a56eb924b0b5b
+|\ \  Merge: 944e80d 6184098
+| | | Author: Vualerie <105138944+Vualerie@users.noreply.github.com>
+| | | Date:   Tue Jan 28 22:31:27 2025 +0700
+| | | 
+| | |     Merge pull request #8 from navyney/parser
+| | |     
+| | |     parser complete(no eval)
+| | | 
+| | * commit f41d301868815102a6c7a0abe546cc8bfcd7d558
+| |/  Author: Sirawit Seetong <sirawit_se@cmu.ac.th>
+| |   Date:   Sun Feb 2 16:59:45 2025 +0700
+| |   
+| |       parser & eval wait InfoExpr
+| | 
+| * commit 6184098011c6df447403b7a3c7b646e9ecd98e4c
+|/  Author: Sirawit Seetong <sirawit_se@cmu.ac.th>
+|   Date:   Tue Jan 28 22:26:01 2025 +0700
+|   
+|       parser complete(no eval)
+| 
+* commit 944e80db04a88763ffaaba97d7105fbff80273b8
+  Author: navyney <141761309+navyney@users.noreply.github.com>
+  Date:   Wed Jan 22 12:18:15 2025 +0700
+  
+      Initial commit
