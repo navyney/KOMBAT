@@ -28,6 +28,7 @@ public class HexHex implements Hex {
 
     @Override
     public int owner() {
+
         return own;
     }
 

@@ -62,28 +62,15 @@ class Map {
         return null;
     }
 
-//    public void printMap() {
-//        for (int i = 0; i < map.length; i++) {
-//            for (int j = 0; j < map[i].length; j++) {
-//                if (minions[i][j] != null) {
-//                    System.out.print(minions[i][j].getOwner().getName() + " ");
-//                } else {
-//                    System.out.print(map[i][j] == 0 ? "X " : "- ");
-//                }
-//            }
-//            System.out.println();
-//        }
-//    }
-
     public void printMap() {
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
                 if (minions[i][j] != null) {
                     // show player's minion (I for Player1, L for Player2)
                     String ownerName = minions[i][j].getOwner().getName();
-                    if (ownerName.equals("1")) {
+                    if (ownerName.equals("Player1")) {
                         System.out.print("I ");
-                    } else if (ownerName.equals("2")) {
+                    } else if (ownerName.equals("Player2")) {
                         System.out.print("L ");
                     }
                 } else if (map[i][j] == 0) {
@@ -91,7 +78,7 @@ class Map {
                     System.out.print("X ");
                 } else {
                     // ตรวจสอบว่า Hex นี้มีเจ้าของหรือไม่
-                    HexHex hex = (HexHex) getHexAt(i + 1, j + 1); // แปลงจาก index 0-based เป็น 1-based
+                    HexHex hex = (HexHex)getHexAt(i + 1, j + 1);
                     if (hex != null && hex.owner() != 0) {
                         // print owner
                         System.out.print(hex.owner() + " ");

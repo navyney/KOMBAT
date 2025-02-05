@@ -11,7 +11,7 @@ class Minion {
     private ConfigFile config = Main.getConfig();
 
     public Minion(MinionType type, int hp, Player owner, Map map) {
-        //this.name = type.getTypeName();
+        this.name = type.getTypeName();
         this.type = type;
         this.hp = hp;
         this.owner = owner;
@@ -67,7 +67,7 @@ class Minion {
             return false;
         }
 
-        if (hex.owner() == (this.owner.getName().equals("1") ? 1 : 2)) {
+        if (hex.owner() == (this.owner.getName().equals("Player1") ? 1 : 2)) {
             if (!map.isWall(this.row, this.col) && !map.isMinionHere(this.row, this.col)) {
                 map.placeMinion(this.row, this.col, this);
                 owner.addMinion(this);
@@ -115,7 +115,7 @@ class Minion {
 
         HexHex hex = (HexHex) map.getHexAt(newRow + 1, newCol + 1);
 
-        if (hex == null || hex.owner() != (this.owner.getName().equals("1") ? 1 : 2)) {
+        if (hex == null || hex.owner() != (this.owner.getName().equals("Player1") ? 1 : 2)) {
             System.out.println("You do not own this area! Cannot move to (" + (newRow + 1) + "," + (newCol + 1) + ")");
             return;
         }
@@ -194,6 +194,7 @@ class Minion {
 //                map.removeMinion(targetRow, targetCol);
 //            }
         } else {
+            owner.setBudget(owner.getBudget() - damage);
             System.out.println("No target to shoot at (" + (targetRow + 1) + "," + (targetCol + 1) + ")");
         }
     }
