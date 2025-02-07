@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.HashMap;
 
 class Minion {
@@ -56,7 +57,7 @@ class Minion {
         return hmIdentifier.get(identifier);
     }
 
-    public boolean spawn(int r, int c) {
+    public boolean spawn(int r, int c) throws IOException {
         this.row = r - 1;
         this.col = c - 1;
 
@@ -109,8 +110,7 @@ class Minion {
         }
 
         if (newRow < 0 || newRow >= map.getRows() || newCol < 0 || newCol >= map.getCols()) {
-            System.out.println("Out of bounds! Cannot move.");
-            return;
+            throw new IllegalArgumentException("Out of bounds! Cannot move.");
         }
 
         HexHex hex = (HexHex) map.getHexAt(newRow + 1, newCol + 1);
@@ -123,7 +123,7 @@ class Minion {
             owner.setBudget(owner.getBudget() - config.move_cost());
             System.out.println("Moved to (" + (this.row + 1) + "," + (this.col + 1) + ")");
         } else {
-            System.out.println("Cannot move to (" + (newRow + 1) + "," + (newCol + 1) + ")");
+            throw new IllegalArgumentException("Cannot move to (" + (newRow + 1) + "," + (newCol + 1) + ")");
         }
     }
 
@@ -149,8 +149,7 @@ class Minion {
 
     public void shoot(int direction, long damage) {
         if (owner.getBudget() < damage) {
-            System.out.println("Not enough budget to shoot!");
-            return;
+            throw new IllegalArgumentException("Not enough budget to shoot!");
         }
 
         int targetRow = this.row;
@@ -190,7 +189,7 @@ class Minion {
 //            }
         } else {
             owner.setBudget(owner.getBudget() - damage);
-            System.out.println("No target to shoot at (" + (targetRow + 1) + "," + (targetCol + 1) + ")");
+            System.out.println("Your action damage nothing");
         }
     }
 
