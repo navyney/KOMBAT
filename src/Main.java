@@ -53,34 +53,38 @@ public class Main {
         */
 
         Map gameMap = new Map(11, 8);
-        GameState gameState = new GameState();
+        Player player1 = new Player("Player1");
+        Player player2 = new Player("Player2");
+        GameState gameState = new GameState(player1, player2, gameMap);
         gameState.setConfig(config);
 
         gameMap.createMap();
-        gameMap.printMap();
 
-
-        StatementParser q = new StatementParser(new ExprTokenizer("move downright move downright") );
-        Strategy s = q.parse();
-        StatementParser b = new StatementParser(new ExprTokenizer("if(ally %10-1)then{move down}else{move downright}") );
-        Strategy a = b.parse();
-
-        Player player1 = new Player("Player1");
-        MinionType Goblin = new MinionType("Goblin", 1, a);
-        MinionType Orc = new MinionType("Orc", 10 , s);
-        Minion n = new Minion(Goblin, config.init_hp(), player1, gameMap);
-        Minion m = new Minion(Orc, config.init_hp(), player1, gameMap);
-        player1.addMinion(m);
-        player1.addMinion(n);
-        player1.setArea(1,1,gameMap);
-        player1.spawnMinion(m,1,1);
-        gameMap.printMap();
-        s.evaluator(m);
-        player1.spawnMinion(n,1,1);
-        gameMap.printMap();
-        s.evaluator(m);
-        a.evaluator(n);
-        gameMap.printMap();
+        gameState.setup();
+        gameState.gameloop();
+//        StatementParser q = new StatementParser(new ExprTokenizer("move downright move downright") );
+//        Strategy s = q.parse();
+//        StatementParser b = new StatementParser(new ExprTokenizer("if(ally %10-1)then{move down}else{move downright}") );
+//        Strategy a = b.parse();
+//
+//        Player player1 = new Player("Player1");
+//        MinionType Goblin = new MinionType("Goblin", 1, a);
+//        MinionType Orc = new MinionType("Orc", 10 , s);
+//        Minion n = new Minion(Goblin, config.init_hp(), player1, gameMap);
+//        Minion m = new Minion(Orc, config.init_hp(), player1, gameMap);
+//        player1.addMinion(m);
+//        player1.addMinion(n);
+//        player1.setArea(1,1,gameMap);
+//        player1.spawnMinion(m,1,1);
+//        gameMap.printMap();
+//
+//        s.evaluator(m);
+//
+//        player1.spawnMinion(n,1,1);
+//        gameMap.printMap();
+//        s.evaluator(m);
+//        a.evaluator(n);
+//        gameMap.printMap();
 //        s.evaluator(m);
 //        s.evaluator(n);
 //        gameMap.printMap();
@@ -156,7 +160,8 @@ public class Main {
 //        catch(Exception e){
 //            System.out.println(e);
 //        }
-//
+//        StatementParser q = new StatementParse(new ExprTokenizer(String));
+//        Strategy s = q.parse():
 //
 //        StatementParser q = new StatementParser(new ExprTokenizer("""
 //                x = 20

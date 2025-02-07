@@ -1,15 +1,26 @@
-public class GameMode {
-    private String gameMode; // Player vs Player, Player vs Bot, Bot vs Bot
+public class GameMode{
+    private GameModeType gameMode;
 
-    GameMode() {
-        this.gameMode = gameMode;
+
+    public GameMode() {
+        this.gameMode = GameModeType.DUEL;
+        System.out.println("Game mode set to: " + this.gameMode);
     }
 
-    public String getGameMode() {
+    public GameMode(GameModeType gameMode) {
+        this.gameMode = gameMode;
+        System.out.println("Game mode set to: " + this.gameMode);
+    }
+
+    public GameMode(String input) {
+        GameModeType gameMode = GameModeType.valueOf(input);
+    }
+
+    public GameModeType getGameMode() {
         return gameMode;
     }
 
-    public void setGameMode(String gameMode) {
+    public void setGameMode(GameModeType gameMode) {
         this.gameMode = gameMode;
     }
 }

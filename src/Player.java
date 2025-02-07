@@ -7,7 +7,7 @@ public class Player {
     String name;
     private double maxBudget;
     private double budget;
-    private ArrayList<Minion> minion ;
+    private ArrayList<Minion> minion;
     private ArrayList<Hex> area;
     private final ConfigFile config = Main.getConfig();
     private int spawnRemaining = config.max_spawns();
@@ -40,7 +40,7 @@ public class Player {
     public int getSpawnRemaining() {
         //spawnRemaining ไม่น่าจะลบจาก จำนวนมินเนี่ยน ได้ เพราะผู้เล่นอาจจะแค่ซื้อมินเนี่ยนไว้แต่ไม่ได้ลง
         //this.spawnRemaining -= getNumofMinion();
-        return this.spawnRemaining ;
+        return this.spawnRemaining;
     }
 
     public void setSpawnRemaining() {
@@ -92,7 +92,7 @@ public class Player {
         return area;
     }
 
-    public void buyMinion(MinionType type,Minion m) {
+    public void buyMinion(MinionType type, Minion m) {
         if (!canBuyMinion()) {
             System.out.println("You already bought this turn. Wait for next turn!");
             return;
@@ -100,7 +100,7 @@ public class Player {
         if (this.budget < config.buy_minion_cost()) {
             System.out.println("Not enough money to buy minion");
         } else {
-            setBudget(this.getBudget() - config.buy_minion_cost()) ;
+            setBudget(this.getBudget() - config.buy_minion_cost());
             addMinion(m);
             lastBuyMinionTurn = GameState.getCurrent_turns();
             System.out.println("Minion bought successfully");
@@ -109,7 +109,7 @@ public class Player {
 
     public void setArea(int r, int c, Map map) {
         HexHex hex = (HexHex) map.getHexAt(r, c);
-        if(hex.owner() == 0){
+        if (hex.owner() == 0) {
             hex.setOwner(this.name.equals("Player1") ? 1 : 2);
             this.area.add(hex);
         }
@@ -133,7 +133,7 @@ public class Player {
             if (this.budget >= config.hex_purchase_cost()) {
                 hex.setOwner(this.name.equals("Player1") ? 1 : 2);
                 this.area.add(hex);
-                setBudget(this.getBudget() - config.hex_purchase_cost()) ;
+                setBudget(this.getBudget() - config.hex_purchase_cost());
                 lastBuyAreaTurn = GameState.getCurrent_turns();
                 System.out.println(this.name + " has bought area at (" + r + "," + c + ")");
             } else {
@@ -154,24 +154,24 @@ public class Player {
         // check that the Minion belong to this Player or not
         if (minion.getOwner() != this) {
             System.out.println("This minion does not belong to you!");
-            return ;
+            return;
         }
 
         if (this.getSpawnRemaining() == 0) {
             System.out.println("The number of minions has reached its limit.");
-            return ;
+            return;
         }
 
         if (this.budget < config.spawn_cost()) {
             System.out.println("Not enough budget to spawn minion!");
-            return ;
+            return;
         }
 
         // try to spawn Minion ในตำแหน่งที่กำหนด
         boolean success = minion.spawn(r, c);
 
         if (success) {
-            setBudget(this.getBudget() - config.spawn_cost()) ;
+            setBudget(this.getBudget() - config.spawn_cost());
             this.setSpawnRemaining();
             lastSpawnMinionTurn = GameState.getCurrent_turns();
             System.out.println("Minion " + minion.getName() + " spawned successfully at (" + r + "," + c + ")");
@@ -185,34 +185,34 @@ public class Player {
         double b = config.interest_pct(); // อัตราดอกเบี้ยฐาน
         double m = this.budget; // งบประมาณปัจจุบัน
         double t = GameState.getCurrent_turns(); // จำนวนเทิร์นปัจจุบัน
-        double r ;
-        double interest = 0 ;
+        double r;
+        double interest = 0;
 
         if (true) {
             if (m == 0 || m == 1) {
-                m = 2 ;
+                m = 2;
                 r = b * Math.log10(m) * Math.log(t);
             } else {
                 // interest rate = b * log10(m) * ln(t)
                 r = b * Math.log10(m) * Math.log(t);
             }
-            m = this.budget ;
+            m = this.budget;
         }
 
-        if (m==0) {
-            m = 1 ;
+        if (m == 0) {
+            m = 1;
             interest = m * (r / 100.0);
         } else {
             // interest = m * (r / 100)
             interest = m * (r / 100.0);
         }
 
-        m = this.budget ;
-        this.budget += interest + config.turn_budget() ;
+        m = this.budget;
+        this.budget += interest + config.turn_budget();
 
-        setBudget(Math.min(this.budget, config.max_budget())) ;
+        setBudget(Math.min(this.budget, config.max_budget()));
 
-        System.out.println(this.name + " earned interest: " + (int)(interest) + ", new budget: " + getIntBudget());
+        System.out.println(this.name + " earned interest: " + (int) (interest) + ", new budget: " + getIntBudget());
     }
 
 //    public void incrementTurnCount() {
@@ -225,7 +225,7 @@ public class Player {
     }
 
     public int getIntBudget() {
-        return (int)(this.budget);
+        return (int) (this.budget);
     }
 
 //    // dummy for testing
@@ -243,5 +243,19 @@ public class Player {
     }
 
     //eiei
+    public void setMinion(Minion minion, int r, int c) {
+        if (minion.getOwner() != this) {
+            System.out.println("This minion does not belong to you!");
+            return;
+        }
+        // try to spawn Minion ในตำแหน่งที่กำหนด
+        boolean success = minion.spawn(r, c);
+
+        if (success) {
+            System.out.println("Minion " + minion.getName() + " spawned successfully at (" + r + "," + c + ")");
+        } else {
+            System.out.println("Failed to spawn minion at (" + r + "," + c + ")");
+        }
+    }
 
 }
