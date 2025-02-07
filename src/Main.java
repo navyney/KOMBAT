@@ -1,3 +1,4 @@
+import java.io.IOException;
 
 public class Main {
 
@@ -10,7 +11,7 @@ public class Main {
         return config;
     }
 
-    public static void main(String[] args) throws LexicalError, EvalError {
+    public static void main(String[] args) throws LexicalError, EvalError, IOException {
 
 
         /*

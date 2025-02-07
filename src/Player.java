@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -145,7 +146,7 @@ public class Player {
         }
     }
 
-    public void spawnMinion(Minion minion, int r, int c) {
+    public void spawnMinion(Minion minion, int r, int c) throws IOException {
         if (!canSpawnMinion()) {
             System.out.println("You already bought this turn. Wait for next turn!");
             return;

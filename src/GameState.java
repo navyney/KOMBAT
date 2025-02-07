@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.Scanner;
 
 public class GameState { // player1 and player2 can play in terminal and show map while playing turn blablabla
@@ -173,7 +174,7 @@ public class GameState { // player1 and player2 can play in terminal and show ma
         }
     }
 
-    public void action(Player player) {
+    public void action(Player player) throws IOException {
         Scanner s = new Scanner(System.in);
         String command = s.nextLine();
         if (command.equals("buy area")) {
@@ -215,7 +216,7 @@ public class GameState { // player1 and player2 can play in terminal and show ma
         }
     }
 
-        public void gameloop () throws LexicalError, EvalError { // not done
+        public void gameloop () throws LexicalError, EvalError, IOException { // not done
 
             // can for-loop until max_turns
 //        while(gameStatus.equals("Playing")) {
