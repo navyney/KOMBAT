@@ -8,10 +8,10 @@ public class Player {
     private double maxBudget;
     private double budget;
     private ArrayList<Minion> minion;
+    private ArrayList<Minion> spawnedMinions;
     private ArrayList<Hex> area;
     private final ConfigFile config = Main.getConfig();
     private int spawnRemaining = config.max_spawns();
-    //private GameState gameState;
     private int lastBuyAreaTurn = -1;
     private int lastBuyMinionTurn = -1;
     private int lastSpawnMinionTurn = -1;
@@ -22,6 +22,7 @@ public class Player {
         this.maxBudget = config.max_budget();
         this.minion = new ArrayList<Minion>();
         this.area = new ArrayList<Hex>();
+        this.spawnedMinions = new ArrayList<>();
     }
 
     public String getName() {
@@ -88,6 +89,14 @@ public class Player {
         return minion;
     }
 
+    public void addSpawnedMinion(Minion minion) {
+        this.spawnedMinions.add(minion);
+    }
+
+    public ArrayList<Minion> getSpawnedMinions() {
+        return this.spawnedMinions;
+    }
+
     public ArrayList<Hex> getArea() {
         return area;
     }
@@ -103,7 +112,7 @@ public class Player {
             setBudget(this.getBudget() - config.buy_minion_cost());
             addMinion(m);
             lastBuyMinionTurn = GameState.getCurrent_turns();
-            System.out.println("Minion bought successfully");
+            System.out.println("Minion " + m.getType().getTypeName() + " bought successfully");
         }
     }
 
@@ -115,21 +124,52 @@ public class Player {
         }
     }
 
+    private boolean isAdjacentToOwnedArea(int r, int c, Map map) {
+//        int[] dr = {-1, -1, 0, 0, 1, 1};
+//        int[] dc = {0, 1, -1, 1, -1, 0};
+        //for hex index
+        int[] dr = {-1, 0, 1, 1, 0, -1};
+        int[] dc = {0, 1, 1, 0, -1, -1};
+
+        for (int i = 0; i < 6; i++) {
+            int newRow = r + dr[i];
+            int newCol = c + dc[i];
+
+            HexHex adjacentHex = (HexHex) map.getHexAt(newRow, newCol);
+
+            if (adjacentHex != null && adjacentHex.owner() == (this.name.equals("Player1") ? 1 : 2)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void deductActionCost(int cost) {
+        if (this.budget >= cost) {
+            this.budget -= cost;
+        } else {
+            System.out.println(this.name + " does not have enough budget to deduct " + cost + ".");
+        }
+    }
+
     public void buyArea(int r, int c, Map map) {
         if (!canBuyArea()) {
             System.out.println("You already bought this turn. Wait for next turn!");
-            return;
+            return ;
         }
         // ตรวจสอบว่า Hex นั้นมีเจ้าของหรือไม่
         HexHex hex = (HexHex) map.getHexAt(r, c);
         // wall
         if (hex == null) {
-            System.out.println("Invalid area!");
-            return;
+            throw new IllegalArgumentException("Invalid area!");
         }
-
         // no เจ้าของ
         if (hex.owner() == 0) {
+            // check ว่าเป็น hex ที่ติดกับ hex ที่เรามีอยู่หรือไม่
+            if (!isAdjacentToOwnedArea(r, c, map)) {
+                System.out.println("You can only buy areas adjacent to your owned areas!");
+                return;
+            }
             if (this.budget >= config.hex_purchase_cost()) {
                 hex.setOwner(this.name.equals("Player1") ? 1 : 2);
                 this.area.add(hex);
@@ -157,13 +197,13 @@ public class Player {
             return;
         }
 
-        if (this.getSpawnRemaining() == 0) {
-            System.out.println("The number of minions has reached its limit.");
+        if (this.budget < config.spawn_cost()) {
+            System.out.println("Not enough budget to spawn minion!");
             return;
         }
 
-        if (this.budget < config.spawn_cost()) {
-            System.out.println("Not enough budget to spawn minion!");
+        if (this.getSpawnRemaining() == 0) {
+            System.out.println("The number of minions has reached its limit.");
             return;
         }
 
@@ -171,6 +211,7 @@ public class Player {
         boolean success = minion.spawn(r, c);
 
         if (success) {
+            addSpawnedMinion(minion);
             setBudget(this.getBudget() - config.spawn_cost());
             this.setSpawnRemaining();
             lastSpawnMinionTurn = GameState.getCurrent_turns();
@@ -228,11 +269,6 @@ public class Player {
         return (int) (this.budget);
     }
 
-//    // dummy for testing
-//    public int getTurnCount() {
-//        return turnCount;
-//    }
-
     public double setBudget(double budget) {
         return this.budget = budget;
     }
@@ -243,19 +279,21 @@ public class Player {
     }
 
     //eiei
-    public void setMinion(Minion minion, int r, int c) {
-        if (minion.getOwner() != this) {
-            System.out.println("This minion does not belong to you!");
-            return;
-        }
-        // try to spawn Minion ในตำแหน่งที่กำหนด
-        boolean success = minion.spawn(r, c);
 
-        if (success) {
-            System.out.println("Minion " + minion.getName() + " spawned successfully at (" + r + "," + c + ")");
-        } else {
-            System.out.println("Failed to spawn minion at (" + r + "," + c + ")");
-        }
-    }
+//    why do we have setMinion() to spawn minion meanwhile we already have spawnMinion() the fuck?
+//    public void setMinion(Minion minion, int r, int c) throws IOException {
+//        if (minion.getOwner() != this) {
+//            System.out.println("This minion does not belong to you!");
+//            return;
+//        }
+//        // try to spawn Minion ในตำแหน่งที่กำหนด
+//        boolean success = minion.spawn(r, c);
+//
+//        if (success) {
+//            System.out.println("Minion " + minion.getName() + " spawned successfully at (" + r + "," + c + ")");
+//        } else {
+//            System.out.println("Failed to spawn minion at (" + r + "," + c + ")");
+//        }
+//    }
 
 }

@@ -1,3 +1,3 @@
 public enum EvalResultStatus {
-    MOVE,DONE,SHOOT,EXECUTE
+    MOVE,DONE,SHOOT,EXECUTE,NOT_EXECUTE
 }

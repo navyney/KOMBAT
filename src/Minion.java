@@ -5,11 +5,13 @@ class Minion {
     private String name;
     private MinionType type;
     private int hp;
-    private int row, col;
+    private int row = -1 ;
+    private int col = -1 ;
     private Player owner;
     private HashMap<String,Long> hmIdentifier = new HashMap<>();
     private Map map;
     private ConfigFile config = Main.getConfig();
+    private boolean actedThisTurn = false;
 
     public Minion(MinionType type, int hp, Player owner, Map map) {
         this.name = type.getTypeName();
@@ -27,6 +29,10 @@ class Minion {
             System.out.println("Hex at (" + getRow() + "," + getCol() + ") is NOT owned by Player " + player.getName());
             return false;
         }
+    }
+
+    public boolean isSpawned() {
+        return row != -1 && col != -1;
     }
 
     public MinionType getType() {
@@ -51,6 +57,22 @@ class Minion {
 
     public void assign(String identifier,long val){
         hmIdentifier.put(identifier,val);
+    }
+
+    public int getHp() {
+        return hp;
+    }
+
+    public String stringGetHp() {
+        return String.valueOf(hp);
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public Map getMap() {
+        return this.map;
     }
 
     public long getValueIdentifier(String identifier){
@@ -84,9 +106,16 @@ class Minion {
     }
 
     public void move(int direction) {
+        if (!isSpawned()) {
+            throw new IllegalArgumentException("Minion " + this.name + " has not been spawned yet!");
+        }
+
         if (owner.getBudget() < config.move_cost()){
+            System.out.println("Not enough budget to move!");
             return;
         }
+
+        actedThisTurn = true;
 
         int newRow = this.row;
         int newCol = this.col;
@@ -110,20 +139,20 @@ class Minion {
         }
 
         if (newRow < 0 || newRow >= map.getRows() || newCol < 0 || newCol >= map.getCols()) {
-            throw new IllegalArgumentException("Out of bounds! Cannot move.");
+            System.out.println("I wonder why you want to go out of the map.");
+            return ;
         }
 
-        HexHex hex = (HexHex) map.getHexAt(newRow + 1, newCol + 1);
+        //HexHex hex = (HexHex) map.getHexAt(newRow + 1, newCol + 1);
 
         if (!map.isWall(newRow, newCol) && !map.isMinionHere(newRow, newCol)) {
             map.removeMinion(this.row, this.col);
             this.row = newRow;
             this.col = newCol;
             map.placeMinion(this.row, this.col, this);
-            owner.setBudget(owner.getBudget() - config.move_cost());
             System.out.println("Moved to (" + (this.row + 1) + "," + (this.col + 1) + ")");
         } else {
-            throw new IllegalArgumentException("Cannot move to (" + (newRow + 1) + "," + (newCol + 1) + ")");
+            System.out.println("Cannot move to (" + (newRow + 1) + "," + (newCol + 1) + ")") ;
         }
     }
 
@@ -148,8 +177,10 @@ class Minion {
     }
 
     public void shoot(int direction, long damage) {
+        actedThisTurn = true;
         if (owner.getBudget() < damage) {
-            throw new IllegalArgumentException("Not enough budget to shoot!");
+            System.out.println("Not enough budget to shoot!");
+            return ;
         }
 
         int targetRow = this.row;
@@ -176,7 +207,13 @@ class Minion {
         }
 
         if (targetRow < 0 || targetRow >= map.getRows() || targetCol < 0 || targetCol >= map.getCols()) {
-            throw new IllegalArgumentException("Invalid Area");
+            owner.setBudget(owner.getBudget() - damage);
+            System.out.println("There is not on the map at all LOL");
+        }
+
+        if (Math.abs(targetRow - this.row) > 1 || Math.abs(targetCol - this.col) > 1) {
+            System.out.println("You can only shoot at adjacent hexes!");
+            return;
         }
 
         Minion target = map.getMinionAt(targetRow, targetCol);
@@ -184,28 +221,17 @@ class Minion {
             System.out.println(name + " shoots at " + target.name);
             target.takeDamage(damage);
             owner.setBudget(owner.getBudget() - damage);
-//            if (target.getHp() <= 0) {
-//                map.removeMinion(targetRow, targetCol);
-//            }
         } else {
             owner.setBudget(owner.getBudget() - damage);
             System.out.println("Your action damage nothing");
         }
     }
 
-    public int getHp() {
-        return hp;
+    public boolean hasActedThisTurn() {
+        return actedThisTurn ;
     }
 
-    public String stringGetHp() {
-        return String.valueOf(hp);
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public Map getMap() {
-        return this.map;
+    public void resetActionFlag() {
+        actedThisTurn = false ;
     }
 }
