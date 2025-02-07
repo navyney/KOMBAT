@@ -22,6 +22,8 @@ public class GameState { // player1 and player2 can play in terminal and show ga
 
     private Map gameMap;
 
+    private List<Minion> minionsShop = new ArrayList<>();
+
     public static int getCurrent_turns() {
         return current_turns;
     }
@@ -67,15 +69,15 @@ public class GameState { // player1 and player2 can play in terminal and show ga
         //add their area
         player1.setArea(1, 1, gameMap);
         player1.setArea(1, 2, gameMap);
-        player1.setArea(1, 3, gameMap);
         player1.setArea(2, 1, gameMap);
         player1.setArea(2, 2, gameMap);
+        player1.setArea(2, 3, gameMap);
 
-        player2.setArea(7, 7, gameMap);
-        player2.setArea(6, 8, gameMap);
-        player2.setArea(8, 6, gameMap);
-        player2.setArea(8, 7, gameMap);
-        player2.setArea(8, 8, gameMap);
+        player2.setArea(10, 6, gameMap);
+        player2.setArea(10, 7, gameMap);
+        player2.setArea(10, 8, gameMap);
+        player2.setArea(11, 7, gameMap);
+        player2.setArea(11, 8, gameMap);
 
         //both player spawn first minion
         //minion setup
@@ -85,6 +87,7 @@ public class GameState { // player1 and player2 can play in terminal and show ga
         player1.setBudget(init_budget);
         player2.setBudget(init_budget);
 
+        gameMap.printMap();
         //Game Start
     }
 
@@ -109,8 +112,13 @@ public class GameState { // player1 and player2 can play in terminal and show ga
             MinionType minionType1 = new MinionType(name, def, p);
             Minion minion1 = new Minion(minionType1, init_hp, player1, gameMap);
             Minion minion2 = new Minion(minionType1, init_hp, player2, gameMap);
+            minionsShop.add(minion1);
+
             player1.addMinion(minion1);
             player2.addMinion(minion2);
+
+            player1.setMinion(minion1, 1, 1);
+            player2.setMinion(minion2,11,8);
         }
     }
 
@@ -244,7 +252,7 @@ public class GameState { // player1 and player2 can play in terminal and show ga
                 System.out.println("Turn " + current_turns + ": " + current.getName() + "'s turn");
 
                 //Player Action buy, spawn
-                System.out.println(current.getName() + "buy area, buy minion, spawn minion");
+                System.out.println(current.getName() + " buy area, buy minion, spawn minion");
                 action(current);
 
                 //Execute Minions by Strategy
