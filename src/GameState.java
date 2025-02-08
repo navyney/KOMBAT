@@ -113,14 +113,14 @@ public class GameState { // player1 and player2 can play in terminal and show ga
             String strategyInput = s.nextLine();
 
             StatementParser q = new StatementParser(new ExprTokenizer(strategyInput));
-            p = q.parse();
+            Strategy strategy = q.parse();
 
 
-            MinionType minionType1 = new MinionType(name, def, p);
+            MinionType minionType1 = new MinionType(name, def, strategy);
             Minion minion1 = new Minion(minionType1, init_hp, player1, gameMap);
             Minion minion2 = new Minion(minionType1, init_hp, player2, gameMap);
 
-            MinionType.addMinionType(name, def, p);
+            MinionType.addMinionType(name, def, strategy);
 
             player1.addMinion(minion1);
             player2.addMinion(minion2);
@@ -195,26 +195,26 @@ public class GameState { // player1 and player2 can play in terminal and show ga
     public void action(Player player) throws IOException, EvalError {
         Scanner s = new Scanner(System.in);
         String command = s.nextLine();
-        while(command.equals("buy area") || command.equals("spawn minion") || command.equals("buy minion")) {
+        while(command.equals("buy area") || command.equals("spawn minion")) {
             if (command.equals("buy area")) {
                 int r = s.nextInt();
                 int c = s.nextInt();
                 s.nextLine();
                 player.buyArea(r, c, gameMap);
-            } else if (command.equals("buy minion")) {
-                MinionType.displayMinionTypes();
-
-                System.out.println("Enter minion type to buy:");
-                String typeName = s.nextLine();
-                MinionType type = MinionType.getMinionType(typeName);
-
-                if (type != null) {
-                    Minion minion = new Minion(type, init_hp, player, gameMap);
-                    player.buyMinion(type, minion);
-                    System.out.println(player.getName() + " bought a " + type.getTypeName() + " minion.");
-                } else {
-                    System.out.println("Invalid minion type!");
-                }
+//            } else if (command.equals("buy minion")) {
+//                MinionType.displayMinionTypes();
+//
+//                System.out.println("Enter minion type to buy:");
+//                String typeName = s.nextLine();
+//                MinionType type = MinionType.getMinionType(typeName);
+//
+//                if (type != null) {
+//                    Minion minion = new Minion(type, init_hp, player, gameMap);
+//                    player.buyMinion(type, minion);
+//                    System.out.println(player.getName() + " bought a " + type.getTypeName() + " minion.");
+//                } else {
+//                    System.out.println("Invalid minion type!");
+//                }
             } else if (command.equals("spawn minion")) {
                 System.out.print("Your minions: ");
                 for (Minion m : player.getMinion()) {
@@ -228,14 +228,13 @@ public class GameState { // player1 and player2 can play in terminal and show ga
                     System.out.println("You don't have this minion!");
                     return;
                 }
-
                 System.out.println("Enter spawn location (row column):");
                 int r = s.nextInt();
                 int c = s.nextInt();
                 s.nextLine();
                 player.spawnMinion(minion, r, c);
             }
-            System.out.println(currentPlayer.getName() + " buy area, buy minion, spawn minion");
+            System.out.println(currentPlayer.getName() + " buy area, spawn minion");
             command = s.nextLine() ;
         }
     }
@@ -247,7 +246,10 @@ public class GameState { // player1 and player2 can play in terminal and show ga
             if (minion.isSpawned()) {
                 // for Debug
                 System.out.println("Executing strategy for minion: " + minion.getName());
-                p.evaluator(minion);
+
+                Strategy strategy = minion.getType().getStrategy();
+                strategy.evaluator(minion);
+
                 totalCost += 1;
             } else {
                 System.out.println("Minion " + minion.getName() + " has not been spawned yet!");
@@ -263,8 +265,10 @@ public class GameState { // player1 and player2 can play in terminal and show ga
             // Player 1's turn
             System.out.println("Turn " + current_turns + ": " + player1.getName() + "'s turn");
 
+            player1.calculateInterest(current_turns) ;
+
             // Player 1 Action: buy, spawn
-            System.out.println(player1.getName() + " buy area, buy minion, spawn minion");
+            System.out.println(player1.getName() + " buy area, spawn minion");
             action(player1);
 
             // Execute Minions by Strategy for Player 1
@@ -282,8 +286,10 @@ public class GameState { // player1 and player2 can play in terminal and show ga
             // Player 2's turn
             System.out.println("Turn " + current_turns + ": " + player2.getName() + "'s turn");
 
+            player2.calculateInterest(current_turns) ;
+
             // Player 2 Action: buy, spawn
-            System.out.println(player2.getName() + " buy area, buy minion, spawn minion");
+            System.out.println(player2.getName() + " buy area, spawn minion");
             action(player2);
 
             // Execute Minions by Strategy for Player 2

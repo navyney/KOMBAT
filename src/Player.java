@@ -101,6 +101,7 @@ public class Player {
         return area;
     }
 
+    // no more buy minion
     public void buyMinion(MinionType type, Minion m) {
         if (!canBuyMinion()) {
             System.out.println("You already bought this turn. Wait for next turn!");
@@ -187,6 +188,7 @@ public class Player {
     }
 
     public void spawnMinion(Minion minion, int r, int c) throws IOException {
+        boolean success ;
         if (!canSpawnMinion()) {
             System.out.println("You already bought this turn. Wait for next turn!");
             return;
@@ -194,6 +196,21 @@ public class Player {
         // check that the Minion belong to this Player or not
         if (minion.getOwner() != this) {
             System.out.println("This minion does not belong to you!");
+            return;
+        }
+
+        // free for first turn
+        if (GameState.getCurrent_turns() == 1) {
+            success = minion.spawn(r, c);
+
+            if (success) {
+                addSpawnedMinion(minion);
+                this.setSpawnRemaining();
+                lastSpawnMinionTurn = GameState.getCurrent_turns();
+                System.out.println("Minion " + minion.getName() + " spawned successfully at (" + r + "," + c + ")");
+            } else {
+                System.out.println("Failed to spawn minion at (" + r + "," + c + ")");
+            }
             return;
         }
 
@@ -208,7 +225,7 @@ public class Player {
         }
 
         // try to spawn Minion ในตำแหน่งที่กำหนด
-        boolean success = minion.spawn(r, c);
+        success = minion.spawn(r, c);
 
         if (success) {
             addSpawnedMinion(minion);
@@ -222,12 +239,15 @@ public class Player {
 
     }
 
-    public void calculateInterest() {
+    public void calculateInterest(int t) {
         double b = config.interest_pct(); // อัตราดอกเบี้ยฐาน
         double m = this.budget; // งบประมาณปัจจุบัน
-        double t = GameState.getCurrent_turns(); // จำนวนเทิร์นปัจจุบัน
         double r;
         double interest = 0;
+
+        if ( t == 1 ) {
+            return ;
+        }
 
         if (true) {
             if (m == 0 || m == 1) {
