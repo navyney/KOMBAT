@@ -34,8 +34,9 @@ public class MinionType {
         System.out.println("Available Minion Types:");
         for (String name : minionTypes.keySet()) {
             MinionType type = minionTypes.get(name);
-            System.out.println("- " + name + " (DEF: " + type.getDefense() + ", Strategy: "
-                    + (type.getStrategy() != null ? type.getStrategy().toString() : "None") + ")");
+//            System.out.println("- " + name + " (DEF: " + type.getDefense() + ", Strategy: "
+//                    + (type.getStrategy() != null ? type.getStrategy().toString() : "None") + ")");
+            System.out.println("- " + name + " (DEF: " + type.getDefense() + ")");
         }
     }
 
