@@ -140,6 +140,7 @@ class Minion {
 
         if (newRow < 0 || newRow >= map.getRows() || newCol < 0 || newCol >= map.getCols()) {
             System.out.println("I wonder why you want to go out of the map.");
+            System.out.println("Now you are at (" + (this.row + 1) + "," + (this.col + 1) + ")");
             return ;
         }
 
@@ -153,6 +154,7 @@ class Minion {
             System.out.println("Moved to (" + (this.row + 1) + "," + (this.col + 1) + ")");
         } else {
             System.out.println("Cannot move to (" + (newRow + 1) + "," + (newCol + 1) + ")") ;
+            System.out.println("Now you are at (" + (this.row + 1) + "," + (this.col + 1) + ")");
         }
     }
 
