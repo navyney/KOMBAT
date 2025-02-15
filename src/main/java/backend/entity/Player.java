@@ -4,8 +4,8 @@ import backend.config.ConfigFile;
 import backend.game.GameState;
 import backend.map.Hex;
 import backend.map.HexHex;
-import backend.map.Map;
 import backend.game.Main;
+import backend.map.MapMap;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -126,7 +126,7 @@ public class Player {
         }
     }
 
-    public void setArea(int r, int c, Map map) {
+    public void setArea(int r, int c, MapMap map) {
         HexHex hex = (HexHex) map.getHexAt(r, c);
         if (hex.owner() == 0) {
             hex.setOwner(this.name.equals("Player1") ? 1 : 2);
@@ -134,7 +134,7 @@ public class Player {
         }
     }
 
-    private boolean isAdjacentToOwnedArea(int r, int c, Map map) {
+    private boolean isAdjacentToOwnedArea(int r, int c, MapMap map) {
 //        int[] dr = {-1, -1, 0, 0, 1, 1};
 //        int[] dc = {0, 1, -1, 1, -1, 0};
         //for hex index
@@ -162,7 +162,7 @@ public class Player {
         }
     }
 
-    public void buyArea(int r, int c, Map map) {
+    public void buyArea(int r, int c, MapMap map) {
         if (!canBuyArea()) {
             System.out.println("You already bought this turn. Wait for next turn!");
             return ;

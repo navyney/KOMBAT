@@ -6,10 +6,10 @@ import backend.entity.MinionType;
 import backend.entity.Player;
 import backend.error.EvalError;
 import backend.error.LexicalError;
+import backend.map.MapMap;
 import backend.parser.ExprTokenizer;
 import backend.parser.StatementParser;
 import backend.strategy.Strategy;
-import backend.map.Map;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +40,7 @@ public class GameState { // player1 and player2 can play in terminal and show ga
 
     private static Strategy p ;
 
-    private Map gameMap;
+    private MapMap gameMap;
 
     private List<MinionType> minionsShop = new ArrayList<MinionType>();
 
@@ -54,7 +54,7 @@ public class GameState { // player1 and player2 can play in terminal and show ga
 
     //Choose Mode before GameState
 
-    public GameState(Player player1, Player player2, Map gameMap) { // not done
+    public GameState(Player player1, Player player2, MapMap gameMap) { // not done
         this.player1 = player1;
         this.player2 = player2;
         this.gameMap = gameMap;

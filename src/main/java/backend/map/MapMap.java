@@ -4,7 +4,7 @@ import backend.entity.Minion;
 
 import java.util.*;
 
-public class Map {
+public class MapMap {
     private int[][] map;
     private Minion[][] minions;
     private List<Hex> allHexes = new ArrayList<>();
@@ -13,7 +13,7 @@ public class Map {
 //            100, 100, 1000, 100,
 //            90, 23456, 5, 69, 47);
 
-    public Map(int row, int col) {
+    public MapMap(int row, int col) {
         this.map = new int[row][col];
         this.minions = new Minion[row][col];
     }
@@ -104,7 +104,7 @@ public class Map {
         return map[0].length;
     }
 
-    public Map getGameMap() {
-        return new Map(11, 8);
+    public MapMap getGameMap() {
+        return new MapMap(11, 8);
     }
 }

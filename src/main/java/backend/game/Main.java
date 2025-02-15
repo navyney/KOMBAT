@@ -4,7 +4,7 @@ import backend.config.ConfigFile;
 import backend.entity.Player;
 import backend.error.EvalError;
 import backend.error.LexicalError;
-import backend.map.Map;
+import backend.map.MapMap;
 
 import java.io.IOException;
 
@@ -60,7 +60,7 @@ public class Main {
 //        }
         */
 
-        Map gameMap = new Map(11, 8);
+        MapMap gameMap = new MapMap(11, 8);
         Player player1 = new Player("Player1");
         Player player2 = new Player("Player2");
         GameState gameState = new GameState(player1, player2, gameMap);

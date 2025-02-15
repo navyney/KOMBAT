@@ -2,7 +2,7 @@ package backend.entity;
 
 import backend.config.ConfigFile;
 import backend.map.HexHex;
-import backend.map.Map;
+import backend.map.MapMap;
 import backend.game.Main;
 
 import java.io.IOException;
@@ -16,11 +16,11 @@ public class Minion {
     private int col = -1 ;
     private Player owner;
     private HashMap<String,Long> hmIdentifier = new HashMap<>();
-    private Map map;
+    private MapMap map;
     private ConfigFile config = Main.getConfig();
     private boolean actedThisTurn = false;
 
-    public Minion(MinionType type, int hp, Player owner, Map map) {
+    public Minion(MinionType type, int hp, Player owner, MapMap map) {
         this.name = type.getTypeName();
         this.type = type;
         this.hp = hp;
@@ -78,7 +78,7 @@ public class Minion {
         return this.name;
     }
 
-    public Map getMap() {
+    public MapMap getMap() {
         return this.map;
     }
 
