@@ -29,7 +29,7 @@ export default function StartPage() {
     return (
         <div
             className="flex flex-col items-center justify-center min-h-screen bg-cover bg-center fixsize-logo"
-            style={{ backgroundImage: "url('/image/bghomepage.png')",
+            style={{ backgroundImage: "url('/image/homepage.png')",
                      //backgroundSize: "1920px 1080px",
                      backgroundPosition: "center",
             }}
