@@ -17,7 +17,7 @@ const HexGrid: React.FC<Hex> = ({
                                   initialHex_Ally = [11, 12, 13, 21, 22]
                                 }) => {
   const [selectedHexes, setSelectedHexes] = useState<number[]>([]);
-  const [yellowHexes, setYellowHexes] = useState<number[]>([]);
+  const [selectedYellowHex, setSelectedYellowHex] = useState<number | null>(null);
 
   const hexWidth = size * 2;
   const hexHeight = Math.sqrt(3) * size;
@@ -40,12 +40,32 @@ const HexGrid: React.FC<Hex> = ({
     setSelectedHexes(initialHex_Ally);
   }, [initialHex_Ally]);
 
-  const toggleHexColor = (hexId: number) => {
-    if (selectedHexes.includes(hexId)) return;
+  const getNeighbors = (hexId: number) => {
+    const row = Math.floor(hexId / 10);
+    const col = hexId % 10;
+    const isOdd = row % 2 !== 0;
 
-    setYellowHexes((prev) =>
-        prev.includes(hexId) ? prev.filter((id) => id !== hexId) : [...prev, hexId]
-    );
+    return [
+      hexId - 10, // ด้านบน
+      hexId + 10, // ด้านล่าง
+      hexId - 1, // ซ้าย
+      hexId + 1, // ขวา
+      isOdd ? hexId - 9 : hexId - 11, // บนซ้าย / บนขวา
+      isOdd ? hexId + 11 : hexId + 9, // ล่างขวา / ล่างซ้าย
+    ];
+  };
+
+  const canClickHex = (hexId: number) => {
+    if (selectedHexes.includes(hexId)) return false;
+    if (selectedYellowHex === hexId) return true;
+
+    return selectedHexes.some((hex) => getNeighbors(hex).includes(hexId));
+  };
+
+  const toggleHexColor = (hexId: number) => {
+    if (!canClickHex(hexId)) return;
+
+    setSelectedYellowHex((prev) => (prev === hexId ? null : hexId));
   };
 
   return (
@@ -69,18 +89,18 @@ const HexGrid: React.FC<Hex> = ({
                         fill={
                           selectedHexes.includes(hexId)
                               ? "green"
-                              : yellowHexes.includes(hexId)
+                              : selectedYellowHex === hexId
                                   ? "yellow"
                                   : "black"
                         }
-                        style={{ cursor: "pointer" }}
+                        style={{ cursor: canClickHex(hexId) ? "pointer" : "not-allowed" }}
                     />
                     <text
                         x={size + distance}
                         y={size + distance}
                         fontSize="14"
                         textAnchor="middle"
-                        fill={selectedHexes.includes(hexId) || yellowHexes.includes(hexId) ? "black" : "white"}
+                        fill={selectedHexes.includes(hexId) || selectedYellowHex === hexId ? "black" : "white"}
                     >
                       {hexId}
                     </text>
