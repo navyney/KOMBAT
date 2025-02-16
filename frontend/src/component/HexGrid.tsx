@@ -1,15 +1,32 @@
-import { useState } from "react";
+'use client'
+import { useEffect, useState } from "react";
 
-const HexGrid = ({ rows = 8, cols = 8, size = 40, distance = 20 }) => {
+export interface Hex {
+  rows: number;
+  cols: number;
+  size: number;
+  distance: number;
+  initialHex_Ally: number[];
+}
+
+const HexGrid: React.FC<Hex> = ({
+                                  rows = 8,
+                                  cols = 8,
+                                  size = 40,
+                                  distance = 20,
+                                  initialHex_Ally = [11, 12, 13, 21, 22]
+                                }) => {
   const [selectedHexes, setSelectedHexes] = useState<number[]>([]);
+  const [yellowHexes, setYellowHexes] = useState<number[]>([]);
+
   const hexWidth = size * 2;
   const hexHeight = Math.sqrt(3) * size;
   const xOffset = hexWidth * 0.25;
   const yOffset = hexHeight * 0.5;
 
   const hexagonPath = [
-    [xOffset + distance , (yOffset * 2) + distance],
-    [(xOffset * 3) + distance,(yOffset * 2) + distance],
+    [xOffset + distance, (yOffset * 2) + distance],
+    [(xOffset * 3) + distance, (yOffset * 2) + distance],
     [(xOffset * 4) + distance, yOffset + distance],
     [(xOffset * 3) + distance, distance],
     [xOffset + distance, distance],
@@ -19,8 +36,14 @@ const HexGrid = ({ rows = 8, cols = 8, size = 40, distance = 20 }) => {
       .map(([x, y]) => `${x},${y}`)
       .join(" ");
 
+  useEffect(() => {
+    setSelectedHexes(initialHex_Ally);
+  }, [initialHex_Ally]);
+
   const toggleHexColor = (hexId: number) => {
-    setSelectedHexes((prev) =>
+    if (selectedHexes.includes(hexId)) return;
+
+    setYellowHexes((prev) =>
         prev.includes(hexId) ? prev.filter((id) => id !== hexId) : [...prev, hexId]
     );
   };
@@ -35,7 +58,7 @@ const HexGrid = ({ rows = 8, cols = 8, size = 40, distance = 20 }) => {
             Array.from({ length: cols }).map((_, col) => {
               const x = col * xOffset * 3;
               const y = row * hexHeight + (col % 2 === 1 ? 0 : hexHeight / 2);
-              const hexId = row * cols + col + 1;
+              const hexId = (row + 1) * 10 + (col + 1);
 
               return (
                   <g key={`${row}-${col}`} transform={`translate(${x},${y})`} onClick={() => toggleHexColor(hexId)}>
@@ -43,7 +66,13 @@ const HexGrid = ({ rows = 8, cols = 8, size = 40, distance = 20 }) => {
                         points={hexagonPath}
                         stroke="white"
                         strokeWidth={1}
-                        fill={selectedHexes.includes(hexId) ? "white" : "black"}
+                        fill={
+                          selectedHexes.includes(hexId)
+                              ? "green"
+                              : yellowHexes.includes(hexId)
+                                  ? "yellow"
+                                  : "black"
+                        }
                         style={{ cursor: "pointer" }}
                     />
                     <text
@@ -51,7 +80,7 @@ const HexGrid = ({ rows = 8, cols = 8, size = 40, distance = 20 }) => {
                         y={size + distance}
                         fontSize="14"
                         textAnchor="middle"
-                        fill={selectedHexes.includes(hexId) ? "black" : "white"}
+                        fill={selectedHexes.includes(hexId) || yellowHexes.includes(hexId) ? "black" : "white"}
                     >
                       {hexId}
                     </text>
