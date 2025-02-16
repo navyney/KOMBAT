@@ -6,7 +6,7 @@
 //
 //     return (
 //         <div className="flex flex-col items-center justify-center min-h-screen bg-orange-100"
-//              style={{ backgroundImage: "url('/public/honeycombHomepage.png')" }}
+//              style={{ backgroundImage: "url('/public/... .png')" }}
 //         >
 //             <h1 className="text-6xl font-bold text-orange-600 shadow-lg">KOMBAT</h1>
 //             <button
@@ -29,7 +29,7 @@ export default function StartPage() {
     return (
         <div
             className="flex flex-col items-center justify-center min-h-screen bg-cover bg-center fixsize-logo"
-            style={{ backgroundImage: "url('/image/hompageBG.png')",
+            style={{ backgroundImage: "url('/image/bghomepage.png')",
                      //backgroundSize: "1920px 1080px",
                      backgroundPosition: "center",
             }}
