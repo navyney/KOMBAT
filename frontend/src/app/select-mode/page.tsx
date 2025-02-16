@@ -8,9 +8,9 @@ export default function Page() {
         <div className="flex flex-col items-center justify-center min-h-screen bg-orange-100">
             <h1 className="text-4xl font-bold text-black mb-6">Select Mode</h1>
             <div className="grid grid-cols-3 gap-6">
-                <button className="mode-button">Player VS Player</button>
-                <button className="mode-button">Player VS Bot</button>
-                <button className="mode-button">Bot VS Bot</button>
+                <button onClick={() => router.push("/select-type")} className="mode-button">Player VS Player</button>
+                <button onClick={() => router.push("/select-type")} className="mode-button">Player VS Bot</button>
+                <button onClick={() => router.push("/select-type")} className="mode-button">Bot VS Bot</button>
             </div>
             <button
                 onClick={() => router.push("/")}
