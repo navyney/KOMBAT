@@ -38,11 +38,11 @@ body {
   box-shadow: 2px 2px 0px #7c2d12;
 }
 
-.fixsize-logo {
-  width : 1980px ;
-  height : 1080px ;
-  object-fit : contain ;
-}
+/*.fixsize-logo {*/
+/*  width : 1980px ;*/
+/*  height : 1080px ;*/
+/*  object-fit : contain ;*/
+/*}*/
 
 .no-spinner::-webkit-inner-spin-button,
 .no-spinner::-webkit-outer-spin-button {
@@ -51,5 +51,14 @@ body {
 }
 
 .no-spinner {
-  -moz-appearance: textfield; /* สำหรับ Firefox */
+  -moz-appearance: textfield;
 }
+
+.margin-left {
+  margin-left: 5%;
+}
+
+.margin-top-hex {
+  margin-top: 4%;
+}
+

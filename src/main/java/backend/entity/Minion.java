@@ -124,23 +124,41 @@ public class Minion {
 
         actedThisTurn = true;
 
-        int newRow = this.row;
+        int newRow = this.row ;
         int newCol = this.col;
 
         if (direction == 1) { // up
             newRow -= 1;
         } else if (direction == 2) { // upright
-            newCol += 1;
+            if ( this.col%2 == 1 ) {
+                newCol += 1 ;
+                newRow -= 1 ;
+            } else {
+                newCol += 1 ;
+            }
         } else if (direction == 3) { // downright
-            newCol += 1;
-            newRow += 1;
+            if ( this.col%2 == 1 ) {
+                newCol += 1 ;
+            } else {
+                newCol += 1 ;
+                newRow += 1 ;
+            }
         } else if (direction == 4) { // down
             newRow += 1;
         } else if (direction == 5) { // downleft
-            newRow -= 1;
+            if ( this.col%2 == 1 ) {
+                newCol -= 1 ;
+            } else {
+                newCol -= 1 ;
+                newRow += 1 ;
+            }
         } else if (direction == 6) { // upleft
-            newRow -= 1;
-            newCol -= 1;
+            if ( newCol%2 == 1 ) {
+                newCol -= 1 ;
+                newRow -= 1 ;
+            } else {
+                newCol -= 1 ;
+            }
         } else {
             throw new IllegalArgumentException("Invalid direction");
         }
@@ -192,8 +210,8 @@ public class Minion {
             return ;
         }
 
-        int targetRow = this.row;
-        int targetCol = this.col;
+        int targetRow = this.row ;
+        int targetCol = this.col ;
 
         if (direction == 1) { // up
             targetRow -= 1;

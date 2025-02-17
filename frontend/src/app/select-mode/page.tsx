@@ -5,7 +5,7 @@ export default function Page() {
     const router = useRouter();
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-orange-100">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-orange-100 w-full h-full">
             <h1 className="text-4xl font-bold text-black mb-6">Select Mode</h1>
             <div className="grid grid-cols-3 gap-6">
                 <button onClick={() => router.push("/select-type")} className="mode-button">Player VS Player</button>

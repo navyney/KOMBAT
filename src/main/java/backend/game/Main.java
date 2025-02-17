@@ -60,16 +60,20 @@ public class Main {
 //        }
         */
 
-        MapMap gameMap = new MapMap(11, 8);
+        MapMap gameMap = new MapMap(8, 8);
         Player player1 = new Player("Player1");
         Player player2 = new Player("Player2");
         GameState gameState = new GameState(player1, player2, gameMap);
         gameState.setConfig(config);
 
         gameMap.createMap();
-
+        //gameMap.printMap();
         gameState.setup();
         gameState.gameloop();
+
+
+
+
 //        StatementParser q = new StatementParser(new ExprTokenizer("move downright move downright") );
 //        Strategy s = q.parse();
 //        StatementParser b = new StatementParser(new ExprTokenizer("if(ally %10-1)then{move down}else{move downright}") );

@@ -18,7 +18,7 @@ export default function SelectType() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-orange-100 p-4">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-orange-100 p-4 w-full h-full">
             <h1 className="text-4xl font-bold text-gray-800 mb-8">Select Number of Minion Types</h1>
             <form onSubmit={handleSubmit} className="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
                 <div className="mb-6">

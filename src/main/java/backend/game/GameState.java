@@ -89,15 +89,15 @@ public class GameState { // player1 and player2 can play in terminal and show ga
         //add their area
         player1.setArea(1, 1, gameMap);
         player1.setArea(1, 2, gameMap);
+        player1.setArea(1, 3, gameMap);
         player1.setArea(2, 1, gameMap);
         player1.setArea(2, 2, gameMap);
-        player1.setArea(2, 3, gameMap);
 
-        player2.setArea(10, 6, gameMap);
-        player2.setArea(10, 7, gameMap);
-        player2.setArea(10, 8, gameMap);
-        player2.setArea(11, 7, gameMap);
-        player2.setArea(11, 8, gameMap);
+        player2.setArea(7, 7, gameMap);
+        player2.setArea(7, 8, gameMap);
+        player2.setArea(8, 6, gameMap);
+        player2.setArea(8, 7, gameMap);
+        player2.setArea(8, 8, gameMap);
 
         //both player spawn first minion
         //minion setup
@@ -283,9 +283,11 @@ public class GameState { // player1 and player2 can play in terminal and show ga
             // Player 1 Action: buy, spawn
             System.out.println(player1.getName() + " buy area, spawn minion");
             action(player1);
+            gameMap.printMap();
 
             // Execute Minions by Strategy for Player 1
             executeMinion(player1.getSpawnedMinions());
+            gameMap.printMap();
 
             // Check Winner after Player 1's turn
             if (checkWinner()) {
@@ -304,9 +306,11 @@ public class GameState { // player1 and player2 can play in terminal and show ga
             // Player 2 Action: buy, spawn
             System.out.println(player2.getName() + " buy area, spawn minion");
             action(player2);
+            gameMap.printMap();
 
             // Execute Minions by Strategy for Player 2
             executeMinion(player2.getSpawnedMinions());
+            gameMap.printMap();
 
             // Check Winner after Player 2's turn
             if (checkWinner()) {

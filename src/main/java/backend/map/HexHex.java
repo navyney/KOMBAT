@@ -30,13 +30,11 @@ public class HexHex implements Hex {
 
     @Override
     public int owner() {
-
         return own;
     }
 
     @Override
     public void setOwner(int owner) {
-
         this.own = owner;
     }
 }

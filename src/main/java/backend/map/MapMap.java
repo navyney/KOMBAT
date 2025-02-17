@@ -22,16 +22,25 @@ public class MapMap {
 //        return config;
 //    }
 
+//    public void createMap() {
+//        for (int i = 0; i < map.length; i++) {
+//            for (int j = 0; j < map[i].length; j++) {
+//                if ((i == 0 && j >= 2 && j <= 7) || (i == 1 && j >= 4 && j <= 7) || (i == 2 && j >= 6 && j <= 7)) {
+//                    map[i][j] = 0;
+//                } else if((i == 8 && j <= 1) || (i == 9 && j <= 3) || (i == 10 && j <= 5)) {
+//                    map[i][j] = 0;
+//                } else {
+//                    map[i][j] = 1;
+//                }
+//                allHexes.add(new HexHex(i + 1, j + 1, false, 0));
+//            }
+//        }
+//    }
+
     public void createMap() {
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
-                if ((i == 0 && j >= 2 && j <= 7) || (i == 1 && j >= 4 && j <= 7) || (i == 2 && j >= 6 && j <= 7)) {
-                    map[i][j] = 0;
-                } else if((i == 8 && j <= 1) || (i == 9 && j <= 3) || (i == 10 && j <= 5)) {
-                    map[i][j] = 0;
-                } else {
-                    map[i][j] = 1;
-                }
+                map[i][j] = 1;
                 allHexes.add(new HexHex(i + 1, j + 1, false, 0));
             }
         }
@@ -66,6 +75,36 @@ public class MapMap {
         return null;
     }
 
+//    public void printMap() {
+//        for (int i = 0; i < map.length; i++) {
+//            for (int j = 0; j < map[i].length; j++) {
+//                if (minions[i][j] != null) {
+//                    // show player's minion (I for Player1, L for Player2)
+//                    String ownerName = minions[i][j].getOwner().getName();
+//                    if (ownerName.equals("Player1")) {
+//                        System.out.print("I ");
+//                    } else if (ownerName.equals("Player2")) {
+//                        System.out.print("L ");
+//                    }
+//                } else if (map[i][j] == 0) {
+//                    // print wall as "X"
+//                    System.out.print("X ");
+//                } else {
+//                    // ตรวจสอบว่า Hex นี้มีเจ้าของหรือไม่
+//                    HexHex hex = (HexHex)getHexAt(i + 1, j + 1);
+//                    if (hex != null && hex.owner() != 0) {
+//                        // print owner
+//                        System.out.print(hex.owner() + " ");
+//                    } else {
+//                        // "-" is for free space
+//                        System.out.print("- ");
+//                    }
+//                }
+//            }
+//            System.out.println();
+//        }
+//    }
+
     public void printMap() {
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
@@ -77,9 +116,6 @@ public class MapMap {
                     } else if (ownerName.equals("Player2")) {
                         System.out.print("L ");
                     }
-                } else if (map[i][j] == 0) {
-                    // print wall as "X"
-                    System.out.print("X ");
                 } else {
                     // ตรวจสอบว่า Hex นี้มีเจ้าของหรือไม่
                     HexHex hex = (HexHex)getHexAt(i + 1, j + 1);
