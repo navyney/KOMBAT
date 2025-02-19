@@ -14,7 +14,7 @@ export default function Page() {
         if (currentMinion < numberOfTypes) {
             setCurrentMinion(currentMinion + 1);
         } else {
-            router.push("/GamePage");
+            router.push("/GamePage"); // เมื่อกรอกข้อมูลครบทุกตัวแล้วไปหน้า game
         }
     };
 
@@ -25,7 +25,7 @@ export default function Page() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-orange-100 p-4 w-full h-full">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-orange-100 p-4">
             <h1 className="text-4xl font-bold text-gray-800 mb-8">Minion's Setup</h1>
             <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
                 <h2 className="text-xl font-bold text-gray-700 mb-4">Minion {currentMinion} of {numberOfTypes}</h2>
