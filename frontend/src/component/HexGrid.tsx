@@ -59,9 +59,10 @@ const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, in
 
     const toggleHexColor = (hexId: number) => {
         if (!canClickHex(hexId)) return;
-
         setSelectedYellowHex((prev) => (prev === hexId ? null : hexId));
-
+        if (onHexClick) {
+            onHexClick(hexId);
+        }
     };
 
     useEffect(() => {
@@ -119,6 +120,7 @@ const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, in
             )}
         </svg>
     );
-};
+}
+;
 
 export default HexGrid;
