@@ -29,22 +29,14 @@ export default function StartPage() {
     return (
             <div
                 className="flex flex-col items-center justify-center min-h-screen bg-cover bg-center w-full h-full"
-            style={{ backgroundImage: "url('/image/homepage.png')",
+            style={{ backgroundImage: "url('/image/Desktop - 1.png')",
                      //backgroundSize: "1920px 1080px",
                      backgroundPosition: "center",
             }}
         >
-            <h1
-                className="text-6xl font-bold text-orange-600"
-                style={{
-                    textShadow: "4px 4px 0px black, -4px -4px 0px black, 4px -4px 0px black, -4px 4px 0px black",
-                }}
-            >
-                KOMBAT
-            </h1>
             <button
                 onClick={() => router.push("/select-mode")}
-                className="mt-6 px-8 py-4 bg-gray-800 text-white text-2xl font-bold rounded-lg shadow-lg hover:bg-gray-700 transition"
+                className="mt-8 px-8 py-4 bg-gray-800 text-white text-2xl font-bold rounded-lg shadow-lg hover:bg-gray-700 transition"
             >
                 START
             </button>
