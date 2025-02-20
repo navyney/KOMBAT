@@ -24,6 +24,8 @@ public class Player {
     private int lastBuyAreaTurn = -1;
     private int lastBuyMinionTurn = -1;
     private int lastSpawnMinionTurn = -1;
+    private boolean hasBoughtAreaThisTurn = false;
+    private boolean hasSpawnedMinionThisTurn = false;
 
     public Player(String name) {
         this.name = name;
@@ -74,7 +76,7 @@ public class Player {
     }
 
     public boolean canBuyArea() {
-        return GameState.getCurrent_turns() != lastBuyAreaTurn;
+        return GameState.getCurrent_turns() != lastBuyAreaTurn && !hasSpawnedMinionThisTurn;
     }
 
     public boolean canBuyMinion() {
@@ -82,7 +84,7 @@ public class Player {
     }
 
     public boolean canSpawnMinion() {
-        return GameState.getCurrent_turns() != lastSpawnMinionTurn;
+        return GameState.getCurrent_turns() != lastSpawnMinionTurn && !hasBoughtAreaThisTurn;
     }
 
     public void addMinion(Minion m) {
@@ -164,7 +166,7 @@ public class Player {
 
     public void buyArea(int r, int c, MapMap map) {
         if (!canBuyArea()) {
-            System.out.println("You already bought this turn. Wait for next turn!");
+            System.out.println("You already action this turn. Wait for next turn!");
             return ;
         }
         // ตรวจสอบว่า Hex นั้นมีเจ้าของหรือไม่
@@ -184,6 +186,7 @@ public class Player {
                 hex.setOwner(this.name.equals("Player1") ? 1 : 2);
                 this.area.add(hex);
                 setBudget(this.getBudget() - config.hex_purchase_cost());
+                hasBoughtAreaThisTurn = true;
                 lastBuyAreaTurn = GameState.getCurrent_turns();
                 System.out.println(this.name + " has bought area at (" + r + "," + c + ")");
             } else {
@@ -199,7 +202,7 @@ public class Player {
     public void spawnMinion(Minion minion, int r, int c) throws IOException {
         boolean success ;
         if (!canSpawnMinion()) {
-            System.out.println("You already bought this turn. Wait for next turn!");
+            System.out.println("You already action this turn. Wait for next turn!");
             return;
         }
         // check that the Minion belong to this Player or not
@@ -215,6 +218,7 @@ public class Player {
             if (success) {
                 addSpawnedMinion(minion);
                 this.setSpawnRemaining();
+                hasSpawnedMinionThisTurn = true;
                 lastSpawnMinionTurn = GameState.getCurrent_turns();
                 System.out.println("Minion " + minion.getName() + " spawned successfully at (" + r + "," + c + ")");
             } else {
@@ -240,6 +244,7 @@ public class Player {
             addSpawnedMinion(minion);
             setBudget(this.getBudget() - config.spawn_cost());
             this.setSpawnRemaining();
+            hasSpawnedMinionThisTurn = true;
             lastSpawnMinionTurn = GameState.getCurrent_turns();
             System.out.println("Minion " + minion.getName() + " spawned successfully at (" + r + "," + c + ")");
         } else {
@@ -300,6 +305,14 @@ public class Player {
 
     public double setBudget(double budget) {
         return this.budget = budget;
+    }
+
+    public boolean setHasNOTSpawnedMinionThisTurn() {
+        return hasSpawnedMinionThisTurn = false;
+    }
+
+    public boolean setHasNOTBoughtareaThisTurn() {
+        return hasBoughtAreaThisTurn = false ;
     }
 
     //dummy done()
