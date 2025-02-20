@@ -295,6 +295,9 @@ public class GameState { // player1 and player2 can play in terminal and show ga
                 break;
             }
 
+            player1.setHasNOTBoughtareaThisTurn() ;
+            player1.setHasNOTSpawnedMinionThisTurn() ;
+
             // Switch to Player 2
             switchTurns();
 
@@ -318,6 +321,9 @@ public class GameState { // player1 and player2 can play in terminal and show ga
                 break;
             }
 
+            player2.setHasNOTBoughtareaThisTurn() ;
+            player2.setHasNOTSpawnedMinionThisTurn() ;
+
             // Increase turn count and switch back to Player 1
             current_turns++;
             //switchTurns();
@@ -333,15 +339,15 @@ public class GameState { // player1 and player2 can play in terminal and show ga
             }
         }
 
-    public void endTurn() {
-        // check มินเนี่ยนที่ไม่ทำอะไรเลย
-        for (Minion minion : currentPlayer.getMinion()) {
-            if (!minion.hasActedThisTurn()) {
-                currentPlayer.setBudget(currentPlayer.getBudget() - 1);
-                System.out.println("Minion " + minion.getName() + " did nothing this turn. Deducted 1 budget.");
-            }
-            minion.resetActionFlag(); // reset action ของมินเนี่ยน
-        }
-        switchTurns();
-    }
+//    public void endTurn() {
+//        // check มินเนี่ยนที่ไม่ทำอะไรเลย
+//        for (Minion minion : currentPlayer.getMinion()) {
+//            if (!minion.hasActedThisTurn()) {
+//                currentPlayer.setBudget(currentPlayer.getBudget() - 1);
+//                System.out.println("Minion " + minion.getName() + " did nothing this turn. Deducted 1 budget.");
+//            }
+//            minion.resetActionFlag(); // reset action ของมินเนี่ยน
+//        }
+//        switchTurns();
+//    }
 }
