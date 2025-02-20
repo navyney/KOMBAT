@@ -89,16 +89,16 @@ const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, in
                            onClick={() => toggleHexColor(hexId)}>
                             <polygon
                                 points={hexagonPath}
-                                stroke="white"
-                                strokeWidth={1}
+                                stroke="black"
+                                strokeWidth={1.5}
                                 fill={
                                     selectedAllyHexes.includes(hexId)
-                                        ? "green"
+                                        ? "#afefaf"
                                         : selectedOpponentHexes.includes(hexId)
-                                            ? "red"
+                                            ? "#e7a09a"
                                             : selectedYellowHex === hexId
-                                                ? "yellow"
-                                                : "black"
+                                                ? "#f6f9f8"
+                                                : "#f6f9f8"
                                 }
                                 style={{cursor: "pointer"}}
                             />
@@ -109,10 +109,10 @@ const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, in
                                 textAnchor="middle"
                                 fill={
                                     selectedAllyHexes.includes(hexId) || selectedOpponentHexes.includes(hexId) || selectedYellowHex === hexId
-                                        ? "black"
-                                        : "white"}
+                                        ? "#f6f9f8"
+                                        : "#f6f9f8"}
                             >
-                                {hexId}
+
                             </text>
                         </g>
                     );
