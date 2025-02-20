@@ -22,24 +22,35 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function StartPage() {
     const router = useRouter();
 
     return (
+        <main>
             <div
                 className="flex flex-col items-center justify-center min-h-screen bg-cover bg-center w-full h-full"
-            style={{ backgroundImage: "url('/image/Desktop - 1.png')",
-                     //backgroundSize: "1920px 1080px",
-                     backgroundPosition: "center",
-            }}
-        >
-            <button
+                style={{
+                    backgroundImage: "url('/image/Desktop - 1.png')",
+                    //backgroundSize: "1920px 1080px",
+                    backgroundPosition: "center",
+                }}
+            ></div>
+
+            <div
                 onClick={() => router.push("/select-mode")}
-                className="mt-8 px-8 py-4 bg-gray-800 text-white text-2xl font-bold rounded-lg shadow-lg hover:bg-gray-700 transition"
+                className="absolute cursor-pointer bottom-80 left-[calc(33%+100px)]"
             >
-                START
-            </button>
-        </div>
+                <Image
+                    src="/image/startbutton.png"
+                    alt="End Turn"
+                    width={450}
+                    height={450}
+                    className="hover:opacity-90 transition-opacity"
+                />
+            </div>
+
+        </main>
     );
 }
