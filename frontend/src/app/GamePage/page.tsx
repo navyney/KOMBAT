@@ -1,15 +1,26 @@
-'use client'
+'use client';
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import HexGrid from "@/component/HexGrid";
+
+interface Minion {
+    id: number;
+    name: string;
+    image: string;
+    color: string;
+}
 
 export default function GamePage() {
     const [turn, setTurn] = useState(1);
     const [currentPlayer, setCurrentPlayer] = useState(1);
-    const [playerData, setPlayerData] = useState<Record<number, { budget: number; minions: number; ownedHexes: number }>>({
-        1: { budget: 100, minions: 3, ownedHexes: 5 },
-        2: { budget: 100, minions: 3, ownedHexes: 5 }
+    const [playerData, setPlayerData] = useState<Record<number, {
+        budget: number;
+        minions: number;
+        ownedHexes: number
+    }>>({
+        1: {budget: 100, minions: 3, ownedHexes: 5},
+        2: {budget: 100, minions: 3, ownedHexes: 5}
     });
     const maxTurn = 50;
     const [selectedAction, setSelectedAction] = useState<"buy" | "spawn" | null>(null);
@@ -18,6 +29,22 @@ export default function GamePage() {
     const [opponentHexes, setOpponentHexes] = useState<number[]>([77, 78, 86, 87, 88]);
     const [hasBought, setHasBought] = useState(false);
     const [hasSpawned, setHasSpawned] = useState(false);
+    const [selectedMinions, setSelectedMinions] = useState<number[]>([]);
+    const [minions, setMinions] = useState<Minion[]>([]);
+
+    useEffect(() => {
+        const queryParams = new URLSearchParams(window.location.search);
+        const selectedMinionsParam = queryParams.get("selectedMinions");
+
+        if (selectedMinionsParam) {
+            const parsedMinions: Minion[] = JSON.parse(selectedMinionsParam);
+            setMinions(parsedMinions);
+            setSelectedMinions(parsedMinions.map(m => m.id));
+        }
+        console.log("Selected Minions:", selectedMinions);
+        console.log("Minions Data:", minions);
+    }, []);
+
 
     const handleHexClick = (hexId: number) => {
         if (!selectedAction) return;
@@ -42,8 +69,7 @@ export default function GamePage() {
                 }
                 setHasBought(true);
             }
-        } else if (selectedAction === "spawn" && !hasSpawned) {
-            // Handle spawning minion logic here
+        } else if (selectedAction === "spawn" && !hasSpawned ) {
             setHasSpawned(true);
         }
         setSelectedAction(null);
@@ -76,8 +102,22 @@ export default function GamePage() {
 
     const isPlayerTurn = (player: number) => currentPlayer === player;
 
+    const getMinionImage = (minionId: number, player: number) => {
+        const minion = minions.find((m) => m.id === minionId);
+        if (!minion) {
+            // @ts-ignore
+            return `/image/minions/white-${minion.name.toLowerCase}.png`;
+        }
+
+        return player === 1
+            ? `/image/minions/green-${minion.name.toLowerCase()}.png`
+            : `/image/minions/red-${minion.name.toLowerCase()}.png`;
+    };
+
+
     return (
-        <main className="flex flex-col items-center justify-center min-h-screen bg-orange-100 w-full h-full overflow-hidden">
+        <main
+            className="flex flex-col items-center justify-center min-h-screen bg-orange-100 w-full h-full overflow-hidden">
             <div className="absolute top-4 right-4 bg-gray-800 text-white px-4 py-2 rounded">
                 Turn {turn} / {maxTurn} - Player {currentPlayer}'s Turn
             </div>
@@ -101,12 +141,26 @@ export default function GamePage() {
                 >
                     Spawn Minion
                 </button>
+                <div className="mt-4">
+                    <h4>Selected Minions:</h4>
+                    <div className="flex">
+                        {selectedMinions.map((id: number) => (
+                            <img
+                                key={id}
+                                src={getMinionImage(id, 1)}
+                                alt="Minion"
+                                className="w-12 h-12 mx-1"
+                            />
+                        ))}
+                    </div>
+                </div>
             </div>
 
             <div
                 className="flex flex-col items-center justify-center min-h-screen bg-orange-100 w-full h-full overflow-hidden overflow-y-hidden downpls"
             >
-                <HexGrid rows={8} cols={8} size={50} distance={20} initialHex_Ally={allyHexes} initialHex_Opponent={opponentHexes} onHexClick={handleHexClick} />
+                <HexGrid rows={8} cols={8} size={50} distance={20} initialHex_Ally={allyHexes}
+                         initialHex_Opponent={opponentHexes} onHexClick={handleHexClick}/>
             </div>
 
             <div className="absolute bottom-4 right-4 bg-red-200 p-4 rounded">
@@ -128,6 +182,19 @@ export default function GamePage() {
                 >
                     Spawn Minion
                 </button>
+                <div className="mt-4">
+                    <h4>Selected Minions:</h4>
+                    <div className="flex">
+                        {selectedMinions.map((id: number) => (
+                            <img
+                                key={id}
+                                src={getMinionImage(id, 2)}
+                                alt="Minion"
+                                className="w-12 h-12 mx-1"
+                            />
+                        ))}
+                    </div>
+                </div>
             </div>
 
             <div
@@ -144,4 +211,5 @@ export default function GamePage() {
             </div>
         </main>
     );
+
 }

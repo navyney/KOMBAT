@@ -3,17 +3,18 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 const minions = [
-    { id: 1, name: "Minion", image: "/image/minions/white-pawn.jpeg" },
-    { id: 2, name: "Minion", image: "/image/minions/white-rook.jpeg" },
-    { id: 3, name: "Minion", image: "/image/minions/white-knight.jpeg" },
-    { id: 4, name: "Minion", image: "/image/minions/white-bishop.jpeg" },
-    { id: 5, name: "Minion", image: "/image/minions/white-queen.jpeg" }
+    { id: 1, name: "Pawn", image: "/image/minions/white-pawn.jpeg", color: "white" },
+    { id: 2, name: "Rook", image: "/image/minions/white-rook.jpeg", color: "white" },
+    { id: 3, name: "Knight", image: "/image/minions/white-knight.jpeg", color: "white" },
+    { id: 4, name: "Bishop", image: "/image/minions/white-bishop.jpeg", color: "white" },
+    { id: 5, name: "Queen", image: "/image/minions/white-queen.jpeg", color: "white" }
 ];
 
 export default function SelectMinions() {
     const [selectedMinions, setSelectedMinions] = useState<number[]>([]);
     const [showModal, setShowModal] = useState(false);
     const [currentMinionIndex, setCurrentMinionIndex] = useState<number | null>(null);
+    const [minionDetails, setMinionDetails] = useState<Record<number, { name: string; defense: number; strategy: string }>>({});
     const router = useRouter();
 
     const toggleSelectMinion = (id: number) => {
@@ -29,8 +30,24 @@ export default function SelectMinions() {
         }
     };
 
-    const handleConfirm = () => {
+    const handleConfirm = (details: { name: string; defense: number; strategy: string }) => {
+        if (currentMinionIndex !== null) {
+            setMinionDetails((prev) => ({
+                ...prev,
+                [selectedMinions[currentMinionIndex]]: details
+            }));
+        }
         setShowModal(false);
+    };
+
+    const isReadyToStart = selectedMinions.length > 0 && selectedMinions.every(id => minionDetails[id]);
+
+    const handleStartGame = () => {
+        const selectedMinionData = selectedMinions.map(id => minions.find(m => m.id === id));
+        const queryParams = new URLSearchParams({
+            selectedMinions: JSON.stringify(selectedMinionData)
+        });
+        router.push(`/GamePage?${queryParams.toString()}`);
     };
 
     return (
@@ -70,7 +87,11 @@ export default function SelectMinions() {
                         <label className="block text-black mb-1">Strategy:</label>
                         <textarea className="w-full text-gray-700 mb-2 p-2 border rounded" rows={3}></textarea>
                         <button
-                            onClick={handleConfirm}
+                            onClick={() => handleConfirm({
+                                name: (document.querySelector('input[type="text"]') as HTMLInputElement).value,
+                                defense: parseInt((document.querySelector('input[type="number"]') as HTMLInputElement).value),
+                                strategy: (document.querySelector('textarea') as HTMLTextAreaElement).value
+                            })}
                             className="w-full py-2 px-4 bg-green-500 text-white rounded"
                         >
                             Apply
@@ -80,8 +101,9 @@ export default function SelectMinions() {
             )}
 
             <button
-                onClick={() => router.push(`/GamePage`)}
-                className="mt-4 bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded"
+                onClick={handleStartGame}
+                className={`mt-4 ${isReadyToStart ? 'bg-orange-500 hover:bg-orange-700' : 'bg-gray-500'} text-white font-bold py-2 px-4 rounded`}
+                disabled={!isReadyToStart}
             >
                 START
             </button>
