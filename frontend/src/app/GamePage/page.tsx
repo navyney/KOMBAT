@@ -4,6 +4,8 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import HexGrid from "@/component/HexGrid";
 
+// สาธุขอให้ push ได้
+
 interface Minion {
     id: number;
     name: string;
@@ -14,15 +16,49 @@ interface Minion {
 export default function GamePage() {
     const [turn, setTurn] = useState(1);
     const [currentPlayer, setCurrentPlayer] = useState(1);
+    const [winner, setWinner] = useState<number | null>(null);
+
+    const [gameConfig, setGameConfig] = useState({
+        spawnedCost: 0,
+        hexPurchasedCost: 0,
+        initialBudget: 0,
+        initialHP: 0,
+        turnBudget: 0,
+        maxBudget: 0,
+        interestPercentage: 0,
+        maxTurn: 50,
+        maxSpawn: 0,
+    });
+
     const [playerData, setPlayerData] = useState<Record<number, {
         budget: number;
         minions: number;
-        ownedHexes: number
+        ownedHexes: number;
     }>>({
-        1: {budget: 100, minions: 3, ownedHexes: 5},
-        2: {budget: 100, minions: 3, ownedHexes: 5}
+        1: { budget: 0, minions: 0, ownedHexes: 5 },
+        2: { budget: 0, minions: 0, ownedHexes: 5 }
     });
-    const maxTurn = 50;
+
+    useEffect(() => {
+        const savedConfig = localStorage.getItem("gameConfig");
+        if (savedConfig) {
+            const parsedConfig = JSON.parse(savedConfig);
+            setGameConfig(parsedConfig);
+
+            setPlayerData({
+                1: { budget: parsedConfig.initialBudget, minions: 0, ownedHexes: 5 },
+                2: { budget: parsedConfig.initialBudget, minions: 0, ownedHexes: 5 }
+            });
+        }
+    }, []);
+
+    useEffect(() => {
+        if (turn > gameConfig.maxTurn) {
+            const winnerPlayer = playerData[1].budget > playerData[2].budget ? 1 : 2;
+            setWinner(winnerPlayer);
+        }
+    }, [turn]);
+
     const [selectedAction, setSelectedAction] = useState<"buy" | "spawn" | null>(null);
     const [selectedHex, setSelectedHex] = useState<number | null>(null);
     const [allyHexes, setAllyHexes] = useState<number[]>([11, 12, 13, 21, 22]);
@@ -41,6 +77,7 @@ export default function GamePage() {
             setMinions(parsedMinions);
             setSelectedMinions(parsedMinions.map(m => m.id));
         }
+        // for debug kub
         console.log("Selected Minions:", selectedMinions);
         console.log("Minions Data:", minions);
     }, []);
@@ -58,10 +95,11 @@ export default function GamePage() {
                     ...prev,
                     [currentPlayer]: {
                         ...prev[currentPlayer],
-                        budget: prev[currentPlayer].budget - 10,
+                        budget: prev[currentPlayer].budget - gameConfig.hexPurchasedCost,
                         ownedHexes: prev[currentPlayer].ownedHexes + 1
                     }
                 }));
+
                 if (currentPlayer === 1) {
                     setAllyHexes([...allyHexes, hexId]);
                 } else {
@@ -69,7 +107,18 @@ export default function GamePage() {
                 }
                 setHasBought(true);
             }
-        } else if (selectedAction === "spawn" && !hasSpawned ) {
+
+        } else if (selectedAction === "spawn" && !hasSpawned) {
+            if (playerData[currentPlayer].minions < gameConfig.maxSpawn) {
+                setPlayerData(prev => ({
+                    ...prev,
+                    [currentPlayer]: {
+                        ...prev[currentPlayer],
+                        budget: prev[currentPlayer].budget - gameConfig.spawnedCost,
+                        minions: prev[currentPlayer].minions + 1
+                    }
+                }));
+            }
             setHasSpawned(true);
         }
         setSelectedAction(null);
@@ -119,28 +168,34 @@ export default function GamePage() {
         <main
             className="flex flex-col items-center justify-center min-h-screen bg-orange-100 w-full h-full overflow-hidden">
             <div className="absolute top-4 right-4 bg-gray-800 text-white px-4 py-2 rounded">
-                Turn {turn} / {maxTurn} - Player {currentPlayer}'s Turn
+                Turn {turn} / {gameConfig.maxTurn} - Player {currentPlayer}'s Turn
             </div>
+
+            <HexGrid rows={8} cols={8} size={50} distance={20} initialHex_Ally={allyHexes}
+                     initialHex_Opponent={opponentHexes} onHexClick={handleHexClick}
+            />
 
             <div className="absolute top-4 left-4 bg-green-200 p-4 rounded">
                 <h3>Player 1</h3>
                 <p>Budget: {playerData[1].budget}</p>
-                <p>Minions: {playerData[1].minions}</p>
+                <p>Minions: {playerData[1].minions} / {gameConfig.maxSpawn}</p>
                 <p>Owned Hexes: {playerData[1].ownedHexes}</p>
                 <button
                     onClick={() => setSelectedAction("buy")}
-                    className={`${!isPlayerTurn(1) || hasBought || hasSpawned ? 'bg-gray-500' : 'bg-green-500'} text-white px-2 py-1 rounded hover:opacity-80 transition-opacity`}
-                    disabled={!isPlayerTurn(1) || hasBought || hasSpawned}
+                    className={`${!isPlayerTurn(1) || hasBought || hasSpawned  || playerData[1].budget < gameConfig.hexPurchasedCost ? 'bg-gray-500' : 'bg-green-500'} text-white px-2 py-1 rounded hover:opacity-80 transition-opacity`}
+                    disabled={!isPlayerTurn(1) || hasBought || hasSpawned  || playerData[1].budget < gameConfig.hexPurchasedCost}
                 >
                     Buy Area
                 </button>
+
                 <button
                     onClick={() => setSelectedAction("spawn")}
-                    className={`${!isPlayerTurn(1) || hasSpawned ? 'bg-gray-500' : 'bg-green-500'} text-white px-2 py-1 rounded ml-2 hover:opacity-80 transition-opacity`}
-                    disabled={!isPlayerTurn(1) || hasSpawned}
+                    className={`${!isPlayerTurn(1) || hasSpawned || playerData[1].minions >= gameConfig.maxSpawn || playerData[1].budget < gameConfig.spawnedCost ? 'bg-gray-500' : 'bg-green-500'} text-white px-2 py-1 rounded ml-2 hover:opacity-80 transition-opacity`}
+                    disabled={!isPlayerTurn(1) || hasSpawned || playerData[1].minions >= gameConfig.maxSpawn || playerData[1].budget < gameConfig.spawnedCost}
                 >
                     Spawn Minion
                 </button>
+
                 <div className="mt-4">
                     <h4>Selected Minions:</h4>
                     <div className="flex">
@@ -166,22 +221,24 @@ export default function GamePage() {
             <div className="absolute bottom-4 right-4 bg-red-200 p-4 rounded">
                 <h3>Player 2</h3>
                 <p>Budget: {playerData[2].budget}</p>
-                <p>Minions: {playerData[2].minions}</p>
+                <p>Minions: {playerData[2].minions} / {gameConfig.maxSpawn}</p>
                 <p>Owned Hexes: {playerData[2].ownedHexes}</p>
                 <button
                     onClick={() => setSelectedAction("buy")}
-                    className={`${!isPlayerTurn(2) || hasBought || hasSpawned ? 'bg-gray-500' : 'bg-red-500'} text-white px-2 py-1 rounded hover:opacity-80 transition-opacity`}
-                    disabled={!isPlayerTurn(2) || hasBought || hasSpawned}
+                    className={`${!isPlayerTurn(2) || hasBought || hasSpawned  || playerData[2].budget < gameConfig.hexPurchasedCost ? 'bg-gray-500' : 'bg-red-500'} text-white px-2 py-1 rounded hover:opacity-80 transition-opacity`}
+                    disabled={!isPlayerTurn(2) || hasBought || hasSpawned || playerData[2].budget < gameConfig.hexPurchasedCost}
                 >
                     Buy Area
                 </button>
+
                 <button
                     onClick={() => setSelectedAction("spawn")}
-                    className={`${!isPlayerTurn(2) || hasSpawned ? 'bg-gray-500' : 'bg-red-500'} text-white px-2 py-1 rounded ml-2 hover:opacity-80 transition-opacity`}
-                    disabled={!isPlayerTurn(2) || hasSpawned}
+                    className={`${!isPlayerTurn(2) || hasSpawned || playerData[2].minions >= gameConfig.maxSpawn || playerData[2].budget < gameConfig.spawnedCost ? 'bg-gray-500' : 'bg-red-500'} text-white px-2 py-1 rounded ml-2 hover:opacity-80 transition-opacity`}
+                    disabled={!isPlayerTurn(2) || hasSpawned || playerData[2].minions >= gameConfig.maxSpawn || playerData[2].budget < gameConfig.spawnedCost}
                 >
                     Spawn Minion
                 </button>
+
                 <div className="mt-4">
                     <h4>Selected Minions:</h4>
                     <div className="flex">
