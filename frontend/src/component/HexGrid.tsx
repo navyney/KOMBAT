@@ -14,11 +14,13 @@ export interface Hex {
 const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, initialHex_Opponent, onHexClick}) => {
     const [selectedAllyHexes, setSelectedAllyHexes] = useState<number[]>([]);
     const [selectedOpponentHexes, setSelectedOpponentHexes] = useState<number[]>([]);
-    const [selectedYellowHex, setSelectedYellowHex] = useState<number | null>(null);
+    const [selectedYellowHex, setSelectedYellowHex] = useState<number[] | null>(null);
     const hexWidth = size * 2;
     const hexHeight = Math.sqrt(3) * size;
     const xOffset = hexWidth * 0.25;
     const yOffset = hexHeight * 0.5;
+
+
 
     const hexagonPath = [
         [xOffset + distance, (yOffset * 2) + distance],
@@ -35,7 +37,7 @@ const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, in
     const getNeighbors = (hexId: number) => {
         const row = Math.floor(hexId / 10);
         const col = hexId % 10;
-        const isOdd = row % 2 !== 0;
+        const isOdd = col % 2 !== 0 && row % 2 !== 0;
         return [
             hexId - 10, // ด้านบน
             hexId + 10, // ด้านล่าง
@@ -46,11 +48,17 @@ const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, in
         ];
     };
 
+        const getlistNeighbors = (listHex: number[]): number[] => {
+            const a: number[] = [];
+            for (let i = 0; i < listHex.length; i++) {
+                a.push(...getNeighbors(listHex[i]));
+            }
+            return a;
+        };
+
     //เช็คว่าช่องที่กดติดกับช่องสีเขียวหรือไม่
     const canClickHex = (hexId: number) => {
         if (selectedAllyHexes.includes(hexId) || selectedOpponentHexes.includes(hexId)) return false;
-        if (selectedYellowHex === hexId) return true;
-
         return (
             selectedAllyHexes.some((hex) => getNeighbors(hex).includes(hexId)) ||
             selectedOpponentHexes.some((hex) => getNeighbors(hex).includes(hexId))
@@ -59,7 +67,6 @@ const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, in
 
     const toggleHexColor = (hexId: number) => {
         if (!canClickHex(hexId)) return;
-        setSelectedYellowHex((prev) => (prev === hexId ? null : hexId));
         if (onHexClick) {
             onHexClick(hexId);
         }
@@ -68,7 +75,8 @@ const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, in
     useEffect(() => {
         setSelectedAllyHexes(initialHex_Ally);
         setSelectedOpponentHexes(initialHex_Opponent);
-    }, [initialHex_Ally, initialHex_Opponent]);
+        setSelectedYellowHex(getlistNeighbors(initialHex_Ally));
+    }, [initialHex_Ally, initialHex_Opponent,selectedYellowHex]);
 
     return (
         <svg
@@ -96,8 +104,8 @@ const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, in
                                         ? "#afefaf"
                                         : selectedOpponentHexes.includes(hexId)
                                             ? "#e7a09a"
-                                            : selectedYellowHex === hexId
-                                                ? "#f6f9f8"
+                                            : selectedYellowHex?.includes(hexId)
+                                                ? "yellow"
                                                 : "#f6f9f8"
                                 }
                                 style={{cursor: "pointer"}}
@@ -108,11 +116,11 @@ const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, in
                                 fontSize="14"
                                 textAnchor="middle"
                                 fill={
-                                    selectedAllyHexes.includes(hexId) || selectedOpponentHexes.includes(hexId) || selectedYellowHex === hexId
+                                    selectedAllyHexes.includes(hexId) || selectedOpponentHexes.includes(hexId) || selectedYellowHex?.includes(hexId)
                                         ? "#f6f9f8"
                                         : "#f6f9f8"}
                             >
-
+                                {hexId}
                             </text>
                         </g>
                     );
