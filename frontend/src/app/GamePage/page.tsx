@@ -4,6 +4,8 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import HexGrid from "@/component/HexGrid";
 
+// สาธุขอให้ push ได้
+
 interface Minion {
     id: number;
     name: string;

@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {useEffect, useState} from "react";
 
+// สาธุขอให้ push ได้
+
 export default function StartPage() {
     const router = useRouter();
     const [config, setConfig] = useState({
