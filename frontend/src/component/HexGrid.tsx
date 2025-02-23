@@ -37,14 +37,14 @@ const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, in
     const getNeighbors = (hexId: number) => {
         const row = Math.floor(hexId / 10);
         const col = hexId % 10;
-        const isOdd = col % 2 !== 0 && row % 2 !== 0;
+        const isOdd = col % 2 !== 0;
         return [
             hexId - 10, // ด้านบน
             hexId + 10, // ด้านล่าง
-            hexId - 1, // ซ้าย
-            hexId + 1, // ขวา
-            isOdd ? hexId - 9 : hexId - 11, // บนซ้าย / บนขวา
-            isOdd ? hexId + 11 : hexId + 9, // ล่างขวา / ล่างซ้าย
+            isOdd ? hexId + 1 : hexId - 9, // บนขวา
+            isOdd ? hexId - 1 : hexId - 11, // บนซ้าย
+            isOdd ? hexId + 9 : hexId - 1, // บนซ้าย / บนขวา
+            isOdd ? hexId + 11 : hexId + 1, // ล่างขวา / ล่างซ้าย
         ];
     };
 

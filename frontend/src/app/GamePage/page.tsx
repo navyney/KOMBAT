@@ -140,12 +140,12 @@ export default function GamePage() {
         const col = hexId % 10;
         const isOdd = row % 2 !== 0;
         return [
-            hexId - 10,
-            hexId + 10,
-            hexId - 1,
-            hexId + 1,
-            isOdd ? hexId - 9 : hexId - 11,
-            isOdd ? hexId + 11 : hexId + 9,
+            hexId - 10, // ด้านบน
+            hexId + 10, // ด้านล่าง
+            isOdd ? hexId + 1 : hexId - 9, // บนขวา
+            isOdd ? hexId - 1 : hexId - 11, // บนซ้าย
+            isOdd ? hexId + 9 : hexId - 1, // ล่างซ้าย
+            isOdd ? hexId + 11 : hexId + 1, //ล่างขวา
         ];
     };
 
