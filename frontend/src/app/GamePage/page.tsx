@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import HexGrid from "@/component/HexGrid";
+import {id} from "postcss-selector-parser";
 
 // สาธุขอให้ push ได้
 
@@ -148,6 +149,39 @@ export default function GamePage() {
             isOdd ? hexId + 11 : hexId + 1, //ล่างขวา
         ];
     };
+    const spawnMinion = (id:number,player:number) =>{
+        if(id === 1 && player === 1 && isPlayerTurn(1)){
+        setHasBought(false);
+        }
+        else if(id === 2 && player === 1 && isPlayerTurn(1)){
+            setHasBought(true);
+        }
+        else if(id === 3 && player === 1 && isPlayerTurn(1)){
+            setHasBought(false);
+        }
+        else if(id === 4 && player === 1 && isPlayerTurn(1)){
+            setHasBought(true);
+        }
+        else if(id === 5 && player === 1 && isPlayerTurn(1)){
+            setHasBought(false);
+        }
+        else if(id === 1 && player === 2 && isPlayerTurn(2)){
+            setHasBought(false);
+        }
+        else if(id === 2 && player === 2 && isPlayerTurn(2)){
+            setHasBought(true);
+        }
+        else if(id === 3 && player === 2 && isPlayerTurn(2)){
+            setHasBought(false);
+        }
+        else if(id === 4 && player === 2 && isPlayerTurn(2)){
+            setHasBought(true);
+        }
+        else if(id === 5 && player === 2 && isPlayerTurn(2)){
+            setHasBought(false);
+        }
+        else{}
+    }
 
     const isPlayerTurn = (player: number) => currentPlayer === player;
 
@@ -198,13 +232,16 @@ export default function GamePage() {
 
                 <div className="mt-4">
                     <h4>Selected Minions:</h4>
-                    <div className="flex">
+                    <div className="flex"
+
+                    >
                         {selectedMinions.map((id: number) => (
                             <img
                                 key={id}
                                 src={getMinionImage(id, 1)}
                                 alt="Minion"
                                 className="w-12 h-12 mx-1"
+                                onClick={() => spawnMinion(id,1)}
                             />
                         ))}
                     </div>
@@ -241,13 +278,16 @@ export default function GamePage() {
 
                 <div className="mt-4">
                     <h4>Selected Minions:</h4>
-                    <div className="flex">
+                    <div
+                        className="flex"
+                        >
                         {selectedMinions.map((id: number) => (
                             <img
                                 key={id}
                                 src={getMinionImage(id, 2)}
                                 alt="Minion"
                                 className="w-12 h-12 mx-1"
+                                onClick={() => spawnMinion(id,2)}
                             />
                         ))}
                     </div>
