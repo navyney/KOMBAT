@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import HexGrid from "@/component/HexGrid";
 import {id} from "postcss-selector-parser";
+import {yellow} from "next/dist/lib/picocolors";
 
 // สาธุขอให้ push ได้
 
@@ -68,6 +69,7 @@ export default function GamePage() {
     const [hasSpawned, setHasSpawned] = useState(false);
     const [selectedMinions, setSelectedMinions] = useState<number[]>([]);
     const [minions, setMinions] = useState<Minion[]>([]);
+    const [YellowHex, setYellowHex] = useState<number[]>([]);
 
     useEffect(() => {
         const queryParams = new URLSearchParams(window.location.search);
@@ -83,13 +85,23 @@ export default function GamePage() {
         console.log("Minions Data:", minions);
     }, []);
 
-
+    useEffect(() => {
+        if(selectedAction === "buy") {
+            if (currentPlayer === 1) {
+                setYellowHex([...YellowHex, ...allyHexes]);
+            } else {
+                setYellowHex([...YellowHex, ...opponentHexes]);
+            }
+        }
+        else{
+            setYellowHex([]);
+        }
+    }, [YellowHex]);
     const handleHexClick = (hexId: number) => {
         if (!selectedAction) return;
 
         if (selectedAction === "buy" && !hasBought) {
             const isAdjacent = [...allyHexes, ...opponentHexes].some(hex => getNeighbors(hex).includes(hexId));
-
             if (isAdjacent && !allyHexes.includes(hexId) && !opponentHexes.includes(hexId)) {
                 setSelectedHex(hexId);
                 setPlayerData(prev => ({
@@ -107,6 +119,7 @@ export default function GamePage() {
                     setOpponentHexes([...opponentHexes, hexId]);
                 }
                 setHasBought(true);
+
             }
 
         } else if (selectedAction === "spawn" && !hasSpawned) {
@@ -149,7 +162,16 @@ export default function GamePage() {
             isOdd ? hexId + 11 : hexId + 1, //ล่างขวา
         ];
     };
-    const spawnMinion = (id:number,player:number) =>{
+
+    const getlistNeighbors = (listHex: number[]): number[] => {
+        const a: number[] = [];
+        for (let i = 0; i < listHex.length; i++) {
+            a.push(...getNeighbors(listHex[i]));
+        }
+        return a;
+    };
+
+    const selectTypeMinion = (id:number,player:number) =>{
         if(id === 1 && player === 1 && isPlayerTurn(1)){
         setHasBought(false);
         }
@@ -206,7 +228,7 @@ export default function GamePage() {
             </div>
 
             <HexGrid rows={8} cols={8} size={50} distance={20} initialHex_Ally={allyHexes}
-                     initialHex_Opponent={opponentHexes} onHexClick={handleHexClick}
+                     initialHex_Opponent={opponentHexes} onHexClick={handleHexClick} initialHex_Yellow={YellowHex}
             />
 
             <div className="absolute top-4 left-4 bg-green-200 p-4 rounded">
@@ -241,7 +263,7 @@ export default function GamePage() {
                                 src={getMinionImage(id, 1)}
                                 alt="Minion"
                                 className="w-12 h-12 mx-1"
-                                onClick={() => spawnMinion(id,1)}
+                                onClick={() => selectTypeMinion(id,1)}
                             />
                         ))}
                     </div>
@@ -252,7 +274,7 @@ export default function GamePage() {
                 className="flex flex-col items-center justify-center min-h-screen bg-orange-100 w-full h-full overflow-hidden overflow-y-hidden downpls"
             >
                 <HexGrid rows={8} cols={8} size={50} distance={20} initialHex_Ally={allyHexes}
-                         initialHex_Opponent={opponentHexes} onHexClick={handleHexClick}/>
+                         initialHex_Opponent={opponentHexes} onHexClick={handleHexClick} initialHex_Yellow={YellowHex}/>
             </div>
 
             <div className="absolute bottom-4 right-4 bg-red-200 p-4 rounded">
@@ -287,7 +309,7 @@ export default function GamePage() {
                                 src={getMinionImage(id, 2)}
                                 alt="Minion"
                                 className="w-12 h-12 mx-1"
-                                onClick={() => spawnMinion(id,2)}
+                                onClick={() => selectTypeMinion(id,2)}
                             />
                         ))}
                     </div>
