@@ -8,16 +8,15 @@ export interface Hex {
     distance: number,
     initialHex_Ally: number[],
     initialHex_Opponent: number[],
-    onHexClick?: (hexId: number) => void,
-    allyNeighbors: number[],
-    opponentNeighbors: number[],
-    currentPlayer: number,
+
+    onHexClick?: (hexId: number) => void
+    initialHex_Yellow: number[]
 }
 
-const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, initialHex_Opponent, onHexClick, allyNeighbors, opponentNeighbors, currentPlayer}) => {
+const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, initialHex_Opponent, onHexClick, initialHex_Yellow}) => {
     const [selectedAllyHexes, setSelectedAllyHexes] = useState<number[]>([]);
     const [selectedOpponentHexes, setSelectedOpponentHexes] = useState<number[]>([]);
-    const [selectedYellowHex, setSelectedYellowHex] = useState<number[] | null>(null);
+    const [selectedYellowHex, setSelectedYellowHex] = useState<number[]>([]);
     const hexWidth = size * 2;
     const hexHeight = Math.sqrt(3) * size;
     const xOffset = hexWidth * 0.25;
@@ -74,16 +73,12 @@ const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, in
     };
 
     useEffect(() => {
-        setSelectedAllyHexes(initialHex_Ally) ;
-        setSelectedOpponentHexes(initialHex_Opponent) ;
-        setSelectedYellowHex(currentPlayer === 1 ? allyNeighbors : opponentNeighbors) ;
-    }, [initialHex_Ally, initialHex_Opponent, allyNeighbors, opponentNeighbors, currentPlayer]) ;
 
-    // useEffect(() => {
-    //     setSelectedAllyHexes(initialHex_Ally);
-    //     setSelectedOpponentHexes(initialHex_Opponent);
-    //     setSelectedYellowHex(getlistNeighbors(initialHex_Ally));
-    // }, [initialHex_Ally, initialHex_Opponent,selectedYellowHex]);
+        setSelectedAllyHexes(initialHex_Ally);
+        setSelectedOpponentHexes(initialHex_Opponent);
+        setSelectedYellowHex(getlistNeighbors(initialHex_Yellow));
+    }, [initialHex_Ally, initialHex_Opponent,selectedYellowHex]);
+
 
     return (
         <svg

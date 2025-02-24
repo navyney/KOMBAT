@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import HexGrid from "@/component/HexGrid";
+import {id} from "postcss-selector-parser";
+import {yellow} from "next/dist/lib/picocolors";
 
 // สาธุขอให้ push ได้
 
@@ -72,6 +74,16 @@ export default function GamePage() {
         }
     }, [turn]);
 
+    const [selectedAction, setSelectedAction] = useState<"buy" | "spawn" | null>(null);
+    const [selectedHex, setSelectedHex] = useState<number | null>(null);
+    const [allyHexes, setAllyHexes] = useState<number[]>([11, 12, 13, 21, 22]);
+    const [opponentHexes, setOpponentHexes] = useState<number[]>([77, 78, 86, 87, 88]);
+    const [hasBought, setHasBought] = useState(false);
+    const [hasSpawned, setHasSpawned] = useState(false);
+    const [selectedMinions, setSelectedMinions] = useState<number[]>([]);
+    const [minions, setMinions] = useState<Minion[]>([]);
+    const [YellowHex, setYellowHex] = useState<number[]>([]);
+
     useEffect(() => {
         const queryParams = new URLSearchParams(window.location.search);
         const selectedMinionsParam = queryParams.get("selectedMinions");
@@ -86,7 +98,18 @@ export default function GamePage() {
         console.log("Minions Data:", minions);
     }, []);
 
-
+    useEffect(() => {
+        if(selectedAction === "buy") {
+            if (currentPlayer === 1) {
+                setYellowHex([...YellowHex, ...allyHexes]);
+            } else {
+                setYellowHex([...YellowHex, ...opponentHexes]);
+            }
+        }
+        else{
+            setYellowHex([]);
+        }
+    }, [YellowHex]);
     const handleHexClick = (hexId: number) => {
         if (!selectedAction) return;
 
@@ -112,6 +135,7 @@ export default function GamePage() {
                     setOpponentHexes([...opponentHexes, hexId]);
                 }
                 setHasBought(true);
+
             }
 
         } else if (selectedAction === "spawn" && !hasSpawned) {
@@ -155,27 +179,47 @@ export default function GamePage() {
         ];
     };
 
-    const getNeighborsForPlayer = (hexes: number[]): number[] => {
-        const neighbors = new Set<number>();
-        hexes.forEach(hex => {
-            const hexNeighbors = getNeighbors(hex);
-            hexNeighbors.forEach(neighbor => {
-                if (!hexes.includes(neighbor)) {
-                    neighbors.add(neighbor);
-                }
-            });
-        });
-        return Array.from(neighbors);
+    const getlistNeighbors = (listHex: number[]): number[] => {
+        const a: number[] = [];
+        for (let i = 0; i < listHex.length; i++) {
+            a.push(...getNeighbors(listHex[i]));
+        }
+        return a;
     };
 
-    useEffect(() => {
-        if (currentPlayer === 1) {
-            setAllyNeighbors(getNeighborsForPlayer(allyHexes));
-        } else {
-            setOpponentNeighbors(getNeighborsForPlayer(opponentHexes));
+    const selectTypeMinion = (id:number,player:number) =>{
+        if(id === 1 && player === 1 && isPlayerTurn(1)){
+        setHasBought(false);
         }
-    }, [currentPlayer, allyHexes, opponentHexes]);
-
+        else if(id === 2 && player === 1 && isPlayerTurn(1)){
+            setHasBought(true);
+        }
+        else if(id === 3 && player === 1 && isPlayerTurn(1)){
+            setHasBought(false);
+        }
+        else if(id === 4 && player === 1 && isPlayerTurn(1)){
+            setHasBought(true);
+        }
+        else if(id === 5 && player === 1 && isPlayerTurn(1)){
+            setHasBought(false);
+        }
+        else if(id === 1 && player === 2 && isPlayerTurn(2)){
+            setHasBought(false);
+        }
+        else if(id === 2 && player === 2 && isPlayerTurn(2)){
+            setHasBought(true);
+        }
+        else if(id === 3 && player === 2 && isPlayerTurn(2)){
+            setHasBought(false);
+        }
+        else if(id === 4 && player === 2 && isPlayerTurn(2)){
+            setHasBought(true);
+        }
+        else if(id === 5 && player === 2 && isPlayerTurn(2)){
+            setHasBought(false);
+        }
+        else{}
+    }
 
     const isPlayerTurn = (player: number) => currentPlayer === player;
 
@@ -199,17 +243,8 @@ export default function GamePage() {
                 Turn {turn} / {gameConfig.maxTurn} - Player {currentPlayer}'s Turn
             </div>
 
-            <HexGrid
-                rows={8}
-                cols={8}
-                size={50}
-                distance={20}
-                initialHex_Ally={allyHexes}
-                initialHex_Opponent={opponentHexes}
-                onHexClick={handleHexClick}
-                allyNeighbors={allyNeighbors}
-                opponentNeighbors={opponentNeighbors}
-                currentPlayer={currentPlayer}
+            <HexGrid rows={8} cols={8} size={50} distance={20} initialHex_Ally={allyHexes}
+                     initialHex_Opponent={opponentHexes} onHexClick={handleHexClick} initialHex_Yellow={YellowHex}
             />
 
             <div className="absolute top-4 left-4 bg-green-200 p-4 rounded">
@@ -235,13 +270,16 @@ export default function GamePage() {
 
                 <div className="mt-4">
                     <h4>Selected Minions:</h4>
-                    <div className="flex">
+                    <div className="flex"
+
+                    >
                         {selectedMinions.map((id: number) => (
                             <img
                                 key={id}
                                 src={getMinionImage(id, 1)}
                                 alt="Minion"
                                 className="w-12 h-12 mx-1"
+                                onClick={() => selectTypeMinion(id,1)}
                             />
                         ))}
                     </div>
@@ -251,18 +289,10 @@ export default function GamePage() {
             <div
                 className="flex flex-col items-center justify-center min-h-screen bg-orange-100 w-full h-full overflow-hidden overflow-y-hidden downpls"
             >
-                <HexGrid
-                    rows={8}
-                    cols={8}
-                    size={50}
-                    distance={20}
-                    initialHex_Ally={allyHexes}
-                    initialHex_Opponent={opponentHexes}
-                    onHexClick={handleHexClick}
-                    allyNeighbors={allyNeighbors}
-                    opponentNeighbors={opponentNeighbors}
-                    currentPlayer={currentPlayer}
-                />
+
+                <HexGrid rows={8} cols={8} size={50} distance={20} initialHex_Ally={allyHexes}
+                         initialHex_Opponent={opponentHexes} onHexClick={handleHexClick} initialHex_Yellow={YellowHex}/>
+
             </div>
 
             <div className="absolute bottom-4 right-4 bg-red-200 p-4 rounded">
@@ -288,13 +318,16 @@ export default function GamePage() {
 
                 <div className="mt-4">
                     <h4>Selected Minions:</h4>
-                    <div className="flex">
+                    <div
+                        className="flex"
+                        >
                         {selectedMinions.map((id: number) => (
                             <img
                                 key={id}
                                 src={getMinionImage(id, 2)}
                                 alt="Minion"
                                 className="w-12 h-12 mx-1"
+                                onClick={() => selectTypeMinion(id,2)}
                             />
                         ))}
                     </div>
