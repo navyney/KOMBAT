@@ -141,7 +141,7 @@ const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, in
             </svg>
         </div>
     );
-
+    //ถ้าจะลองให้ ครอบ return ข้างบนให้หมดแล้ว comment แล้วค่อยปลดคอมเม้นส่วนที่เหลือ (มี return ด้านล่าง,const [hexagons, setHexagons] และ interface ด้านบน)
     // return (
     //     <div style={{ position: "relative", width: cols * hexWidth, height: rows * hexHeight }}>
     //         <svg
