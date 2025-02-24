@@ -94,7 +94,7 @@ export default function GamePage() {
         else{
             setYellowHex([]);
         }
-    }, [YellowHex]);
+    }, [selectedAction]);
 
     const handleHexClick = (hexId: number) => {
         if (!selectedAction) return;
@@ -153,7 +153,7 @@ export default function GamePage() {
     const getNeighbors = (hexId: number) => {
         const row = Math.floor(hexId / 10);
         const col = hexId % 10;
-        const isOdd = row % 2 !== 0;
+        const isOdd = col % 2 !== 0;
         return [
             hexId - 10, // ด้านบน
             hexId + 10, // ด้านล่าง
