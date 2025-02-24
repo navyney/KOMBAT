@@ -1,4 +1,6 @@
 'use client'
+
+import Image from "next/image";
 import {useEffect, useState} from "react";
 
 export interface Hex {
@@ -12,6 +14,11 @@ export interface Hex {
     onHexClick?: (hexId: number) => void
     initialHex_Yellow: number[]
 }
+
+// interface Hexagon {
+//     id: number;
+//     imageUrl: string;
+// }
 
 const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, initialHex_Opponent, onHexClick, initialHex_Yellow}) => {
     const [selectedAllyHexes, setSelectedAllyHexes] = useState<number[]>([]);
@@ -56,7 +63,6 @@ const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, in
             return a;
         };
 
-    //เช็คว่าช่องที่กดติดกับช่องสีเขียวหรือไม่
     const canClickHex = (hexId: number) => {
         if (selectedAllyHexes.includes(hexId) || selectedOpponentHexes.includes(hexId)) return false;
         return (
@@ -79,58 +85,119 @@ const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, in
         setSelectedYellowHex(getlistNeighbors(initialHex_Yellow));
     }, [initialHex_Ally, initialHex_Opponent,initialHex_Yellow]);
 
+    // const [hexagons, setHexagons] = useState<Hexagon[]>(
+    //     Array.from({ length: rows * cols }).map((_, index) => ({
+    //         id: index + 1,
+    //         imageUrl: `/image/minions/white-pawn.png`,
+    //     }))
+    // );
 
     return (
-        <svg
-            className={"margin-left flex flex-col items-center justify-center min-h-screen"}
-            //width={cols * (2 * hexWidth) + 2 * distance}
-            width={cols * (hexWidth) + 2 * distance}
-            height={rows * (hexHeight + size) + 2 * distance}
-            style={{display: "block"}}
-        >
-            {Array.from({length: rows}).map((_, row) =>
-                Array.from({length: cols}).map((_, col) => {
-                    const x = col * xOffset * 3;
-                    const y = row * hexHeight + (col % 2 === 1 ? 0 : hexHeight / 2);
-                    const hexId = (row + 1) * 10 + (col + 1);
+        <div>
+            <div className="flex">
+                <Image
+                    src="/image/minions/chess-bishop-red.png"
+                    alt="Minion"
+                    width={75}
+                    height={75}
+                    className="align-middle"
+                />
+            </div>
+            <svg
+                className={"margin-left flex flex-col items-center justify-center min-h-screen"}
+                //width={cols * (2 * hexWidth) + 2 * distance}
+                width={cols * (hexWidth) + 2 * distance}
+                height={rows * (hexHeight + size) + 2 * distance}
+                style={{display: "block"}}
+            >
+                {Array.from({length: rows}).map((_, row) =>
+                    Array.from({length: cols}).map((_, col) => {
+                        const x = col * xOffset * 3;
+                        const y = row * hexHeight + (col % 2 === 1 ? 0 : hexHeight / 2);
+                        const hexId = (row + 1) * 10 + (col + 1);
 
-                    return (
-                        <g key={`${row}-${col}`} transform={`translate(${x},${y})`}
-                           onClick={() => toggleHexColor(hexId)}>
-                            <polygon
-                                points={hexagonPath}
-                                stroke="black"
-                                strokeWidth={1.5}
-                                fill={
-                                    selectedAllyHexes.includes(hexId)
-                                        ? "#afefaf"
-                                        : selectedOpponentHexes.includes(hexId)
-                                            ? "#e7a09a"
-                                            : selectedYellowHex?.includes(hexId)
-                                                ? "yellow"
-                                                : "#f6f9f8"
-                                }
-                                style={{cursor: "pointer"}}
-                            />
-                            <text
-                                x={size + distance}
-                                y={size + distance}
-                                fontSize="14"
-                                textAnchor="middle"
-                                fill={
-                                    selectedAllyHexes.includes(hexId) || selectedOpponentHexes.includes(hexId) || selectedYellowHex?.includes(hexId)
-                                        ? "#f6f9f8"
-                                        : "#f6f9f8"}
-                            >
-
-                            </text>
-                        </g>
-                    );
-                })
-            )}
-        </svg>
+                        return (
+                            <g key={`${row}-${col}`} transform={`translate(${x},${y})`}
+                               onClick={() => toggleHexColor(hexId)}>
+                                <polygon
+                                    points={hexagonPath}
+                                    stroke="black"
+                                    strokeWidth={1.5}
+                                    fill={
+                                        selectedAllyHexes.includes(hexId)
+                                            ? "#afefaf"
+                                            : selectedOpponentHexes.includes(hexId)
+                                                ? "#e7a09a"
+                                                : selectedYellowHex?.includes(hexId)
+                                                    ? "yellow"
+                                                    : "#f6f9f8"
+                                    }
+                                    style={{cursor: "pointer"}}
+                                />
+                            </g>
+                        );
+                    })
+                )}
+            </svg>
+        </div>
     );
-}
+    //ถ้าจะลองให้ ครอบ return ข้างบนให้หมดแล้ว comment แล้วค่อยปลดคอมเม้นส่วนที่เหลือ (มี return ด้านล่าง,const [hexagons, setHexagons] และ interface ด้านบน)
+    // return (
+    //     <div style={{ position: "relative", width: cols * hexWidth, height: rows * hexHeight }}>
+    //         <svg
+    //             className="hex-grid"
+    //             width={cols * hexWidth + 2 * distance}
+    //             height={rows * (hexHeight + 10) + 2 * distance}
+    //             style={{ display: "block" }}
+    //         >
+    //             {Array.from({ length: rows }).map((_, row) =>
+    //                 Array.from({ length: cols }).map((_, col) => {
+    //                     const x = col * xOffset * 3;
+    //                     const y = row * hexHeight + (col % 2 === 1 ? 0 : hexHeight / 2);
+    //                     const hexId = (row + 1) * 10 + (col + 1);
+    //
+    //                     return (
+    //                         <g key={hexId} transform={`translate(${x},${y})`}>
+    //                             <polygon
+    //                                 points={hexagonPath}
+    //                                 stroke="black"
+    //                                 strokeWidth={2}
+    //                                 fill="transparent"
+    //                                 style={{ cursor: "pointer" }}
+    //                             />
+    //                         </g>
+    //                     );
+    //                 })
+    //             )}
+    //         </svg>
+    //
+    //         {hexagons.map((hex) => {
+    //             const col = (hex.id - 1) % cols;
+    //             const row = Math.floor((hex.id - 1) / cols);
+    //             const x = col * xOffset * 3+20;
+    //             const y = row * hexHeight + (col % 2 === 1 ? 0 : hexHeight / 2);
+    //
+    //
+    //             return (
+    //                 <img
+    //                     key={hex.id}
+    //                     src="/image/minions/chess-bishop-green.png"
+    //                     alt={`Hex ${hex.id}`}
+    //                     className="hex-image"
+    //                     style={{
+    //                         position: "absolute",
+    //                         left: x,
+    //                         top: y+y/100,
+    //                         width: hexWidth,
+    //                         height: hexHeight,
+    //                         clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
+    //                     }}
+    //                 />
+    //             );
+    //         })}
+    //     </div>
+    // );
+    }
 ;
 
 export default HexGrid;
