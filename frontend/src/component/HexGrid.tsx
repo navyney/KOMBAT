@@ -8,6 +8,7 @@ export interface Hex {
     distance: number,
     initialHex_Ally: number[],
     initialHex_Opponent: number[],
+
     onHexClick?: (hexId: number) => void
     initialHex_Yellow: number[]
 }
@@ -20,7 +21,6 @@ const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, in
     const hexHeight = Math.sqrt(3) * size;
     const xOffset = hexWidth * 0.25;
     const yOffset = hexHeight * 0.5;
-
 
     const hexagonPath = [
         [xOffset + distance, (yOffset * 2) + distance],
@@ -73,10 +73,12 @@ const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, in
     };
 
     useEffect(() => {
+
         setSelectedAllyHexes(initialHex_Ally);
         setSelectedOpponentHexes(initialHex_Opponent);
         setSelectedYellowHex(getlistNeighbors(initialHex_Yellow));
     }, [initialHex_Ally, initialHex_Opponent,selectedYellowHex]);
+
 
     return (
         <svg
