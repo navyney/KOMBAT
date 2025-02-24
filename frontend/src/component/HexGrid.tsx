@@ -77,7 +77,7 @@ const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, in
         setSelectedAllyHexes(initialHex_Ally);
         setSelectedOpponentHexes(initialHex_Opponent);
         setSelectedYellowHex(getlistNeighbors(initialHex_Yellow));
-    }, [initialHex_Ally, initialHex_Opponent,selectedYellowHex]);
+    }, [initialHex_Ally, initialHex_Opponent,initialHex_Yellow]);
 
 
     return (
