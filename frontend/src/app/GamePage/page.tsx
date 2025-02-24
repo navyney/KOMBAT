@@ -41,6 +41,18 @@ export default function GamePage() {
         2: { budget: 0, minions: 0, ownedHexes: 5 }
     });
 
+    const [selectedAction, setSelectedAction] = useState<"buy" | "spawn" | null>(null);
+    const [selectedHex, setSelectedHex] = useState<number | null>(null);
+    const [allyHexes, setAllyHexes] = useState<number[]>([11, 12, 13, 21, 22]);
+    const [opponentHexes, setOpponentHexes] = useState<number[]>([77, 78, 86, 87, 88]);
+    const [hasBought, setHasBought] = useState(false);
+    const [hasSpawned, setHasSpawned] = useState(false);
+    const [selectedMinions, setSelectedMinions] = useState<number[]>([]);
+    const [minions, setMinions] = useState<Minion[]>([]);
+
+    const [allyNeighbors, setAllyNeighbors] = useState<number[]>([]);
+    const [opponentNeighbors, setOpponentNeighbors] = useState<number[]>([]);
+
     useEffect(() => {
         const savedConfig = localStorage.getItem("gameConfig");
         if (savedConfig) {
@@ -54,6 +66,7 @@ export default function GamePage() {
         }
     }, []);
 
+    // dummy winner checked
     useEffect(() => {
         if (turn > gameConfig.maxTurn) {
             const winnerPlayer = playerData[1].budget > playerData[2].budget ? 1 : 2;
@@ -101,7 +114,10 @@ export default function GamePage() {
         if (!selectedAction) return;
 
         if (selectedAction === "buy" && !hasBought) {
-            const isAdjacent = [...allyHexes, ...opponentHexes].some(hex => getNeighbors(hex).includes(hexId));
+            const isAdjacent = currentPlayer === 1
+                ? allyHexes.some(hex => getNeighbors(hex).includes(hexId))
+                : opponentHexes.some(hex => getNeighbors(hex).includes(hexId));
+
             if (isAdjacent && !allyHexes.includes(hexId) && !opponentHexes.includes(hexId)) {
                 setSelectedHex(hexId);
                 setPlayerData(prev => ({
@@ -273,8 +289,10 @@ export default function GamePage() {
             <div
                 className="flex flex-col items-center justify-center min-h-screen bg-orange-100 w-full h-full overflow-hidden overflow-y-hidden downpls"
             >
+
                 <HexGrid rows={8} cols={8} size={50} distance={20} initialHex_Ally={allyHexes}
                          initialHex_Opponent={opponentHexes} onHexClick={handleHexClick} initialHex_Yellow={YellowHex}/>
+
             </div>
 
             <div className="absolute bottom-4 right-4 bg-red-200 p-4 rounded">
