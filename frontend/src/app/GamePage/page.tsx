@@ -3,8 +3,6 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import HexGrid from "@/component/HexGrid";
-import {id} from "postcss-selector-parser";
-import {yellow} from "next/dist/lib/picocolors";
 
 // สาธุขอให้ push ได้
 
@@ -97,11 +95,14 @@ export default function GamePage() {
             setYellowHex([]);
         }
     }, [YellowHex]);
+
     const handleHexClick = (hexId: number) => {
         if (!selectedAction) return;
 
         if (selectedAction === "buy" && !hasBought) {
-            const isAdjacent = [...allyHexes, ...opponentHexes].some(hex => getNeighbors(hex).includes(hexId));
+            const isAdjacent = currentPlayer === 1
+                ? allyHexes.some(hex => getNeighbors(hex).includes(hexId))
+                : opponentHexes.some(hex => getNeighbors(hex).includes(hexId));
             if (isAdjacent && !allyHexes.includes(hexId) && !opponentHexes.includes(hexId)) {
                 setSelectedHex(hexId);
                 setPlayerData(prev => ({
@@ -119,7 +120,6 @@ export default function GamePage() {
                     setOpponentHexes([...opponentHexes, hexId]);
                 }
                 setHasBought(true);
-
             }
 
         } else if (selectedAction === "spawn" && !hasSpawned) {
@@ -133,6 +133,7 @@ export default function GamePage() {
                     }
                 }));
             }
+            //minion น่าจะแก้ตรงนี้
             setHasSpawned(true);
         }
         setSelectedAction(null);
@@ -163,17 +164,9 @@ export default function GamePage() {
         ];
     };
 
-    const getlistNeighbors = (listHex: number[]): number[] => {
-        const a: number[] = [];
-        for (let i = 0; i < listHex.length; i++) {
-            a.push(...getNeighbors(listHex[i]));
-        }
-        return a;
-    };
-
     const selectTypeMinion = (id:number,player:number) =>{
         if(id === 1 && player === 1 && isPlayerTurn(1)){
-        setHasBought(false);
+            setHasBought(false);
         }
         else if(id === 2 && player === 1 && isPlayerTurn(1)){
             setHasBought(true);
@@ -254,9 +247,7 @@ export default function GamePage() {
 
                 <div className="mt-4">
                     <h4>Selected Minions:</h4>
-                    <div className="flex"
-
-                    >
+                    <div className="flex">
                         {selectedMinions.map((id: number) => (
                             <img
                                 key={id}
@@ -300,9 +291,7 @@ export default function GamePage() {
 
                 <div className="mt-4">
                     <h4>Selected Minions:</h4>
-                    <div
-                        className="flex"
-                        >
+                    <div className="flex">
                         {selectedMinions.map((id: number) => (
                             <img
                                 key={id}

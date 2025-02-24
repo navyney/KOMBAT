@@ -120,7 +120,7 @@ const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, in
                                         ? "#f6f9f8"
                                         : "#f6f9f8"}
                             >
-                                {hexId}
+
                             </text>
                         </g>
                     );
