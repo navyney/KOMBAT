@@ -3,8 +3,6 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import HexGrid from "@/component/HexGrid";
-import {id} from "postcss-selector-parser";
-import {yellow} from "next/dist/lib/picocolors";
 
 // สาธุขอให้ push ได้
 
@@ -41,18 +39,6 @@ export default function GamePage() {
         2: { budget: 0, minions: 0, ownedHexes: 5 }
     });
 
-    const [selectedAction, setSelectedAction] = useState<"buy" | "spawn" | null>(null);
-    const [selectedHex, setSelectedHex] = useState<number | null>(null);
-    const [allyHexes, setAllyHexes] = useState<number[]>([11, 12, 13, 21, 22]);
-    const [opponentHexes, setOpponentHexes] = useState<number[]>([77, 78, 86, 87, 88]);
-    const [hasBought, setHasBought] = useState(false);
-    const [hasSpawned, setHasSpawned] = useState(false);
-    const [selectedMinions, setSelectedMinions] = useState<number[]>([]);
-    const [minions, setMinions] = useState<Minion[]>([]);
-
-    const [allyNeighbors, setAllyNeighbors] = useState<number[]>([]);
-    const [opponentNeighbors, setOpponentNeighbors] = useState<number[]>([]);
-
     useEffect(() => {
         const savedConfig = localStorage.getItem("gameConfig");
         if (savedConfig) {
@@ -66,7 +52,6 @@ export default function GamePage() {
         }
     }, []);
 
-    // dummy winner checked
     useEffect(() => {
         if (turn > gameConfig.maxTurn) {
             const winnerPlayer = playerData[1].budget > playerData[2].budget ? 1 : 2;
@@ -110,6 +95,7 @@ export default function GamePage() {
             setYellowHex([]);
         }
     }, [YellowHex]);
+
     const handleHexClick = (hexId: number) => {
         if (!selectedAction) return;
 
@@ -117,7 +103,6 @@ export default function GamePage() {
             const isAdjacent = currentPlayer === 1
                 ? allyHexes.some(hex => getNeighbors(hex).includes(hexId))
                 : opponentHexes.some(hex => getNeighbors(hex).includes(hexId));
-
             if (isAdjacent && !allyHexes.includes(hexId) && !opponentHexes.includes(hexId)) {
                 setSelectedHex(hexId);
                 setPlayerData(prev => ({
@@ -135,7 +120,6 @@ export default function GamePage() {
                     setOpponentHexes([...opponentHexes, hexId]);
                 }
                 setHasBought(true);
-
             }
 
         } else if (selectedAction === "spawn" && !hasSpawned) {
@@ -149,6 +133,7 @@ export default function GamePage() {
                     }
                 }));
             }
+            //minion น่าจะแก้ตรงนี้
             setHasSpawned(true);
         }
         setSelectedAction(null);
@@ -179,17 +164,9 @@ export default function GamePage() {
         ];
     };
 
-    const getlistNeighbors = (listHex: number[]): number[] => {
-        const a: number[] = [];
-        for (let i = 0; i < listHex.length; i++) {
-            a.push(...getNeighbors(listHex[i]));
-        }
-        return a;
-    };
-
     const selectTypeMinion = (id:number,player:number) =>{
         if(id === 1 && player === 1 && isPlayerTurn(1)){
-        setHasBought(false);
+            setHasBought(false);
         }
         else if(id === 2 && player === 1 && isPlayerTurn(1)){
             setHasBought(true);
@@ -270,9 +247,7 @@ export default function GamePage() {
 
                 <div className="mt-4">
                     <h4>Selected Minions:</h4>
-                    <div className="flex"
-
-                    >
+                    <div className="flex">
                         {selectedMinions.map((id: number) => (
                             <img
                                 key={id}
@@ -289,10 +264,8 @@ export default function GamePage() {
             <div
                 className="flex flex-col items-center justify-center min-h-screen bg-orange-100 w-full h-full overflow-hidden overflow-y-hidden downpls"
             >
-
                 <HexGrid rows={8} cols={8} size={50} distance={20} initialHex_Ally={allyHexes}
                          initialHex_Opponent={opponentHexes} onHexClick={handleHexClick} initialHex_Yellow={YellowHex}/>
-
             </div>
 
             <div className="absolute bottom-4 right-4 bg-red-200 p-4 rounded">
@@ -318,9 +291,7 @@ export default function GamePage() {
 
                 <div className="mt-4">
                     <h4>Selected Minions:</h4>
-                    <div
-                        className="flex"
-                        >
+                    <div className="flex">
                         {selectedMinions.map((id: number) => (
                             <img
                                 key={id}
