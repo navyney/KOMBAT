@@ -102,8 +102,8 @@ const HexGrid: React.FC<Hex> = ({
                         alt={`Minion ${minion.id}`}
                         style={{
                             position: 'absolute',
-                            left: `${x + size/1.57 + size}px`,
-                            top: `${y + size/1.55}px`,
+                            left: `${x + size/0.95 + size}px`,
+                            top: `${y + size/0.525}px`,
                             width: `${size*1.25}px`,
                             height: `${size*1.25}px`,
                             pointerEvents: 'none'
