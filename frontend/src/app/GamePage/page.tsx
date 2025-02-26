@@ -296,7 +296,13 @@ export default function GamePage() {
                 </button>
 
                 <button
-                    onClick={() => setSelectedAction("spawn")}
+                    onClick={() => {
+                        setSelectedAction("spawn")
+                        setSelectedMinionType(prev => ({
+                            ...prev,
+                            [currentPlayer]: null
+                        }));
+                    }}
                     className={`${!isPlayerTurn(1) || hasSpawned || playerData[1].minions >= gameConfig.maxSpawn || playerData[1].budget < gameConfig.spawnedCost ? 'bg-gray-500' : 'bg-green-500'} text-white px-2 py-1 rounded ml-2 hover:opacity-80 transition-opacity`}
                     disabled={!isPlayerTurn(1) || hasSpawned || playerData[1].minions >= gameConfig.maxSpawn || playerData[1].budget < gameConfig.spawnedCost}
                 >
@@ -344,7 +350,13 @@ export default function GamePage() {
                 <p>Minions: {playerData[2].minions} / {gameConfig.maxSpawn}</p>
                 <p>Owned Hexes: {playerData[2].ownedHexes}</p>
                 <button
-                    onClick={() => setSelectedAction("buy")}
+                    onClick={() => {
+                        setSelectedAction("buy")
+                        setSelectedMinionType(prev => ({
+                            ...prev,
+                            [currentPlayer]: null
+                        }));
+                    }}
                     className={`${!isPlayerTurn(2) || hasBought || hasSpawned || playerData[2].budget < gameConfig.hexPurchasedCost ? 'bg-gray-500' : 'bg-red-500'} text-white px-2 py-1 rounded hover:opacity-80 transition-opacity`}
                     disabled={!isPlayerTurn(2) || hasBought || hasSpawned || playerData[2].budget < gameConfig.hexPurchasedCost}
                 >
@@ -352,7 +364,13 @@ export default function GamePage() {
                 </button>
 
                 <button
-                    onClick={() => setSelectedAction("spawn")}
+                    onClick={() => {
+                        setSelectedAction("spawn")
+                        setSelectedMinionType(prev => ({
+                            ...prev,
+                            [currentPlayer]: null
+                        }));
+                    }}
                     className={`${!isPlayerTurn(2) || hasSpawned || playerData[2].minions >= gameConfig.maxSpawn || playerData[2].budget < gameConfig.spawnedCost ? 'bg-gray-500' : 'bg-red-500'} text-white px-2 py-1 rounded ml-2 hover:opacity-80 transition-opacity`}
                     disabled={!isPlayerTurn(2) || hasSpawned || playerData[2].minions >= gameConfig.maxSpawn || playerData[2].budget < gameConfig.spawnedCost}
                 >
