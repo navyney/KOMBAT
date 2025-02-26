@@ -12,14 +12,15 @@ import backend.parser.StatementParser;
 import backend.strategy.Strategy;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import java.io.IOException;
 import java.util.Scanner;
 
+//fixed later
 public class GameState { // player1 and player2 can play in terminal and show gameMap while playing turn blablabla
     private static Player player1;
     private Player player2;
+    public static ArrayList<Minion> MinionOnMapMap = new ArrayList<>();
 
     private static int current_turns;
     private int max_turns;
@@ -41,8 +42,6 @@ public class GameState { // player1 and player2 can play in terminal and show ga
     private static Strategy p ;
 
     private MapMap gameMap;
-
-    private List<MinionType> minionsShop = new ArrayList<MinionType>();
 
     public static int getCurrent_turns() {
         return current_turns;
@@ -138,6 +137,9 @@ public class GameState { // player1 and player2 can play in terminal and show ga
             player1.addMinion(minion1);
             player2.addMinion(minion2);
 
+//            player1.addMinion(minion1);
+//            player2.addMinion(minion2);
+
             // for  Debug
             System.out.println("Minion created for Player1: " + minion1.getName());
             System.out.println("Minion created for Player2: " + minion2.getName());
@@ -230,7 +232,7 @@ public class GameState { // player1 and player2 can play in terminal and show ga
 //                }
             } else if (command.equals("spawn minion")) {
                 System.out.print("Your minions: ");
-                for (Minion m : player.getMinion()) {
+                for (Minion m : player.getSpawnedMinions()) {
                     System.out.print("Minion name: " + m.getName() + " ");
                 }
                 System.out.println("Enter minion name to spawn:");
@@ -267,8 +269,8 @@ public class GameState { // player1 and player2 can play in terminal and show ga
             } else {
                 System.out.println("Minion " + minion.getName() + " has not been spawned yet!");
             }
+            minion.getOwner().deductActionCost(totalCost);
         }
-        currentPlayer.deductActionCost(totalCost);
     }
 
     //public void gameloop () throws LexicalError, EvalError { // not done
@@ -283,10 +285,6 @@ public class GameState { // player1 and player2 can play in terminal and show ga
             // Player 1 Action: buy, spawn
             System.out.println(player1.getName() + " buy area, spawn minion");
             action(player1);
-            gameMap.printMap();
-
-            // Execute Minions by Strategy for Player 1
-            executeMinion(player1.getSpawnedMinions());
             gameMap.printMap();
 
             // Check Winner after Player 1's turn
@@ -311,10 +309,6 @@ public class GameState { // player1 and player2 can play in terminal and show ga
             action(player2);
             gameMap.printMap();
 
-            // Execute Minions by Strategy for Player 2
-            executeMinion(player2.getSpawnedMinions());
-            gameMap.printMap();
-
             // Check Winner after Player 2's turn
             if (checkWinner()) {
                 endGame();
@@ -323,6 +317,15 @@ public class GameState { // player1 and player2 can play in terminal and show ga
 
             player2.setHasNOTBoughtareaThisTurn() ;
             player2.setHasNOTSpawnedMinionThisTurn() ;
+
+//            // Execute Minions by Strategy for Player 1
+//            executeMinion(player1.getSpawnedMinions());
+//            // Execute Minions by Strategy for Player 2
+//            executeMinion(player2.getSpawnedMinions());
+//            gameMap.printMap();
+
+            executeMinion(MinionOnMapMap);
+            gameMap.printMap();
 
             // Increase turn count and switch back to Player 1
             current_turns++;

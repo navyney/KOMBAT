@@ -100,7 +100,7 @@ public class Minion {
         if (hex.owner() == (this.owner.getName().equals("Player1") ? 1 : 2)) {
             if (!map.isWall(this.row, this.col) && !map.isMinionHere(this.row, this.col)) {
                 map.placeMinion(this.row, this.col, this);
-                owner.addMinion(this);
+//                owner.addSpawnedMinion(this);
                 return true;
             } else {
                 System.out.println("Cannot spawn minion here!");

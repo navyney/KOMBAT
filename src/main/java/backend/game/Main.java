@@ -1,10 +1,15 @@
 package backend.game;
 
 import backend.config.ConfigFile;
+import backend.entity.Minion;
+import backend.entity.MinionType;
 import backend.entity.Player;
 import backend.error.EvalError;
 import backend.error.LexicalError;
 import backend.map.MapMap;
+import backend.parser.ExprTokenizer;
+import backend.parser.StatementParser;
+import backend.strategy.Strategy;
 
 import java.io.IOException;
 
@@ -67,10 +72,40 @@ public class Main {
         gameState.setConfig(config);
 
         gameMap.createMap();
-        //gameMap.printMap();
         gameState.setup();
         gameState.gameloop();
 
+
+//        gameMap.createMap();
+//        StatementParser q = new StatementParser(new ExprTokenizer("move up"));
+//        Strategy s = q.parse();
+//        MinionType n = new MinionType("m", 1, s);
+//        Minion m = new Minion(n, 1,player1, gameMap);
+//        Minion m2 = new Minion(n, 1,player2, gameMap);
+//
+//        player1.addMinion(m);
+//        System.out.println(player1.getMinion());
+//        System.out.println(player1.getSpawnedMinions());
+//        player1.setArea(3,1,gameMap);
+//        player1.spawnMinion(m,3,1);
+//        System.out.println(player1.getMinion());
+//        System.out.println(player1.getSpawnedMinions());
+
+//        player2.addMinion(m2);
+//        System.out.println(player2.getMinion());
+//        player2.setArea(7,7,gameMap);
+//        player2.spawnMinion(m2,7,7);
+//        System.out.println(player2.getMinion());
+//
+//        gameMap.printMap();
+//        System.out.println(player1.getMinion());
+//        System.out.println(player2.getMinion());
+//
+//        gameState.executeMinion(player1.getMinion());
+//        gameState.executeMinion(player2.getMinion());
+//        gameMap.printMap();
+//        System.out.println(player1.getMinion());
+//        System.out.println(player2.getMinion());
 
 
 

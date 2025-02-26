@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static backend.game.GameState.MinionOnMapMap;
+
 public class Player {
     String name;
     private double maxBudget;
@@ -217,6 +219,7 @@ public class Player {
 
             if (success) {
                 addSpawnedMinion(minion);
+                MinionOnMapMap.add(minion);
                 this.setSpawnRemaining();
                 hasSpawnedMinionThisTurn = true;
                 lastSpawnMinionTurn = GameState.getCurrent_turns();
@@ -242,6 +245,7 @@ public class Player {
 
         if (success) {
             addSpawnedMinion(minion);
+            MinionOnMapMap.add(minion);
             setBudget(this.getBudget() - config.spawn_cost());
             this.setSpawnRemaining();
             hasSpawnedMinionThisTurn = true;
