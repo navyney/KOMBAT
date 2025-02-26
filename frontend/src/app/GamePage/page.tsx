@@ -193,8 +193,15 @@ export default function GamePage() {
     };
 
     const endTurn = () => {
+        if (turn > gameConfig.maxTurn) return;
+
         setHasBought(false);
         setHasSpawned(false);
+        setSelectedMinionType(prev => ({
+            ...prev,
+            [currentPlayer]: null
+        }));
+
         if (currentPlayer === 1) {
             setCurrentPlayer(2);
         } else {
@@ -394,8 +401,10 @@ export default function GamePage() {
             </div>
 
             <div
-                onClick={endTurn}
-                className="absolute cursor-pointer bottom-7 left-[calc(0.75%+100px)]"
+                onClick={ turn <= gameConfig.maxTurn ? endTurn : undefined}
+                className={`absolute bottom-7 left-[calc(0.75%+100px)] cursor-pointer ${
+                    turn > gameConfig.maxTurn ? "opacity-50 cursor-not-allowed" : "hover:opacity-80"
+                }`}
             >
                 <Image
                     src="/image/DoneButton.png"
