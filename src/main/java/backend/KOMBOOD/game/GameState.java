@@ -21,6 +21,8 @@ public class GameState { // player1 and player2 can play in terminal and show ga
     private static Player player1;
     private Player player2;
 
+    public static ArrayList<Minion> MinionOnMapMap = new ArrayList<>();
+
     private static int current_turns;
     private int max_turns;
     private int spawn_cost;
@@ -285,10 +287,6 @@ public class GameState { // player1 and player2 can play in terminal and show ga
             action(player1);
             gameMap.printMap();
 
-            // Execute Minions by Strategy for Player 1
-            executeMinion(player1.getSpawnedMinions());
-            gameMap.printMap();
-
             // Check Winner after Player 1's turn
             if (checkWinner()) {
                 endGame();
@@ -311,8 +309,8 @@ public class GameState { // player1 and player2 can play in terminal and show ga
             action(player2);
             gameMap.printMap();
 
-            // Execute Minions by Strategy for Player 2
-            executeMinion(player2.getSpawnedMinions());
+            // Execute Minions by Strategy
+            executeMinion(MinionOnMapMap);
             gameMap.printMap();
 
             // Check Winner after Player 2's turn

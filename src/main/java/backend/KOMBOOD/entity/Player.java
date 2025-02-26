@@ -10,6 +10,8 @@ import backend.KOMBOOD.map.MapMap;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import static backend.KOMBOOD.game.GameState.MinionOnMapMap;
+
 public class Player {
     String name;
     private double maxBudget;
@@ -215,6 +217,7 @@ public class Player {
 
             if (success) {
                 addSpawnedMinion(minion);
+                MinionOnMapMap.add(minion);
                 this.setSpawnRemaining();
                 hasSpawnedMinionThisTurn = true;
                 lastSpawnMinionTurn = GameState.getCurrent_turns();
@@ -240,6 +243,7 @@ public class Player {
 
         if (success) {
             addSpawnedMinion(minion);
+            MinionOnMapMap.add(minion);
             setBudget(this.getBudget() - config.spawn_cost());
             this.setSpawnRemaining();
             hasSpawnedMinionThisTurn = true;

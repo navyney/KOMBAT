@@ -6,7 +6,6 @@ import backend.KOMBOOD.command.MoveCommand;
 import backend.KOMBOOD.error.EvalError;
 import backend.KOMBOOD.error.LexicalError;
 import backend.KOMBOOD.error.SyntaxError;
-import backend.KOMBOOD.command.expression.*;
 import backend.KOMBOOD.expression.*;
 import backend.KOMBOOD.strategy.Strategy;
 import backend.KOMBOOD.utils.Direction;
