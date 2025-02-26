@@ -52,7 +52,7 @@ const HexGrid: React.FC<Hex> = ({
     return (
         <div style={{ position: 'relative' }}>
             <svg
-                className={"margin-left flex flex-col items-center justify-center min-h-screen"}
+                className={"margin-left flex flex-col items-center justify-center min-h-screen downpls"}
                 width={cols * (hexWidth) + 2 * distance}
                 height={rows * (hexHeight + size) + 2 * distance}
                 style={{ display: "block" }}
