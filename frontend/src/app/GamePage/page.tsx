@@ -11,6 +11,8 @@ interface Minion {
     name: string;
     image: string;
     color: string;
+    type: string;
+    player: number;
 }
 
 export default function GamePage() {
@@ -39,6 +41,24 @@ export default function GamePage() {
         2: { budget: 0, minions: 0, ownedHexes: 5 }
     });
 
+    const [selectedAction, setSelectedAction] = useState<"buy" | "spawn" | null>(null);
+    const [selectedHex, setSelectedHex] = useState<number | null>(null);
+    const [allyHexes, setAllyHexes] = useState<number[]>([11, 12, 13, 21, 22]);
+    const [opponentHexes, setOpponentHexes] = useState<number[]>([77, 78, 86, 87, 88]);
+    const [hasBought, setHasBought] = useState(false);
+    const [hasSpawned, setHasSpawned] = useState(false);
+    const [selectedMinions, setSelectedMinions] = useState<number[]>([]);
+
+    const [selectedMinionType, setSelectedMinionType] = useState<Record<number, string | null>>({
+        1: null,
+        2: null,
+    });
+
+    const [minions, setMinions] = useState<Minion[]>([]);
+    const [boardMinions, setBoardMinions] = useState<{ id: number, type: string, player: number }[]>([]);
+    const [allyNeighbors, setAllyNeighbors] = useState<number[]>([]);
+    const [opponentNeighbors, setOpponentNeighbors] = useState<number[]>([]);
+
     useEffect(() => {
         const savedConfig = localStorage.getItem("gameConfig");
         if (savedConfig) {
@@ -52,22 +72,13 @@ export default function GamePage() {
         }
     }, []);
 
+    // dummy winner checked
     useEffect(() => {
         if (turn > gameConfig.maxTurn) {
             const winnerPlayer = playerData[1].budget > playerData[2].budget ? 1 : 2;
             setWinner(winnerPlayer);
         }
     }, [turn]);
-
-    const [selectedAction, setSelectedAction] = useState<"buy" | "spawn" | null>(null);
-    const [selectedHex, setSelectedHex] = useState<number | null>(null);
-    const [allyHexes, setAllyHexes] = useState<number[]>([11, 12, 13, 21, 22]);
-    const [opponentHexes, setOpponentHexes] = useState<number[]>([77, 78, 86, 87, 88]);
-    const [hasBought, setHasBought] = useState(false);
-    const [hasSpawned, setHasSpawned] = useState(false);
-    const [selectedMinions, setSelectedMinions] = useState<number[]>([]);
-    const [minions, setMinions] = useState<Minion[]>([]);
-    const [YellowHex, setYellowHex] = useState<number[]>([]);
 
     useEffect(() => {
         const queryParams = new URLSearchParams(window.location.search);
@@ -83,26 +94,20 @@ export default function GamePage() {
         console.log("Minions Data:", minions);
     }, []);
 
-    useEffect(() => {
-        if(selectedAction === "buy") {
-            if (currentPlayer === 1) {
-                setYellowHex([...YellowHex, ...allyHexes]);
-            } else {
-                setYellowHex([...YellowHex, ...opponentHexes]);
-            }
-        }
-        else{
-            setYellowHex([]);
-        }
-    }, [selectedAction]);
-
     const handleHexClick = (hexId: number) => {
-        if (!selectedAction) return;
+        if (!selectedAction) {
+            setSelectedMinionType(prev => ({
+                ...prev,
+                [currentPlayer]: null
+            }));
+            return;
+        }
 
         if (selectedAction === "buy" && !hasBought) {
             const isAdjacent = currentPlayer === 1
                 ? allyHexes.some(hex => getNeighbors(hex).includes(hexId))
                 : opponentHexes.some(hex => getNeighbors(hex).includes(hexId));
+
             if (isAdjacent && !allyHexes.includes(hexId) && !opponentHexes.includes(hexId)) {
                 setSelectedHex(hexId);
                 setPlayerData(prev => ({
@@ -122,8 +127,27 @@ export default function GamePage() {
                 setHasBought(true);
             }
 
-        } else if (selectedAction === "spawn" && !hasSpawned) {
-            if (playerData[currentPlayer].minions < gameConfig.maxSpawn) {
+        } else if (selectedAction === "spawn" && !hasSpawned && selectedMinionType[currentPlayer] !== null) {
+            const isOwned = currentPlayer === 1
+                ? allyHexes.includes(hexId)
+                : opponentHexes.includes(hexId);
+
+            const isOccupied = boardMinions.some(minion => minion.id === hexId);
+            if (isOccupied) {
+                console.log("This hex is already occupied by another minion.");
+                return;
+            }
+
+            if (!isOwned) {
+                console.log("You don't own this hex. Minion placement canceled.");
+                setSelectedMinionType(prev => ({
+                    ...prev,
+                    [currentPlayer]: null
+                }));
+                return;
+            }
+
+            if (isOwned && playerData[currentPlayer].minions < gameConfig.maxSpawn) {
                 setPlayerData(prev => ({
                     ...prev,
                     [currentPlayer]: {
@@ -132,11 +156,40 @@ export default function GamePage() {
                         minions: prev[currentPlayer].minions + 1
                     }
                 }));
+                setHasSpawned(true)
+
+                const selectedId = selectedMinionType[currentPlayer];
+                if (selectedId) {
+                    const selectedMinion = minions.find(m => m.id === Number(selectedId));
+                    if (selectedMinion) {
+                        const newBoardMinion = {
+                            id: hexId,
+                            type: selectedMinion.name,
+                            player: currentPlayer
+                        };
+
+                        console.log("Adding new minion:", newBoardMinion);
+                        setBoardMinions(prev => [...prev, newBoardMinion]);
+                    }
+                }
+                setSelectedMinionType(prev => ({
+                    ...prev,
+                    [currentPlayer]: null
+                }));
             }
-            //minion น่าจะแก้ตรงนี้
-            setHasSpawned(true);
         }
         setSelectedAction(null);
+    };
+
+    const handleMinionSelect = (minionId: number) => {
+        if (hasSpawned) return;
+        const selectedMinion = minions.find(m => m.id === minionId);
+        if (selectedMinion) {
+            setSelectedMinionType(prev => ({
+                ...prev,
+                [currentPlayer]: String(selectedMinion.id)
+            }));
+        }
     };
 
     const endTurn = () => {
@@ -164,39 +217,27 @@ export default function GamePage() {
         ];
     };
 
-    const selectTypeMinion = (id:number,player:number) =>{
-        if(id === 1 && player === 1 && isPlayerTurn(1)){
-            setHasBought(false);
+    const getNeighborsForPlayer = (hexes: number[]): number[] => {
+        const neighbors = new Set<number>();
+        hexes.forEach(hex => {
+            const hexNeighbors = getNeighbors(hex);
+            hexNeighbors.forEach(neighbor => {
+                if (!hexes.includes(neighbor)) {
+                    neighbors.add(neighbor);
+                }
+            });
+        });
+        return Array.from(neighbors);
+    };
+
+    useEffect(() => {
+        if (currentPlayer === 1) {
+            setAllyNeighbors(getNeighborsForPlayer(allyHexes));
+        } else {
+            setOpponentNeighbors(getNeighborsForPlayer(opponentHexes));
         }
-        else if(id === 2 && player === 1 && isPlayerTurn(1)){
-            setHasBought(true);
-        }
-        else if(id === 3 && player === 1 && isPlayerTurn(1)){
-            setHasBought(false);
-        }
-        else if(id === 4 && player === 1 && isPlayerTurn(1)){
-            setHasBought(true);
-        }
-        else if(id === 5 && player === 1 && isPlayerTurn(1)){
-            setHasBought(false);
-        }
-        else if(id === 1 && player === 2 && isPlayerTurn(2)){
-            setHasBought(false);
-        }
-        else if(id === 2 && player === 2 && isPlayerTurn(2)){
-            setHasBought(true);
-        }
-        else if(id === 3 && player === 2 && isPlayerTurn(2)){
-            setHasBought(false);
-        }
-        else if(id === 4 && player === 2 && isPlayerTurn(2)){
-            setHasBought(true);
-        }
-        else if(id === 5 && player === 2 && isPlayerTurn(2)){
-            setHasBought(false);
-        }
-        else{}
-    }
+    }, [currentPlayer, allyHexes, opponentHexes]);
+
 
     const isPlayerTurn = (player: number) => currentPlayer === player;
 
@@ -220,8 +261,19 @@ export default function GamePage() {
                 Turn {turn} / {gameConfig.maxTurn} - Player {currentPlayer}'s Turn
             </div>
 
-            <HexGrid rows={8} cols={8} size={50} distance={20} initialHex_Ally={allyHexes}
-                     initialHex_Opponent={opponentHexes} onHexClick={handleHexClick} initialHex_Yellow={YellowHex}
+            <HexGrid
+                rows={8}
+                cols={8}
+                size={50}
+                distance={20}
+                initialHex_Ally={allyHexes}
+                initialHex_Opponent={opponentHexes}
+                onHexClick={handleHexClick}
+                allyNeighbors={allyNeighbors}
+                opponentNeighbors={opponentNeighbors}
+                currentPlayer={currentPlayer}
+                minions={minions}
+                boardMinions={boardMinions}
             />
 
             <div className="absolute top-4 left-4 bg-green-200 p-4 rounded">
@@ -230,9 +282,15 @@ export default function GamePage() {
                 <p>Minions: {playerData[1].minions} / {gameConfig.maxSpawn}</p>
                 <p>Owned Hexes: {playerData[1].ownedHexes}</p>
                 <button
-                    onClick={() => setSelectedAction("buy")}
-                    className={`${!isPlayerTurn(1) || hasBought || hasSpawned  || playerData[1].budget < gameConfig.hexPurchasedCost ? 'bg-gray-500' : 'bg-green-500'} text-white px-2 py-1 rounded hover:opacity-80 transition-opacity`}
-                    disabled={!isPlayerTurn(1) || hasBought || hasSpawned  || playerData[1].budget < gameConfig.hexPurchasedCost}
+                    onClick={() => {
+                        setSelectedAction("buy")
+                        setSelectedMinionType(prev => ({
+                            ...prev,
+                            [currentPlayer]: null
+                        }));
+                    }}
+                    className={`${!isPlayerTurn(1) || hasBought || hasSpawned || playerData[1].budget < gameConfig.hexPurchasedCost ? 'bg-gray-500' : 'bg-green-500'} text-white px-2 py-1 rounded hover:opacity-80 transition-opacity`}
+                    disabled={!isPlayerTurn(1) || hasBought || hasSpawned || playerData[1].budget < gameConfig.hexPurchasedCost}
                 >
                     Buy Area
                 </button>
@@ -253,8 +311,8 @@ export default function GamePage() {
                                 key={id}
                                 src={getMinionImage(id, 1)}
                                 alt="Minion"
-                                className="w-12 h-12 mx-1"
-                                onClick={() => selectTypeMinion(id,1)}
+                                className={`w-12 h-12 mx-1 cursor-pointer ${selectedMinionType[1] === String(id) ? 'border-2 border-blue-500' : ''}`}
+                                onClick={() => handleMinionSelect(id)}
                             />
                         ))}
                     </div>
@@ -264,8 +322,20 @@ export default function GamePage() {
             <div
                 className="flex flex-col items-center justify-center min-h-screen bg-orange-100 w-full h-full overflow-hidden overflow-y-hidden downpls"
             >
-                <HexGrid rows={8} cols={8} size={50} distance={20} initialHex_Ally={allyHexes}
-                         initialHex_Opponent={opponentHexes} onHexClick={handleHexClick} initialHex_Yellow={YellowHex}/>
+                <HexGrid
+                    rows={8}
+                    cols={8}
+                    size={50}
+                    distance={20}
+                    initialHex_Ally={allyHexes}
+                    initialHex_Opponent={opponentHexes}
+                    onHexClick={handleHexClick}
+                    allyNeighbors={allyNeighbors}
+                    opponentNeighbors={opponentNeighbors}
+                    currentPlayer={currentPlayer}
+                    minions={minions}
+                    boardMinions={boardMinions}
+                />
             </div>
 
             <div className="absolute bottom-4 right-4 bg-red-200 p-4 rounded">
@@ -275,7 +345,7 @@ export default function GamePage() {
                 <p>Owned Hexes: {playerData[2].ownedHexes}</p>
                 <button
                     onClick={() => setSelectedAction("buy")}
-                    className={`${!isPlayerTurn(2) || hasBought || hasSpawned  || playerData[2].budget < gameConfig.hexPurchasedCost ? 'bg-gray-500' : 'bg-red-500'} text-white px-2 py-1 rounded hover:opacity-80 transition-opacity`}
+                    className={`${!isPlayerTurn(2) || hasBought || hasSpawned || playerData[2].budget < gameConfig.hexPurchasedCost ? 'bg-gray-500' : 'bg-red-500'} text-white px-2 py-1 rounded hover:opacity-80 transition-opacity`}
                     disabled={!isPlayerTurn(2) || hasBought || hasSpawned || playerData[2].budget < gameConfig.hexPurchasedCost}
                 >
                     Buy Area
@@ -297,8 +367,8 @@ export default function GamePage() {
                                 key={id}
                                 src={getMinionImage(id, 2)}
                                 alt="Minion"
-                                className="w-12 h-12 mx-1"
-                                onClick={() => selectTypeMinion(id,2)}
+                                className={`w-12 h-12 mx-1 cursor-pointer ${selectedMinionType[2] === String(id) ? 'border-2 border-blue-500' : ''}`}
+                                onClick={() => handleMinionSelect(id)}
                             />
                         ))}
                     </div>
