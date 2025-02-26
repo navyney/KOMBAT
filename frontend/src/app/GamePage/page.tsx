@@ -11,6 +11,8 @@ interface Minion {
     name: string;
     image: string;
     color: string;
+    type: string;
+    player: number;
 }
 
 export default function GamePage() {
@@ -46,7 +48,15 @@ export default function GamePage() {
     const [hasBought, setHasBought] = useState(false);
     const [hasSpawned, setHasSpawned] = useState(false);
     const [selectedMinions, setSelectedMinions] = useState<number[]>([]);
+
+    const [selectedMinionType, setSelectedMinionType] = useState<Record<number, string | null>>({
+        1: null,
+        2: null,
+    });
+
     const [minions, setMinions] = useState<Minion[]>([]);
+    const [boardMinions, setBoardMinions] = useState<{ id: number, type: string, player: number }[]>([]);
+
 
     const [allyNeighbors, setAllyNeighbors] = useState<number[]>([]);
     const [opponentNeighbors, setOpponentNeighbors] = useState<number[]>([]);
@@ -114,8 +124,19 @@ export default function GamePage() {
                 setHasBought(true);
             }
 
-        } else if (selectedAction === "spawn" && !hasSpawned) {
-            if (playerData[currentPlayer].minions < gameConfig.maxSpawn) {
+        } else if (selectedAction === "spawn" && !hasSpawned && selectedMinionType[currentPlayer] !== null) {
+            const isOwned = currentPlayer === 1
+                ? allyHexes.includes(hexId)
+                : opponentHexes.includes(hexId);
+
+            if (isOwned && playerData[currentPlayer].minions < gameConfig.maxSpawn) {
+
+                const minionExists = minions.some(m => m.id === hexId);
+                if (minionExists) {
+                    console.log("There's already a minion on this hex");
+                    return;
+                }
+
                 setPlayerData(prev => ({
                     ...prev,
                     [currentPlayer]: {
@@ -124,10 +145,33 @@ export default function GamePage() {
                         minions: prev[currentPlayer].minions + 1
                     }
                 }));
+                setHasSpawned(true);
+
+                const selectedType = selectedMinionType[currentPlayer];
+                if (selectedType) {
+
+                    const newBoardMinion = {
+                        id: hexId,
+                        type: selectedType.toString(),
+                        player: currentPlayer
+                    };
+
+                    console.log("Adding new minion:", newBoardMinion);
+                    setBoardMinions(prev => [...prev, newBoardMinion]);
+                }
             }
-            setHasSpawned(true);
         }
         setSelectedAction(null);
+    };
+
+    const handleMinionSelect = (minionId: number) => {
+        const selectedMinion = minions.find(m => m.id === minionId);
+        if (selectedMinion) {
+            setSelectedMinionType(prev => ({
+                ...prev,
+                [currentPlayer]: String(selectedMinion.type)
+            }));
+        }
     };
 
     const endTurn = () => {
@@ -210,6 +254,7 @@ export default function GamePage() {
                 allyNeighbors={allyNeighbors}
                 opponentNeighbors={opponentNeighbors}
                 currentPlayer={currentPlayer}
+                minions={minions}
             />
 
             <div className="absolute top-4 left-4 bg-green-200 p-4 rounded">
@@ -219,8 +264,8 @@ export default function GamePage() {
                 <p>Owned Hexes: {playerData[1].ownedHexes}</p>
                 <button
                     onClick={() => setSelectedAction("buy")}
-                    className={`${!isPlayerTurn(1) || hasBought || hasSpawned  || playerData[1].budget < gameConfig.hexPurchasedCost ? 'bg-gray-500' : 'bg-green-500'} text-white px-2 py-1 rounded hover:opacity-80 transition-opacity`}
-                    disabled={!isPlayerTurn(1) || hasBought || hasSpawned  || playerData[1].budget < gameConfig.hexPurchasedCost}
+                    className={`${!isPlayerTurn(1) || hasBought || hasSpawned || playerData[1].budget < gameConfig.hexPurchasedCost ? 'bg-gray-500' : 'bg-green-500'} text-white px-2 py-1 rounded hover:opacity-80 transition-opacity`}
+                    disabled={!isPlayerTurn(1) || hasBought || hasSpawned || playerData[1].budget < gameConfig.hexPurchasedCost}
                 >
                     Buy Area
                 </button>
@@ -241,7 +286,8 @@ export default function GamePage() {
                                 key={id}
                                 src={getMinionImage(id, 1)}
                                 alt="Minion"
-                                className="w-12 h-12 mx-1"
+                                className={`w-12 h-12 mx-1 cursor-pointer ${selectedMinionType[1] === String(id) ? 'border-2 border-blue-500' : ''}`}
+                                onClick={() => handleMinionSelect(id)}
                             />
                         ))}
                     </div>
@@ -262,6 +308,7 @@ export default function GamePage() {
                     allyNeighbors={allyNeighbors}
                     opponentNeighbors={opponentNeighbors}
                     currentPlayer={currentPlayer}
+                    minions={minions}
                 />
             </div>
 
@@ -272,7 +319,7 @@ export default function GamePage() {
                 <p>Owned Hexes: {playerData[2].ownedHexes}</p>
                 <button
                     onClick={() => setSelectedAction("buy")}
-                    className={`${!isPlayerTurn(2) || hasBought || hasSpawned  || playerData[2].budget < gameConfig.hexPurchasedCost ? 'bg-gray-500' : 'bg-red-500'} text-white px-2 py-1 rounded hover:opacity-80 transition-opacity`}
+                    className={`${!isPlayerTurn(2) || hasBought || hasSpawned || playerData[2].budget < gameConfig.hexPurchasedCost ? 'bg-gray-500' : 'bg-red-500'} text-white px-2 py-1 rounded hover:opacity-80 transition-opacity`}
                     disabled={!isPlayerTurn(2) || hasBought || hasSpawned || playerData[2].budget < gameConfig.hexPurchasedCost}
                 >
                     Buy Area
@@ -294,7 +341,8 @@ export default function GamePage() {
                                 key={id}
                                 src={getMinionImage(id, 2)}
                                 alt="Minion"
-                                className="w-12 h-12 mx-1"
+                                className={`w-12 h-12 mx-1 cursor-pointer ${selectedMinionType[2] === String(id) ? 'border-2 border-blue-500' : ''}`}
+                                onClick={() => handleMinionSelect(id)}
                             />
                         ))}
                     </div>

@@ -1,5 +1,7 @@
 'use client'
-import {useEffect, useState} from "react";
+
+import {useEffect, useMemo, useState} from "react";
+import Image from "next/image";
 
 export interface Hex {
     rows: number,
@@ -12,9 +14,11 @@ export interface Hex {
     allyNeighbors: number[],
     opponentNeighbors: number[],
     currentPlayer: number,
+    minions: { id: number, type: string, player: number }[],
 }
 
-const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, initialHex_Opponent, onHexClick, allyNeighbors, opponentNeighbors, currentPlayer}) => {
+const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, initialHex_Opponent,
+                                    onHexClick, allyNeighbors, opponentNeighbors, currentPlayer, minions}) => {
     const [selectedAllyHexes, setSelectedAllyHexes] = useState<number[]>([]);
     const [selectedOpponentHexes, setSelectedOpponentHexes] = useState<number[]>([]);
     const [selectedYellowHex, setSelectedYellowHex] = useState<number[] | null>(null);
@@ -23,7 +27,12 @@ const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, in
     const xOffset = hexWidth * 0.25;
     const yOffset = hexHeight * 0.5;
 
-    const hexagonPath = [
+    // const selectedYellowHex = useMemo(() => (
+        //     currentPlayer === 1 ? allyNeighbors : opponentNeighbors
+        // ), [currentPlayer, allyNeighbors, opponentNeighbors]);
+
+
+        const hexagonPath = [
         [xOffset + distance, (yOffset * 2) + distance],
         [(xOffset * 3) + distance, (yOffset * 2) + distance],
         [(xOffset * 4) + distance, yOffset + distance],
@@ -85,55 +94,83 @@ const HexGrid: React.FC<Hex> = ({rows, cols, size, distance, initialHex_Ally, in
     //     setSelectedYellowHex(getlistNeighbors(initialHex_Ally));
     // }, [initialHex_Ally, initialHex_Opponent,selectedYellowHex]);
 
-    return (
-        <svg
-            className={"margin-left flex flex-col items-center justify-center min-h-screen"}
-            //width={cols * (2 * hexWidth) + 2 * distance}
-            width={cols * (hexWidth) + 2 * distance}
-            height={rows * (hexHeight + size) + 2 * distance}
-            style={{display: "block"}}
-        >
-            {Array.from({length: rows}).map((_, row) =>
-                Array.from({length: cols}).map((_, col) => {
+        return (
+            <div style={{ position: 'relative' }}>
+                <svg
+                    className={"margin-left flex flex-col items-center justify-center min-h-screen"}
+                    //width={cols * (2 * hexWidth) + 2 * distance}
+                    width={cols * (hexWidth) + 2 * distance}
+                    height={rows * (hexHeight + size) + 2 * distance}
+                    style={{display: "block"}}
+                >
+                    {Array.from({length: rows}).map((_, row) =>
+                    Array.from({length: cols}).map((_, col) => {
+                        const x = col * xOffset * 3;
+                        const y = row * hexHeight + (col % 2 === 1 ? 0 : hexHeight / 2);
+                        const hexId = (row + 1) * 10 + (col + 1);
+                        // const minionOnHex = minions.find((m: { id: number }) => m.id === hexId);
+
+                        return (
+                            <g key={`${row}-${col}`} transform={`translate(${x},${y})`}
+                            onClick={() => toggleHexColor(hexId)}>
+                                <polygon
+                                    points={hexagonPath}
+                                    stroke="black"
+                                    strokeWidth={1.5}
+                                    fill={
+                                        selectedAllyHexes.includes(hexId)
+                                            ? "#afefaf"
+                                            : selectedOpponentHexes.includes(hexId)
+                                                ? "#e7a09a"
+                                                : selectedYellowHex?.includes(hexId)
+                                                    ? "yellow"
+                                                    : "#f6f9f8"
+                                    }
+                                    style={{cursor: "pointer"}}
+                                />
+
+                                <text
+                                    x={size + distance}
+                                    y={size + distance}
+                                    fontSize="14"
+                                    textAnchor="middle"
+                                    fill={
+                                        selectedAllyHexes.includes(hexId) || selectedOpponentHexes.includes(hexId) || selectedYellowHex?.includes(hexId)
+                                            ? "#f6f9f8"
+                                            : "#f6f9f8"}
+                                >
+                                    {hexId}
+                                </text>
+                            </g>
+                        );
+                    })
+                )}
+                </svg>
+
+                {minions.map((minion) => {
+                    const row = Math.floor(minion.id / 10) - 1;
+                    const col = (minion.id % 10) - 1;
                     const x = col * xOffset * 3;
                     const y = row * hexHeight + (col % 2 === 1 ? 0 : hexHeight / 2);
-                    const hexId = (row + 1) * 10 + (col + 1);
 
                     return (
-                        <g key={`${row}-${col}`} transform={`translate(${x},${y})`}
-                           onClick={() => toggleHexColor(hexId)}>
-                            <polygon
-                                points={hexagonPath}
-                                stroke="black"
-                                strokeWidth={1.5}
-                                fill={
-                                    selectedAllyHexes.includes(hexId)
-                                        ? "#afefaf"
-                                        : selectedOpponentHexes.includes(hexId)
-                                            ? "#e7a09a"
-                                            : selectedYellowHex?.includes(hexId)
-                                                ? "yellow"
-                                                : "#f6f9f8"
-                                }
-                                style={{cursor: "pointer"}}
-                            />
-                            <text
-                                x={size + distance}
-                                y={size + distance}
-                                fontSize="14"
-                                textAnchor="middle"
-                                fill={
-                                    selectedAllyHexes.includes(hexId) || selectedOpponentHexes.includes(hexId) || selectedYellowHex?.includes(hexId)
-                                        ? "#f6f9f8"
-                                        : "#f6f9f8"}
-                            >
-                                {hexId}
-                            </text>
-                        </g>
+                        <div
+                            key={`minion-${minion.id}`}
+                            style={{
+                                position: 'absolute',
+                                left: `${x + size + distance}px`,
+                                top: `${y + size + distance/2}px`,
+                                width: `${size}px`,
+                                height: `${size}px`,
+                                backgroundImage: `url(/image/minions/chess-${minion.type}-${minion.player === 1 ? 'green' : 'red'}.png)`,
+                                backgroundSize: 'cover',
+                                pointerEvents: 'none',
+                                //zIndex: 10
+                            }}
+                        />
                     );
-                })
-            )}
-        </svg>
+                })}
+            </div>
     );
 }
 ;
