@@ -296,8 +296,8 @@ export default function GamePage() {
                             [currentPlayer]: null
                         }));
                     }}
-                    className={`${!isPlayerTurn(1) || hasBought || hasSpawned || playerData[1].budget < gameConfig.hexPurchasedCost ? 'bg-gray-500' : 'bg-green-500'} text-white px-2 py-1 rounded hover:opacity-80 transition-opacity`}
-                    disabled={!isPlayerTurn(1) || hasBought || hasSpawned || playerData[1].budget < gameConfig.hexPurchasedCost}
+                    className={`${turn > gameConfig.maxTurn || !isPlayerTurn(1) || hasBought || hasSpawned || playerData[1].budget < gameConfig.hexPurchasedCost ? 'bg-gray-500' : 'bg-green-500'} text-white px-2 py-1 rounded hover:opacity-80 transition-opacity`}
+                    disabled={turn > gameConfig.maxTurn || !isPlayerTurn(1) || hasBought || hasSpawned || playerData[1].budget < gameConfig.hexPurchasedCost}
                 >
                     Buy Area
                 </button>
@@ -310,8 +310,8 @@ export default function GamePage() {
                             [currentPlayer]: null
                         }));
                     }}
-                    className={`${!isPlayerTurn(1) || hasSpawned || playerData[1].minions >= gameConfig.maxSpawn || playerData[1].budget < gameConfig.spawnedCost ? 'bg-gray-500' : 'bg-green-500'} text-white px-2 py-1 rounded ml-2 hover:opacity-80 transition-opacity`}
-                    disabled={!isPlayerTurn(1) || hasSpawned || playerData[1].minions >= gameConfig.maxSpawn || playerData[1].budget < gameConfig.spawnedCost}
+                    className={`${turn > gameConfig.maxTurn || !isPlayerTurn(1) || hasSpawned || playerData[1].minions >= gameConfig.maxSpawn || playerData[1].budget < gameConfig.spawnedCost ? 'bg-gray-500' : 'bg-green-500'} text-white px-2 py-1 rounded ml-2 hover:opacity-80 transition-opacity`}
+                    disabled={turn > gameConfig.maxTurn || !isPlayerTurn(1) || hasSpawned || playerData[1].minions >= gameConfig.maxSpawn || playerData[1].budget < gameConfig.spawnedCost}
                 >
                     Spawn Minion
                 </button>
@@ -364,8 +364,8 @@ export default function GamePage() {
                             [currentPlayer]: null
                         }));
                     }}
-                    className={`${!isPlayerTurn(2) || hasBought || hasSpawned || playerData[2].budget < gameConfig.hexPurchasedCost ? 'bg-gray-500' : 'bg-red-500'} text-white px-2 py-1 rounded hover:opacity-80 transition-opacity`}
-                    disabled={!isPlayerTurn(2) || hasBought || hasSpawned || playerData[2].budget < gameConfig.hexPurchasedCost}
+                    className={`${turn > gameConfig.maxTurn || !isPlayerTurn(2) || hasBought || hasSpawned || playerData[2].budget < gameConfig.hexPurchasedCost ? 'bg-gray-500' : 'bg-red-500'} text-white px-2 py-1 rounded hover:opacity-80 transition-opacity`}
+                    disabled={turn > gameConfig.maxTurn || !isPlayerTurn(2) || hasBought || hasSpawned || playerData[2].budget < gameConfig.hexPurchasedCost}
                 >
                     Buy Area
                 </button>
@@ -378,8 +378,8 @@ export default function GamePage() {
                             [currentPlayer]: null
                         }));
                     }}
-                    className={`${!isPlayerTurn(2) || hasSpawned || playerData[2].minions >= gameConfig.maxSpawn || playerData[2].budget < gameConfig.spawnedCost ? 'bg-gray-500' : 'bg-red-500'} text-white px-2 py-1 rounded ml-2 hover:opacity-80 transition-opacity`}
-                    disabled={!isPlayerTurn(2) || hasSpawned || playerData[2].minions >= gameConfig.maxSpawn || playerData[2].budget < gameConfig.spawnedCost}
+                    className={`${turn > gameConfig.maxTurn || !isPlayerTurn(2) || hasSpawned || playerData[2].minions >= gameConfig.maxSpawn || playerData[2].budget < gameConfig.spawnedCost ? 'bg-gray-500' : 'bg-red-500'} text-white px-2 py-1 rounded ml-2 hover:opacity-80 transition-opacity`}
+                    disabled={turn > gameConfig.maxTurn || !isPlayerTurn(2) || hasSpawned || playerData[2].minions >= gameConfig.maxSpawn || playerData[2].budget < gameConfig.spawnedCost}
                 >
                     Spawn Minion
                 </button>
