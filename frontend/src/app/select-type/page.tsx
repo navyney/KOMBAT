@@ -3,11 +3,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 const minions = [
-    { id: 1, name: "Pawn", image: "/image/minions/white-pawn.jpeg", color: "white" },
-    { id: 2, name: "Rook", image: "/image/minions/white-rook.jpeg", color: "white" },
-    { id: 3, name: "Knight", image: "/image/minions/white-knight.jpeg", color: "white" },
-    { id: 4, name: "Bishop", image: "/image/minions/white-bishop.jpeg", color: "white" },
-    { id: 5, name: "Queen", image: "/image/minions/white-queen.jpeg", color: "white" }
+    { id: 1, name: "pawn", image: "/image/minions/white-pawn.jpeg", color: "white" },
+    { id: 2, name: "rook", image: "/image/minions/white-rook.jpeg", color: "white" },
+    { id: 3, name: "knight", image: "/image/minions/white-knight.jpeg", color: "white" },
+    { id: 4, name: "bishop", image: "/image/minions/white-bishop.jpeg", color: "white" },
+    { id: 5, name: "queen", image: "/image/minions/white-queen.jpeg", color: "white" }
 ];
 
 export default function SelectMinions() {

@@ -8,7 +8,7 @@ export default function Page() {
         <div className="flex flex-col items-center justify-center min-h-screen bg-orange-100 w-full h-full">
             <h1 className="text-4xl font-bold text-black mb-6">Select Mode</h1>
             <div className="grid grid-cols-3 gap-6">
-                <button onClick={() => router.push("/Config-set-up")} className="mode-button">Player VS Player</button>
+                <button onClick={() => router.push("/Waiting-Player")} className="mode-button">Player VS Player</button>
                 <button onClick={() => router.push("/Config-set-up")} className="mode-button">Player VS Bot</button>
                 <button onClick={() => router.push("/Config-set-up")} className="mode-button">Bot VS Bot</button>
             </div>
