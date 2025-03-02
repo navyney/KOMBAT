@@ -8,9 +8,22 @@
 //   );
 // }
 
+// // @ts-ignore
+// import Page from "./start/page";
+//
+// export default function Home() {
+//     return <Page />;
+// }
+
+
 // @ts-ignore
-import Page from "./start/page";
+import WebSocketTest from "@/app/components/WebSocketTest";
 
 export default function Home() {
-    return <Page />;
+    return (
+        <div>
+            <h1>Welcome to KOMBAT</h1>
+            <WebSocketTest />
+        </div>
+    );
 }
