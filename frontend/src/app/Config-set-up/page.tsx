@@ -2,9 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import {useEffect, useState} from "react";
-
-// สาธุขอให้ push ได้
+import { useEffect, useState } from "react";
+import SockJS from "sockjs-client";
+import { Client } from "@stomp/stompjs";
 
 export default function StartPage() {
     const router = useRouter();
@@ -22,18 +22,59 @@ export default function StartPage() {
 
     const [error, setError] = useState<string | null>(null);
     const [isConfirmed, setIsConfirmed] = useState(false);
+    const [players, setPlayers] = useState(0);
+    const [stompClient, setStompClient] = useState<Client | null>(null);
 
     useEffect(() => {
-        const savedConfig = localStorage.getItem("gameConfig");
-        if (savedConfig) {
-            setConfig(JSON.parse(savedConfig));
-        }
-    }, []);
+        const socket = new SockJS("http://localhost:8080/ws");
+        const client = new Client({
+            webSocketFactory: () => socket,
+            reconnectDelay: 5000,
+        });
+
+        client.onConnect = () => {
+            console.log("✅ Connected to WebSocket Server");
+
+            client.publish({ destination: "/app/join-config-setup" });
+
+            client.subscribe("/topic/player-count", (message) => {
+                const count = JSON.parse(message.body);
+                setPlayers(count);
+                if (count > 2) {
+                    alert("already have 2 players, cant join");
+                    router.push("/");
+                }
+            });
+
+            client.subscribe("/topic/config-update", (message) => {
+                setConfig(JSON.parse(message.body));
+            });
+
+            client.subscribe("/topic/config-confirmed", (message) => {
+                setConfig(JSON.parse(message.body));
+                setIsConfirmed(true);
+            });
+        };
+
+        client.activate();
+        setStompClient(client);
+
+        return () => {
+            client.deactivate();
+        };
+    }, [router]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         if (value === "" || (!isNaN(Number(value)) && Number(value) >= 0)) {
-            setConfig({ ...config, [e.target.name]: value === "" ? "" : parseFloat(value) });
+            const updatedConfig = { ...config, [e.target.name]: value === "" ? "" : parseFloat(value) };
+            setConfig(updatedConfig);
+            if (stompClient && stompClient.connected) {
+                stompClient.publish({
+                    destination: "/app/config-update",
+                    body: JSON.stringify(updatedConfig),
+                });
+            }
         }
         setIsConfirmed(false);
     };
@@ -46,23 +87,22 @@ export default function StartPage() {
         } else {
             setError(null);
             setIsConfirmed(true);
-            localStorage.setItem("gameConfig", JSON.stringify(config));
-        }
-    };
-
-    const handleNext = () => {
-        if (isConfirmed) {
-            localStorage.setItem("gameConfig", JSON.stringify(config));
-            router.push("/select-type");
+            if (stompClient && stompClient.connected) {
+                stompClient.publish({
+                    destination: "/app/config-confirmed",
+                    body: JSON.stringify(config),
+                });
+            }
         }
     };
 
     return (
         <main className="flex flex-col items-center justify-center min-h-screen bg-cover bg-center w-full h-full p-8"
-              style={{backgroundImage: "url('/image/config.png')"}}>
+              style={{ backgroundImage: "url('/image/config.png')" }}>
 
             <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg mt-16 space-y-4 space-x-5">
                 <h1 className="text-xl font-bold text-center">Set Up Your Game Configuration</h1>
+                <p className="text-center text-gray-600">Players Connected: {players} / 2</p>
                 {Object.keys(config).map((key) => (
                     <div key={key} className="flex justify-between items-center">
                         <label className="font-medium capitalize">{key.replace(/([A-Z])/g, ' $1')} :</label>
@@ -87,34 +127,6 @@ export default function StartPage() {
                     </button>
                 </div>
 
-            </div>
-
-            <div
-                onClick={() => router.push("/select-mode")}
-                className="absolute cursor-pointer bottom-10 left-20"
-            >
-                <Image
-                    src="/image/back-button.png"
-                    alt="back"
-                    width={150}
-                    height={150}
-                    className="hover:opacity-75 transition-opacity"
-                />
-            </div>
-
-            <div
-                onClick={handleNext}
-                className={`absolute cursor-pointer bottom-10 right-20 ${
-                    !isConfirmed ? "opacity-50 cursor-not-allowed" : "hover:opacity-75 transition-opacity"
-                }`}
-            >
-                <Image
-                    src="/image/next-button.png"
-                    alt="next"
-                    width={150}
-                    height={150}
-                    className="hover:opacity-75 transition-opacity"
-                />
             </div>
         </main>
     );
