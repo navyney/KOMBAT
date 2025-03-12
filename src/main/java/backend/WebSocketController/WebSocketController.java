@@ -5,30 +5,26 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
-
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Controller
 public class WebSocketController {
 
-    private final SimpMessagingTemplate messagingTemplate;
-    private final AtomicInteger playerCount = new AtomicInteger(0);
+    private final Set<String> sessionIds = ConcurrentHashMap.newKeySet();
 
-    public WebSocketController(SimpMessagingTemplate messagingTemplate) {
-        this.messagingTemplate = messagingTemplate;
-    }
-
-    public AtomicInteger getPlayerCountReference() {
-        return playerCount; // 👈 ให้ EventListener ดึงมาใช้
+    public Set<String> getSessionIdsReference() {
+        return sessionIds;
     }
 
     @MessageMapping("/join-config-setup")
     @SendTo("/topic/player-count")
-    public int handleJoin() {
-        return Math.min(playerCount.incrementAndGet(), 2);
+    public int handleJoin(SimpMessageHeaderAccessor headerAccessor) {
+        String sessionId = headerAccessor.getSessionId();
+        sessionIds.add(sessionId);
+        return Math.min(sessionIds.size(), 2);
     }
 
     @MessageMapping("/config-update")
