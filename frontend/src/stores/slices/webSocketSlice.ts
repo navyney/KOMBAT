@@ -1,16 +1,25 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { Client } from "@stomp/stompjs";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { Client, Message } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
+import { RootState } from "@/stores/store";
 
 const SOCKET_URL = "http://localhost:8080/ws";
 
+interface WebSocketState {
+    client: Client | null;
+    connected: boolean;
+    data: any;
+}
+
+const initialState: WebSocketState = {
+    client: null,
+    connected: false,
+    data: null,
+};
+
 const webSocketSlice = createSlice({
     name: "webSocket",
-    initialState: {
-        client: null as Client | null,
-        connected: false,
-        data: null,
-    },
+    initialState,
     reducers: {
         connectWebSocket: (state) => {
             if (!state.client) {
@@ -18,7 +27,7 @@ const webSocketSlice = createSlice({
                     webSocketFactory: () => new SockJS(SOCKET_URL),
                     reconnectDelay: 5000,
                     onConnect: () => {
-                        stompClient.subscribe("/topic/config", (message) => {
+                        stompClient.subscribe("/topic/config", (message: Message) => {
                             state.data = JSON.parse(message.body);
                         });
                         stompClient.publish({
@@ -27,12 +36,16 @@ const webSocketSlice = createSlice({
                         });
                         state.connected = true;
                     },
+                    onDisconnect: () => {
+                        state.connected = false;
+                        state.client = null;
+                    },
                 });
                 stompClient.activate();
                 state.client = stompClient;
             }
         },
-        sendWebSocketMessage: (state, action) => {
+        sendWebSocketMessage: (state, action: PayloadAction<any>) => {
             if (state.client && state.connected) {
                 state.client.publish({
                     destination: "/app/config",
@@ -40,8 +53,21 @@ const webSocketSlice = createSlice({
                 });
             }
         },
+        setWebSocketClient: (state, action: PayloadAction<Client | null>) => {
+            state.client = action.payload;
+        },
+        setConnectionStatus: (state, action: PayloadAction<boolean>) => {
+            state.connected = action.payload;
+        },
     },
 });
 
-export const { connectWebSocket, sendWebSocketMessage } = webSocketSlice.actions;
+export const {
+    connectWebSocket,
+    sendWebSocketMessage,
+    setWebSocketClient,
+    setConnectionStatus
+} = webSocketSlice.actions;
+
+export const selectWebsocket = (state: RootState) => state.websocket;
 export default webSocketSlice.reducer;

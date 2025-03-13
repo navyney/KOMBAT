@@ -1,81 +1,80 @@
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import SockJS from "sockjs-client";
-import Stomp from "stompjs";
 import {
-    selectWebsocket,
-    setConnectionStatus,
+    Client,
+    IMessage as Message,
+    StompSubscription as Subscription,
+    Stomp
+} from "@stomp/stompjs";
+import {
     setWebSocketClient,
+    setConnectionStatus,
+    selectWebsocket,
 } from "@/stores/slices/webSocketSlice";
 import { useAppSelector } from "@/stores/hook";
-import { addMessageToRoom } from "@/stores/slices/roomSlice";
+//import {Stomp} from "@stomp/stompjs";
 
 export const useWebSocket = () => {
     const dispatch = useDispatch();
-    const { client, isConnected } = useAppSelector(selectWebsocket);
+    const { client, connected } = useAppSelector(selectWebsocket);
     const serverUrl = process.env.API_BASE_URL;
-
-    const subscribe = (destination: string, callback: (payload: Stomp.Message) => void) => {
-        if (client && isConnected) {
-            const subscription = client.subscribe(destination, callback);
-            console.log(`Subscribed to ${destination}`);
-            return subscription;
-        } else {
-            console.log("No active WebSocket connection to disconnect.");
-        }
-    }
-
-    const unsubscribe = (subscription: Stomp.Subscription| undefined) => {
-        if (client && isConnected && subscription) {
-            client.unsubscribe(subscription.id);
-            console.log(`Unsubscribed from ${subscription.id}`);
-        } else {
-            console.log("No active WebSocket connection to disconnect.");
-        }
-    }
-
-    const sendMessage = (destination: string, message: never) => {
-        if (client && isConnected) {
-            console.log("send", JSON.stringify(message));
-            client.send(`/app${destination}`, {}, JSON.stringify(message));
-        } else {
-            console.log("No active WebSocket connection to disconnect.");
-        }
-    };
 
     const connect = () => {
         try {
             const webSocket = new SockJS(`${serverUrl}/ws`);
             const stompClient = Stomp.over(webSocket);
-            stompClient.connect({}, () => onConnected(stompClient));
-            stompClient.debug = () => {};
+            stompClient.debug = () => {}; // disable logging
+
+            stompClient.connect({}, () => {
+                dispatch(setWebSocketClient(stompClient));
+                dispatch(setConnectionStatus(true));
+                console.log("✅ WebSocket connected");
+            });
         } catch (e) {
-            console.log(e);
+            console.error("WebSocket connection error:", e);
         }
     };
 
     const disconnect = () => {
-        if (client && isConnected) {
-            client.disconnect(() => {
-                dispatch(setWebSocketClient(null));
-                dispatch(setConnectionStatus(false));
-            });
-            console.log("WebSocket disconnected");
+        if (client && connected) {
+            client.deactivate();
+            dispatch(setWebSocketClient(null));
+            dispatch(setConnectionStatus(false));
+            console.log("🛑 WebSocket disconnected");
         } else {
             console.log("No active WebSocket connection to disconnect.");
         }
     };
 
-    const onConnected = (stompClient: Stomp.Client) => {
-        stompClient.subscribe(`/topic/messages`, onUpdateRoom);
-        dispatch(setWebSocketClient(stompClient));
-        dispatch(setConnectionStatus(true));
-        console.log("WebSocket connected successfully");
+    const sendMessage = (destination: string, message: any) => {
+        if (client && connected) {
+            client.publish({
+                destination: `/app${destination}`,
+                body: JSON.stringify(message),
+            });
+            console.log("📤 Sent message to", destination, message);
+        } else {
+            console.warn("Cannot send: No active WebSocket connection.");
+        }
     };
 
-    const onUpdateRoom = (payload: Stomp.Message) => {
-        const newMessageObject = JSON.parse(payload.body);
-        dispatch(addMessageToRoom(newMessageObject));
-        console.log("Receive new message object", newMessageObject);
+    const subscribe = (destination: string, callback: (payload: Message) => void): Subscription | undefined => {
+        if (client && connected) {
+            const subscription = client.subscribe(destination, callback);
+            console.log(`✅ Subscribed to ${destination}`);
+            return subscription;
+        } else {
+            console.warn("Cannot subscribe: No active WebSocket connection.");
+        }
+    };
+
+    const unsubscribe = (subscription: Subscription | undefined) => {
+        if (client && connected && subscription) {
+            subscription.unsubscribe();
+            console.log(`🛑 Unsubscribed from ${subscription.id}`);
+        } else {
+            console.warn("No active subscription to unsubscribe.");
+        }
     };
 
     return {
