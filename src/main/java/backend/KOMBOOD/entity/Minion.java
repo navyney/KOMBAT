@@ -16,6 +16,7 @@ public class Minion {
     private int col = -1 ;
     private Player owner;
     private HashMap<String,Long> hmIdentifier = new HashMap<>();
+    private static HashMap<String,Long> hmGlobalIdentifier = new HashMap<>();
     private MapMap map;
     private ConfigFile config = Main.getConfig();
     private boolean actedThisTurn = false;
@@ -63,7 +64,12 @@ public class Minion {
     }
 
     public void assign(String identifier,long val){
-        hmIdentifier.put(identifier,val);
+        if(Character.isUpperCase(identifier.charAt(0))){
+            hmGlobalIdentifier.put(identifier,val);
+        }
+        else{
+            hmIdentifier.put(identifier,val);
+        }
     }
 
     public int getHp() {
@@ -84,6 +90,10 @@ public class Minion {
 
     public long getValueIdentifier(String identifier){
         return hmIdentifier.get(identifier);
+    }
+
+    public long getValueGlobalVariable(String identifier){
+        return hmGlobalIdentifier.get(identifier);
     }
 
     public boolean spawn(int r, int c) throws IOException {
