@@ -216,7 +216,7 @@ public class StatementParser implements Parser {
                 return val;
             }
             else{
-                if(!specialVariable.contains(tkz.peek())) {
+                if(specialVariable.contains(tkz.peek())) {
                     return new SpecialVariable(tkz.consume());
                 }
                 else if(Character.isUpperCase(tkz.peek().charAt(0))){
