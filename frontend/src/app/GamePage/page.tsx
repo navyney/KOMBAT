@@ -48,7 +48,6 @@ export default function GamePage() {
     const [hasBought, setHasBought] = useState(false);
     const [hasSpawned, setHasSpawned] = useState(false);
     const [selectedMinions, setSelectedMinions] = useState<number[]>([]);
-
     const [selectedMinionType, setSelectedMinionType] = useState<Record<number, string | null>>({
         1: null,
         2: null,

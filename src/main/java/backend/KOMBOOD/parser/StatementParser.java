@@ -23,6 +23,9 @@ public class StatementParser implements Parser {
             "ally", "done", "down", "downleft", "downright",
             "else", "if", "move", "nearby", "opponent",
             "shoot", "then", "up", "upleft", "upright", "while"));
+    HashSet<String> specialVariable = new HashSet<>(Arrays.asList(
+            "row", "col", "budget", "int", "maxbudget", "spawnsleft", "random"
+    ));
     public StatementParser(ExprTokenizer tkz) {
         this.tkz = tkz;
     }
@@ -153,9 +156,9 @@ public class StatementParser implements Parser {
         Expr val = parseExpression();
         tkz.consume(")");
         tkz.consume("then");
-            Statement trueStatement = parseStatement();
-            tkz.consume("else");
-            Statement falseStatement = parseStatement();
+        Statement trueStatement = parseStatement();
+        tkz.consume("else");
+        Statement falseStatement = parseStatement();
         Statement s = new IfStatement(val, trueStatement, falseStatement);
         return s;
 
@@ -213,8 +216,12 @@ public class StatementParser implements Parser {
                 return val;
             }
             else{
-                Expr v = new Variable(tkz.consume());
-                return v;
+                if(!hsIdentifiers.contains(tkz.peek())) {
+                    return new SpecialVariable(tkz.consume());
+                }
+                else{
+                    return new Variable(tkz.consume());
+                }
             }
         }
     }
