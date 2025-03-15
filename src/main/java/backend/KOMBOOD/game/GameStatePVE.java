@@ -267,7 +267,6 @@ public class GameStatePVE {
         while (current_turns <= max_turns) {
             // Player 1's turn
             System.out.println("Turn " + current_turns + ": " + player1.getName() + "'s turn");
-
             player1.calculateInterest(current_turns) ;
 
             // Player 1 Action: buy, spawn

@@ -13,32 +13,22 @@ import java.util.Random;
 
 public class Bot extends Player {
     private Random random = new Random();
-    private MapMap map = GameStatePVE.gamemap;
-    private ArrayList<Minion> minions = getAllMinions();
 
     public Bot(String name) {
         super(name);
     }
 
-    public void takeTurn() {
+    public void takeTurn(MapMap map) throws IOException {
+        ArrayList<Minion> minions = getAllMinions();
         System.out.println("Bot " + getName() + " is taking a turn...");
-
-        if (random.nextBoolean() && canBuyArea()) {
-            buyRandomArea();
-        }
-
-        if (random.nextBoolean() && canBuyMinion()) {
-            buyRandomMinion();
-        }
-
-        if (random.nextBoolean() && canSpawnMinion()) {
-            spawnRandomMinion();
-        }
+            buyRandomArea(map);
+            if(false){buyRandomMinion(minions);}
+            spawnRandomMinion(minions);
 
         System.out.println("Bot " + getName() + " has finished its turn.");
     }
 
-    private void buyRandomArea() {
+    private void buyRandomArea(MapMap map) {
         ArrayList<Hex> availableAreas = new ArrayList<>();
 
         for (int r = 0; r < map.getRows(); r++) {
@@ -56,7 +46,7 @@ public class Bot extends Player {
         }
     }
 
-    private void buyRandomMinion() {
+    private void buyRandomMinion(ArrayList<Minion> minions) {
         if (getBudget() < Main.getConfig().buy_minion_cost()) {
             return;
         }
@@ -72,24 +62,19 @@ public class Bot extends Player {
         buyMinion(randomType, minion);
     }
 
-    private void spawnRandomMinion() {
+    private void spawnRandomMinion(ArrayList<Minion> minions) throws IOException {
         if (getMinion().isEmpty() || getBudget() < Main.getConfig().spawn_cost()) {
             return;
         }
 
-        ArrayList<Minion> availableMinions = new ArrayList<>(getMinion());
-        Minion minion = availableMinions.get(random.nextInt(availableMinions.size()));
+        Minion minion = minions.get(random.nextInt(minions.size()));
 
         ArrayList<Hex> ownedAreas = getArea();
         if (ownedAreas.isEmpty()) {
             return;
         }
-
         Hex selectedHex = ownedAreas.get(random.nextInt(ownedAreas.size()));
-        try {
-            spawnMinion(minion, selectedHex.getRow(), selectedHex.getCol());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        spawnMinion(minion, selectedHex.getRow(), selectedHex.getCol());
+
     }
 }
