@@ -25,12 +25,10 @@ const HexGrid: React.FC<Hex> = ({
     const [selectedAllyHexes, setSelectedAllyHexes] = useState<number[]>([]);
     const [selectedOpponentHexes, setSelectedOpponentHexes] = useState<number[]>([]);
     const [selectedYellowHex, setSelectedYellowHex] = useState<number[]>([]);
-
     const hexWidth = size * 2;
     const hexHeight = Math.sqrt(3) * size;
     const xOffset = hexWidth * 0.25;
     const yOffset = hexHeight * 0.5;
-
     const hexagonPath = [
         [xOffset + distance, (yOffset * 2) + distance],
         [(xOffset * 3) + distance, (yOffset * 2) + distance],
