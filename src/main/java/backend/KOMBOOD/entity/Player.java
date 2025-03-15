@@ -136,7 +136,7 @@ public class Player {
         }
     }
 
-    private boolean isAdjacentToOwnedArea(int r, int c, MapMap map) {
+    boolean isAdjacentToOwnedArea(int r, int c, MapMap map) {
 //        int[] dr = {-1, -1, 0, 0, 1, 1};
 //        int[] dc = {0, 1, -1, 1, -1, 0};
         //for hex index
@@ -315,6 +315,10 @@ public class Player {
 
     public boolean setHasNOTBoughtareaThisTurn() {
         return hasBoughtAreaThisTurn = false ;
+    }
+
+    public ArrayList<Minion> getAllMinions() {
+        return minion;
     }
 
     //dummy done()
