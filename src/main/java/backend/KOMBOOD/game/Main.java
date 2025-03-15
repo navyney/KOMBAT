@@ -1,6 +1,7 @@
 package backend.KOMBOOD.game;
 
 import backend.KOMBOOD.config.ConfigFile;
+import backend.KOMBOOD.entity.Bot;
 import backend.KOMBOOD.entity.Player;
 import backend.KOMBOOD.error.EvalError;
 import backend.KOMBOOD.error.LexicalError;
@@ -62,8 +63,8 @@ public class Main {
 
         MapMap gameMap = new MapMap(8, 8);
         Player player1 = new Player("Player1");
-        Player player2 = new Player("Player2");
-        GameState gameState = new GameState(player1, player2, gameMap);
+        Bot player2 = new Bot("Player2");
+        GameStatePVE gameState = new GameStatePVE(player1, player2, gameMap);
         gameState.setConfig(config);
 
         gameMap.createMap();
