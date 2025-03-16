@@ -1,8 +1,5 @@
 package backend.KOMBOOD.entity;
 
-import backend.KOMBOOD.config.ConfigFile;
-import backend.KOMBOOD.game.GameState;
-import backend.KOMBOOD.game.GameStatePVE;
 import backend.KOMBOOD.map.Hex;
 import backend.KOMBOOD.map.HexHex;
 import backend.KOMBOOD.game.Main;
@@ -21,10 +18,15 @@ public class Bot extends Player {
     public void takeTurn(MapMap map) throws IOException {
         ArrayList<Minion> minions = getAllMinions();
         System.out.println("Bot " + getName() + " is taking a turn...");
+        int r = random.nextInt(1000);
+        if (r  % 2 == 0) {
             buyRandomArea(map);
-            if(false){buyRandomMinion(minions);}
+        }else if (r % 3 == 0) {
             spawnRandomMinion(minions);
-
+        }else{
+            buyRandomArea(map);
+            spawnRandomMinion(minions);
+        }
         System.out.println("Bot " + getName() + " has finished its turn.");
     }
 

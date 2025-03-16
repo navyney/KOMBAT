@@ -62,25 +62,25 @@ public class Main {
         */
 
         MapMap gameMap = new MapMap(8, 8);
-//        Player player1 = new Player("Player1");
-//        Player player2 = new Player("Player2");
-//        GameState gameState = new GameState(player1, player2, gameMap);
-//        gameState.setConfig(config);
-//
-//        gameMap.createMap();
-//        //gameMap.printMap();
-//        gameState.setup();
-//        gameState.gameloop();
-
-
         Player player1 = new Player("Player1");
         Bot player2 = new Bot("Player2");
-        GameStatePVE gameState2 = new GameStatePVE(player1, player2, gameMap);
-        gameState2.setConfig(config);
+        GameState gameState = new GameState(player1, player2, gameMap);
+        gameState.setConfig(config);
 
         gameMap.createMap();
-        gameState2.setup();
-        gameState2.gameloop();
+        //gameMap.printMap();
+        gameState.setup();
+        gameState.gameloop();
+
+
+//        Player player1 = new Player("Player1");
+//        Player player2 = new Player("Player2");
+//        GameStatePvE gameState2 = new GameStatePvE(player1, player2, gameMap);
+//        gameState2.setConfig(config);
+//
+//        gameMap.createMap();
+//        gameState2.setup();
+//        gameState2.gameloop();
 
 
 

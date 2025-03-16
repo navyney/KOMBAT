@@ -1,7 +1,6 @@
 package backend.KOMBOOD.game;
 
 import backend.KOMBOOD.config.ConfigFile;
-import backend.KOMBOOD.entity.Bot;
 import backend.KOMBOOD.entity.Minion;
 import backend.KOMBOOD.entity.MinionType;
 import backend.KOMBOOD.entity.Player;
@@ -18,10 +17,9 @@ import java.util.List;
 import java.io.IOException;
 import java.util.Scanner;
 
-public class GameStatePVE {
-    public static MapMap gamemap; // player1 and player2 can play in terminal and show gameMap while playing turn blablabla
+public class GameStatePvE { // player1 and player2 can play in terminal and show gameMap while playing turn blablabla
     private static Player player1;
-    private Bot bot1;
+    private Player bot1;
 
     public static ArrayList<Minion> MinionOnMapMap = new ArrayList<>();
 
@@ -58,7 +56,7 @@ public class GameStatePVE {
 
     //Choose Mode before GameState
 
-    public GameStatePVE(Player player1, Bot bot1, MapMap gameMap) { // not done
+    public GameStatePvE(Player player1, Player bot1, MapMap gameMap) { // not done
         this.player1 = player1;
         this.bot1 = bot1;
         this.gameMap = gameMap;
@@ -144,7 +142,7 @@ public class GameStatePVE {
 
             // for  Debug
             System.out.println("Minion created for Player1: " + minion1.getName());
-            System.out.println("Minion created for Bot: " + minion2.getName());
+            System.out.println("Minion created for Player2: " + minion2.getName());
 
 //            player1.setMinion(minion1, 1, 1);
 //            player2.setMinion(minion2,11,8);
@@ -162,10 +160,10 @@ public class GameStatePVE {
 
     public boolean checkWinner() {
         if (player1.getNumofMinion() == 0) {
-            this.winner = "Bot";
+            this.winner = "Player";
             return true;
         } else if (bot1.getNumofMinion() == 0) {
-            this.winner = "Player";
+            this.winner = "Bot";
             return true;
         } else if (this.current_turns == this.max_turns && player1.getNumofMinion() == bot1.getNumofMinion()) {
             checkWinnerBySumOfHP();
@@ -183,10 +181,10 @@ public class GameStatePVE {
         int sumOfHp2 = getTotalMinionsHp(bot1);
 
         if (sumOfHp1 > sumOfHp2) {
-            this.winner = "Player";
+            this.winner = "Player 1";
             return true;
         } else if (sumOfHp2 > sumOfHp1) {
-            this.winner = "Bot";
+            this.winner = "Player 2";
             return true;
         } else if (this.current_turns == this.max_turns && sumOfHp1 == sumOfHp2) {
             checkWinnerByBudget();
@@ -198,10 +196,10 @@ public class GameStatePVE {
         int budget1 = player1.getIntBudget();
         int budget2 = bot1.getIntBudget();
         if (budget1 > budget2) {
-            this.winner = "Player";
+            this.winner = "Player1";
             return true;
         } else if (budget2 > budget1) {
-            this.winner = "Bot";
+            this.winner = "Player2";
             return true;
         } else {
             this.winner = "Draw!!!";
@@ -218,6 +216,20 @@ public class GameStatePVE {
                 int c = s.nextInt();
                 s.nextLine();
                 player.buyArea(r, c, gameMap);
+//            } else if (command.equals("buy minion")) {
+//                MinionType.displayMinionTypes();
+//
+//                System.out.println("Enter minion type to buy:");
+//                String typeName = s.nextLine();
+//                MinionType type = MinionType.getMinionType(typeName);
+//
+//                if (type != null) {
+//                    Minion minion = new Minion(type, init_hp, player, gameMap);
+//                    player.buyMinion(type, minion);
+//                    System.out.println(player.getName() + " bought a " + type.getTypeName() + " minion.");
+//                } else {
+//                    System.out.println("Invalid minion type!");
+//                }
             } else if (command.equals("spawn minion")) {
                 System.out.print("Your minions: ");
                 for (Minion m : player.getMinion()) {
@@ -267,6 +279,7 @@ public class GameStatePVE {
         while (current_turns <= max_turns) {
             // Player 1's turn
             System.out.println("Turn " + current_turns + ": " + player1.getName() + "'s turn");
+
             player1.calculateInterest(current_turns) ;
 
             // Player 1 Action: buy, spawn
@@ -292,7 +305,8 @@ public class GameStatePVE {
             bot1.calculateInterest(current_turns) ;
 
             // Player 2 Action: buy, spawn
-            bot1.takeTurn(gameMap);
+            System.out.println(bot1.getName() + " buy area, spawn minion");
+            action(bot1);
             gameMap.printMap();
 
             // Execute Minions by Strategy

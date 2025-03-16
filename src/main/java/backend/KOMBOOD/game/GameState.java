@@ -1,6 +1,7 @@
 package backend.KOMBOOD.game;
 
 import backend.KOMBOOD.config.ConfigFile;
+import backend.KOMBOOD.entity.Bot;
 import backend.KOMBOOD.entity.Minion;
 import backend.KOMBOOD.entity.MinionType;
 import backend.KOMBOOD.entity.Player;
@@ -19,7 +20,7 @@ import java.util.Scanner;
 
 public class GameState { // player1 and player2 can play in terminal and show gameMap while playing turn blablabla
     private static Player player1;
-    private Player player2;
+    private Bot player2;
 
     public static ArrayList<Minion> MinionOnMapMap = new ArrayList<>();
 
@@ -56,7 +57,7 @@ public class GameState { // player1 and player2 can play in terminal and show ga
 
     //Choose Mode before GameState
 
-    public GameState(Player player1, Player player2, MapMap gameMap) { // not done
+    public GameState(Player player1, Bot player2, MapMap gameMap) { // not done
         this.player1 = player1;
         this.player2 = player2;
         this.gameMap = gameMap;
@@ -306,7 +307,8 @@ public class GameState { // player1 and player2 can play in terminal and show ga
 
             // Player 2 Action: buy, spawn
             System.out.println(player2.getName() + " buy area, spawn minion");
-            action(player2);
+//            action(player2);
+            player2.takeTurn(gameMap);
             gameMap.printMap();
 
             // Execute Minions by Strategy

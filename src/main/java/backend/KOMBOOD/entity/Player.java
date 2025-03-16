@@ -167,7 +167,7 @@ public class Player {
     public void buyArea(int r, int c, MapMap map) {
         if (!canBuyArea()) {
             System.out.println("You already action this turn. Wait for next turn!");
-            return ;
+            return;
         }
         // ตรวจสอบว่า Hex นั้นมีเจ้าของหรือไม่
         HexHex hex = (HexHex) map.getHexAt(r, c);
