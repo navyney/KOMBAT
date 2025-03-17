@@ -24,5 +24,6 @@ public class GameMode{
 
     public void setGameMode(GameModeType gameMode) {
         this.gameMode = gameMode;
+        System.out.println("Game mode set to: " + this.gameMode);
     }
 }

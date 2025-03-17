@@ -13,7 +13,7 @@ public class Main {
 
     private static ConfigFile config = new ConfigFile(
             100, 100, 1000, 100,
-            90, 23456, 5, 100,
+            90, 23456, 5, 20,
             47, 50, 75);
 
     public static ConfigFile getConfig() {
@@ -63,8 +63,11 @@ public class Main {
 
         MapMap gameMap = new MapMap(8, 8);
         Player player1 = new Player("Player1");
-        Bot player2 = new Bot("Player2");
-        GameState gameState = new GameState(player1, player2, gameMap);
+        Player player2 = new Player("Player2");
+        GameMode gameMode = new GameMode();
+        gameMode.setGameMode(GameModeType.SOLITAIRE);
+        GameModeType gameModeType = gameMode.getGameMode();
+        GameState gameState = new GameState(player1, player2, gameMap, gameModeType);
         gameState.setConfig(config);
 
         gameMap.createMap();
@@ -73,14 +76,6 @@ public class Main {
         gameState.gameloop();
 
 
-//        Player player1 = new Player("Player1");
-//        Player player2 = new Player("Player2");
-//        GameStatePvE gameState2 = new GameStatePvE(player1, player2, gameMap);
-//        gameState2.setConfig(config);
-//
-//        gameMap.createMap();
-//        gameState2.setup();
-//        gameState2.gameloop();
 
 
 
