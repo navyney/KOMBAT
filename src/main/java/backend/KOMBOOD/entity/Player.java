@@ -351,7 +351,10 @@ public class Player {
         ArrayList<Minion> minions = getAllMinions();
         System.out.println("Bot " + getName() + " is taking a turn...");
         int r = random.nextInt(1000);
-        if (r  % 3 == 0) {
+        if(r % 10 == 0){
+
+        }
+        else if (r  % 3 == 0) {
             buyRandomArea(map);
         }else if (r % 3 == 1) {
             spawnRandomMinion(minions);

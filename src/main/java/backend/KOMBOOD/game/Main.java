@@ -13,7 +13,7 @@ public class Main {
 
     private static ConfigFile config = new ConfigFile(
             100, 100, 1000, 100,
-            90, 23456, 5, 20,
+            90, 23456, 5, 200,
             47, 50, 75);
 
     public static ConfigFile getConfig() {
@@ -65,7 +65,7 @@ public class Main {
         Player player1 = new Player("Player1");
         Player player2 = new Player("Player2");
         GameMode gameMode = new GameMode();
-        gameMode.setGameMode(GameModeType.SOLITAIRE);
+        gameMode.setGameMode(GameModeType.AUTO);
         GameModeType gameModeType = gameMode.getGameMode();
         GameState gameState = new GameState(player1, player2, gameMap, gameModeType);
         gameState.setConfig(config);
@@ -74,6 +74,7 @@ public class Main {
         //gameMap.printMap();
         gameState.setup();
         gameState.gameloop();
+        gameState.endGame();
 
 
 
