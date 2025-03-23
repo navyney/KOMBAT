@@ -98,6 +98,10 @@ public class Player {
         this.minion.add(m);
     }
 
+    public void removeMinion(Minion m) {
+        this.minion.remove(m);
+    }
+
     public ArrayList<Minion> getMinion() {
         return minion;
     }

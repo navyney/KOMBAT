@@ -266,7 +266,7 @@ public class GameState { // player1 and player2 can play in terminal and show ga
             // check ว่า minion ถูก spawn แล้วหรือยัง
             if (minion.isSpawned()) {
                 // for Debug
-                System.out.println("Executing strategy for minion: " + minion.getName());
+                System.out.println("Executing strategy for minion: " + minion.getName() + " (" + minion.getRow() + "," + minion.getCol() + ")");
 
                 Strategy strategy = minion.getType().getStrategy();
                 strategy.evaluator(minion);

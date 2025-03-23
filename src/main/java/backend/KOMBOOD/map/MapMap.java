@@ -51,7 +51,8 @@ public class MapMap {
     }
 
     public boolean isMinionHere(int row, int col) {
-        return minions[row][col] != null;
+        if(row>0 || col>0 || row<8 || col<8) {return false;}
+        else {return minions[row][col] != null;}
     }
 
     public void placeMinion(int row, int col, Minion minion) {
@@ -59,6 +60,7 @@ public class MapMap {
     }
 
     public Minion getMinionAt(int row, int col) {
+
         return minions[row][col];
     }
 
