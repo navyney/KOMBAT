@@ -13,7 +13,7 @@ public class Main {
 
     private static ConfigFile config = new ConfigFile(
             100, 100, 1000, 100,
-            90, 23456, 5, 200,
+            90, 23456, 5, 20,
             47, 50, 75);
 
     public static ConfigFile getConfig() {
@@ -115,7 +115,8 @@ public class Main {
 //public class Main {
 //    public static void main(String[] args) throws LexicalError, EvalError {
 //        StatementParser p = new StatementParser(new ExprTokenizer("""
-//                t = t + 1
+//                t = 0
+//		          t = t + 1
 //                m = 0
 //                while (3 - m) {
 //                  if (budget - 100) then {} else done

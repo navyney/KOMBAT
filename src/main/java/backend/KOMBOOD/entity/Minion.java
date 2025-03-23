@@ -29,6 +29,14 @@ public class Minion {
         this.map = map;
     }
 
+    public Minion(Minion other){
+        this.name = other.type.getTypeName();
+        this.type = other.type;
+        this.hp = other.hp;
+        this.owner = other.owner;
+        this.map = other.map;
+    }
+
     //for debug
     public boolean isOwnedBy(Player player) {
         if (this.owner == player) {

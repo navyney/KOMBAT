@@ -86,7 +86,7 @@ public class Player {
     }
 
     public boolean canSpawnMinion() {
-        return GameState.getCurrent_turns() != lastSpawnMinionTurn && !hasBoughtAreaThisTurn;
+        return GameState.getCurrent_turns() != lastSpawnMinionTurn;
     }
 
     public void addMinion(Minion m) {
@@ -213,17 +213,19 @@ public class Player {
             return;
         }
 
+        Minion newMinion = new Minion(minion);
+
         // free for first turn
         if (GameState.getCurrent_turns() == 1) {
-            success = minion.spawn(r, c);
+            success =  newMinion.spawn(r, c);
 
             if (success) {
-                addSpawnedMinion(minion);
-                MinionOnMapMap.add(minion);
+                addSpawnedMinion(newMinion);
+                MinionOnMapMap.add(newMinion);
                 this.setSpawnRemaining();
                 hasSpawnedMinionThisTurn = true;
                 lastSpawnMinionTurn = GameState.getCurrent_turns();
-                System.out.println("Minion " + minion.getName() + " spawned successfully at (" + r + "," + c + ")");
+                System.out.println("Minion " + newMinion.getName() + " spawned successfully at (" + r + "," + c + ")");
             } else {
                 System.out.println("Failed to spawn minion at (" + r + "," + c + ")");
             }
@@ -241,16 +243,16 @@ public class Player {
         }
 
         // try to spawn Minion ในตำแหน่งที่กำหนด
-        success = minion.spawn(r, c);
+        success = newMinion.spawn(r, c);
 
         if (success) {
-            addSpawnedMinion(minion);
-            MinionOnMapMap.add(minion);
+            addSpawnedMinion(newMinion);
+            MinionOnMapMap.add(newMinion);
             setBudget(this.getBudget() - config.spawn_cost());
             this.setSpawnRemaining();
             hasSpawnedMinionThisTurn = true;
             lastSpawnMinionTurn = GameState.getCurrent_turns();
-            System.out.println("Minion " + minion.getName() + " spawned successfully at (" + r + "," + c + ")");
+            System.out.println("Minion " + newMinion.getName() + " spawned successfully at (" + r + "," + c + ")");
         } else {
             System.out.println("Failed to spawn minion at (" + r + "," + c + ")");
         }

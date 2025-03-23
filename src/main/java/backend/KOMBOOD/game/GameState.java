@@ -216,6 +216,7 @@ public class GameState { // player1 and player2 can play in terminal and show ga
         String command = s.nextLine();
         while(command.equals("buy area") || command.equals("spawn minion")) {
             if (command.equals("buy area")) {
+                System.out.println("Enter area to buy (row column):");
                 int r = s.nextInt();
                 int c = s.nextInt();
                 s.nextLine();
@@ -236,9 +237,10 @@ public class GameState { // player1 and player2 can play in terminal and show ga
 //                }
             } else if (command.equals("spawn minion")) {
                 System.out.print("Your minions: ");
-                for (Minion m : player.getMinion()) {
-                    System.out.print("Minion name: " + m.getName() + " ");
-                }
+//                for (Minion m : player.getMinion()) {
+//                    System.out.print("Minion name: " + m.getName() + " ");
+//                }
+                MinionType.displayMinionTypes();
                 System.out.println("Enter minion name to spawn:");
                 String minionName = s.nextLine();
 
