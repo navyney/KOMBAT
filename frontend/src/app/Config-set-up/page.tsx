@@ -128,17 +128,17 @@ export default function ConfigPage() {
               style={{ backgroundImage: "url('/image/config.png')" }}>
 
             <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg mt-16 space-y-4 space-x-5">
-                <h1 className="text-xl font-bold text-center">Set Up Your Game Configuration</h1>
+                <h1 className="text-xl font-bold text-center text-black">Set Up Your Game Configuration</h1>
                 <p className="text-center text-gray-600">Players Connected: {players} / 2</p>
                 {Object.keys(config).filter(key => key !== "playerId").map((key) => (
                     <div key={key} className="flex justify-between items-center">
-                        <label className="font-medium capitalize">{key.replace(/([A-Z])/g, ' $1')} :</label>
+                        <label className="font-medium capitalize text-black">{key.replace(/([A-Z])/g, ' $1')} :</label>
                         <input
                             type="number"
                             name={key}
                             value={config[key as keyof typeof config]}
                             onChange={handleChange}
-                            className="border rounded p-2 w-32 text-center"
+                            className="border rounded p-2 w-32 text-center text-black"
                         />
                     </div>
                 ))}
@@ -147,12 +147,12 @@ export default function ConfigPage() {
                     <div className='flex items-center gap-2'>
                         <div
                             className={`w-4 h-4 border-2 rounded ${youConfirmed ? 'bg-green-500 border-green-700' : 'bg-white'}`}/>
-                        <span className='text-sm'>You</span>
+                        <span className='text-sm text-black'>You</span>
                     </div>
                     <div className='flex items-center gap-2'>
                         <div
                             className={`w-4 h-4 border-2 rounded ${opponentConfirmed ? 'bg-green-500 border-green-700' : 'bg-white'}`}/>
-                        <span className='text-sm'>Opponent</span>
+                        <span className='text-sm text-black'>Opponent</span>
                     </div>
                 </div>
 
