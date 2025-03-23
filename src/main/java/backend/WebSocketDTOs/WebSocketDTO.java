@@ -8,6 +8,11 @@ import java.io.Serializable;
 @Getter
 @Setter
 public class WebSocketDTO implements Serializable {
+
+    @Getter
+    @Setter
+    private String playerId;
+
     @Min(0) private int spawnedCost;
     @Min(0) private int hexPurchasedCost;
     @Min(0) private int initialBudget;

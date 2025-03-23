@@ -1,20 +1,20 @@
 import { configureStore } from "@reduxjs/toolkit";
-import userReducer from "./slices/userSlice"; // Correct import for the user slice reducer
-import webSocketReducer from "./slices/webSocketSlice"; // Correct import for the user slice reducer
-import roomReducer from "./slices/roomSlice"; // Correct import for the user slice reducer
-import onlineUsersReducer from "./slices/onlineUsersSlice";
+import userReducer from "./slices/onlineUsersSlice";
+import webSocketReducer from "./slices/webSocketSlice";
+import gameReducer from "./slices/gameSlice";
+import playerReducer from "./slices/playerSlice";
+import configReducer from "./slices/configSlice"
 
-const store = configureStore({
+export const store = configureStore({
     reducer: {
         user: userReducer,
-        room: roomReducer,
         websocket: webSocketReducer,
-        onlineUsers: onlineUsersReducer,
+        game: gameReducer,
+        player: playerReducer,
+        config: configReducer,
     },
     middleware: (getDefaultMiddleware) =>
-        getDefaultMiddleware({
-            serializableCheck: false,
-        }),
+        getDefaultMiddleware({ serializableCheck: false }),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

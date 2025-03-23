@@ -5,25 +5,24 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
+import { useAppDispatch, useAppSelector } from "@/stores/hook";
+import { updateConfig, confirmConfig } from "@/stores/slices/configSlice";
 
-export default function StartPage() {
+export default function ConfigPage() {
     const router = useRouter();
-    const [config, setConfig] = useState({
-        spawnedCost: "" as number | "",
-        hexPurchasedCost: "" as number | "",
-        initialBudget: "" as number | "",
-        initialHP: "" as number | "",
-        turnBudget: "" as number | "",
-        maxBudget: "" as number | "",
-        interestPercentage: "" as number | "",
-        maxTurn: "" as number | "",
-        maxSpawn: "" as number | "",
-    });
+    const dispatch = useAppDispatch();
+
+    const config = useAppSelector((state) => state.config.config || {});
+    const confirmedPlayers = useAppSelector((state) => state.config.confirmedPlayers);
 
     const [error, setError] = useState<string | null>(null);
-    const [isConfirmed, setIsConfirmed] = useState(false);
     const [players, setPlayers] = useState(0);
     const [stompClient, setStompClient] = useState<Client | null>(null);
+
+    const playerId = typeof window !== "undefined" ? localStorage.getItem("playerId") || "" : "";
+
+    const isBothConfirmed = Object.values(confirmedPlayers ?? {}).length === 2 &&
+        Object.values(confirmedPlayers ?? {}).every((val) => val);
 
     useEffect(() => {
         const socket = new SockJS("http://localhost:8080/ws");
@@ -33,26 +32,33 @@ export default function StartPage() {
         });
 
         client.onConnect = () => {
-            console.log("✅ Connected to WebSocket Server");
+            console.log(`${playerId} is joined`);
 
-            client.publish({ destination: "/app/join-config-setup" });
+            client.publish({
+                destination: "/app/join-config-setup",
+                body: JSON.stringify({playerId}),
+            });
 
             client.subscribe("/topic/player-count", (message) => {
                 const count = JSON.parse(message.body);
                 setPlayers(count);
-                if (count > 2) {
-                    alert("already have 2 players, cant join");
-                    router.push("/");
-                }
             });
 
             client.subscribe("/topic/config-update", (message) => {
-                setConfig(JSON.parse(message.body));
+                const newConfig = JSON.parse(message.body);
+                dispatch(updateConfig(newConfig));
+                dispatch(confirmConfig("reset"));
             });
 
             client.subscribe("/topic/config-confirmed", (message) => {
-                setConfig(JSON.parse(message.body));
-                setIsConfirmed(true);
+                const { playerId: confirmId } = JSON.parse(message.body);
+                dispatch(confirmConfig(confirmId));
+            });
+
+            client.subscribe("/topic/navigate", (message) => {
+                const action = message.body;
+                if (action === "next") router.push("/select-type");
+                else if (action === "back") router.push("/select-mode");
             });
         };
 
@@ -62,37 +68,49 @@ export default function StartPage() {
         return () => {
             client.deactivate();
         };
-    }, [router]);
+    }, [dispatch, router, playerId]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         if (value === "" || (!isNaN(Number(value)) && Number(value) >= 0)) {
             const updatedConfig = { ...config, [e.target.name]: value === "" ? "" : parseFloat(value) };
-            setConfig(updatedConfig);
-            if (stompClient && stompClient.connected) {
+            dispatch(updateConfig(updatedConfig));
+            dispatch(confirmConfig("reset"));
+
+            if (stompClient?.connected) {
                 stompClient.publish({
                     destination: "/app/config-update",
                     body: JSON.stringify(updatedConfig),
                 });
             }
         }
-        setIsConfirmed(false);
     };
 
     const handleConfirm = () => {
         const hasError = Object.values(config).some(value => value === "" || isNaN(Number(value)));
         if (hasError) {
             setError("Allow only numbers. Please check your inputs.");
-            setIsConfirmed(false);
         } else {
             setError(null);
-            setIsConfirmed(true);
-            if (stompClient && stompClient.connected) {
+            if (stompClient?.connected) {
                 stompClient.publish({
                     destination: "/app/config-confirmed",
-                    body: JSON.stringify(config),
+                    body: JSON.stringify({ ...config, playerId }),
                 });
             }
+        }
+    };
+
+    const handleNext = () => {
+        if (isBothConfirmed && stompClient?.connected) {
+            localStorage.setItem("gameConfig", JSON.stringify(config));
+            stompClient.publish({ destination: "/topic/navigate", body: "next" });
+        }
+    };
+
+    const handleBack = () => {
+        if (stompClient?.connected) {
+            stompClient.publish({ destination: "/topic/navigate", body: "back" });
         }
     };
 
@@ -126,7 +144,33 @@ export default function StartPage() {
                         Confirm Config
                     </button>
                 </div>
+            </div>
 
+            <div
+                onClick={handleBack}
+                className="absolute cursor-pointer bottom-10 left-20"
+            >
+                <Image
+                    src="/image/back-button.png"
+                    alt="back"
+                    width={150}
+                    height={150}
+                    className="hover:opacity-75 transition-opacity"
+                />
+            </div>
+
+            <div
+                onClick={isBothConfirmed ? handleNext : undefined}
+                className={`absolute cursor-pointer bottom-10 right-20 transition-opacity ${
+                    isBothConfirmed ? "hover:opacity-75" : "opacity-50 cursor-not-allowed"
+                }`}
+            >
+                <Image
+                    src="/image/next-button.png"
+                    alt="next"
+                    width={150}
+                    height={150}
+                />
             </div>
         </main>
     );

@@ -26,6 +26,7 @@ public class Player {
     private int lastSpawnMinionTurn = -1;
     private boolean hasBoughtAreaThisTurn = false;
     private boolean hasSpawnedMinionThisTurn = false;
+    private String sessionId;
 
     public Player(String name) {
         this.name = name;
@@ -35,6 +36,14 @@ public class Player {
         this.area = new ArrayList<Hex>();
         this.spawnedMinions = new ArrayList<>();
     }
+    public Object get() {
+        return this;
+    }
+
+    public void set(String sessionId) {
+        this.sessionId = sessionId ;
+    }
+
 
     public String getName() {
         return this.name;

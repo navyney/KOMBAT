@@ -1,25 +1,20 @@
-"use client";
-
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { useWebSocket } from "@/hooks/useWebsocket";
-import { setOnlineUsers } from "@/stores/slices/onlineUsersSlice";
+import { connectWebSocket } from "@/stores/slices/webSocketSlice";
 
-export const WebSocketProvider = ({ children }: { children: React.ReactNode }) => {
-    const { connect, subscribe } = useWebSocket();
+interface Props {
+    children: React.ReactNode;
+}
+
+const WebSocketProvider: React.FC<Props> = ({ children }) => {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        connect();
+        // Connect WebSocket only once when app starts
+        dispatch(connectWebSocket());
 
-        const subscription = subscribe("/topic/onlineUsers", (message) => {
-            dispatch(setOnlineUsers(Number(message.body)));
-        });
-
-        return () => {
-            subscription?.unsubscribe();
-        };
-    }, [connect, subscribe, dispatch]);
+        // Do NOT disconnect on unmount to persist WebSocket across pages
+    }, [dispatch]);
 
     return <>{children}</>;
 };
