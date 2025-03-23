@@ -1,6 +1,7 @@
 package backend.KOMBOOD.game;
 
 import backend.KOMBOOD.config.ConfigFile;
+import backend.KOMBOOD.entity.Bot;
 import backend.KOMBOOD.entity.Minion;
 import backend.KOMBOOD.entity.MinionType;
 import backend.KOMBOOD.entity.Player;
@@ -44,6 +45,8 @@ public class GameState { // player1 and player2 can play in terminal and show ga
 
     private MapMap gameMap;
 
+    private GameModeType gameMode;
+
     private List<MinionType> minionsShop = new ArrayList<MinionType>();
 
     public static int getCurrent_turns() {
@@ -56,12 +59,13 @@ public class GameState { // player1 and player2 can play in terminal and show ga
 
     //Choose Mode before GameState
 
-    public GameState(Player player1, Player player2, MapMap gameMap) { // not done
+    public GameState(Player player1, Player player2, MapMap gameMap, GameModeType gameMode) { // not done
         this.player1 = player1;
         this.player2 = player2;
         this.gameMap = gameMap;
         this.currentPlayer = player1;
         this.current_turns = 1;
+        this.gameMode = gameMode;
     }
 
     public void setConfig(ConfigFile config) { // maybe need to add config file here, not done
@@ -212,6 +216,7 @@ public class GameState { // player1 and player2 can play in terminal and show ga
         String command = s.nextLine();
         while(command.equals("buy area") || command.equals("spawn minion")) {
             if (command.equals("buy area")) {
+                System.out.println("Enter area to buy (row column):");
                 int r = s.nextInt();
                 int c = s.nextInt();
                 s.nextLine();
@@ -232,9 +237,10 @@ public class GameState { // player1 and player2 can play in terminal and show ga
 //                }
             } else if (command.equals("spawn minion")) {
                 System.out.print("Your minions: ");
-                for (Minion m : player.getMinion()) {
-                    System.out.print("Minion name: " + m.getName() + " ");
-                }
+//                for (Minion m : player.getMinion()) {
+//                    System.out.print("Minion name: " + m.getName() + " ");
+//                }
+                MinionType.displayMinionTypes();
                 System.out.println("Enter minion name to spawn:");
                 String minionName = s.nextLine();
 
@@ -260,7 +266,7 @@ public class GameState { // player1 and player2 can play in terminal and show ga
             // check ว่า minion ถูก spawn แล้วหรือยัง
             if (minion.isSpawned()) {
                 // for Debug
-                System.out.println("Executing strategy for minion: " + minion.getName());
+                System.out.println("Executing strategy for minion: " + minion.getName() + " (" + minion.getRow() + "," + minion.getCol() + ")");
 
                 Strategy strategy = minion.getType().getStrategy();
                 strategy.evaluator(minion);
@@ -284,7 +290,11 @@ public class GameState { // player1 and player2 can play in terminal and show ga
 
             // Player 1 Action: buy, spawn
             System.out.println(player1.getName() + " buy area, spawn minion");
-            action(player1);
+            if(gameMode.ordinal() == 0 || gameMode.ordinal() == 1){
+                action(player1);
+            }else{
+                player1.takeTurn(gameMap);
+            }
             gameMap.printMap();
 
             // Check Winner after Player 1's turn
@@ -306,7 +316,12 @@ public class GameState { // player1 and player2 can play in terminal and show ga
 
             // Player 2 Action: buy, spawn
             System.out.println(player2.getName() + " buy area, spawn minion");
-            action(player2);
+//            action(player2);
+            if(gameMode.ordinal() == 0){
+                action(player2);
+            }else{
+                player2.takeTurn(gameMap);
+            }
             gameMap.printMap();
 
             // Execute Minions by Strategy

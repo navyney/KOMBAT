@@ -1,6 +1,7 @@
 package backend.KOMBOOD.game;
 
 import backend.KOMBOOD.config.ConfigFile;
+import backend.KOMBOOD.entity.Bot;
 import backend.KOMBOOD.entity.Player;
 import backend.KOMBOOD.error.EvalError;
 import backend.KOMBOOD.error.LexicalError;
@@ -12,7 +13,7 @@ public class Main {
 
     private static ConfigFile config = new ConfigFile(
             100, 100, 1000, 100,
-            90, 23456, 5, 5,
+            90, 23456, 5, 100,
             47, 50, 75);
 
     public static ConfigFile getConfig() {
@@ -63,13 +64,18 @@ public class Main {
         MapMap gameMap = new MapMap(8, 8);
         Player player1 = new Player("Player1");
         Player player2 = new Player("Player2");
-        GameState gameState = new GameState(player1, player2, gameMap);
+        GameMode gameMode = new GameMode();
+        gameMode.setGameMode(GameModeType.AUTO);
+        GameModeType gameModeType = gameMode.getGameMode();
+        GameState gameState = new GameState(player1, player2, gameMap, gameModeType);
         gameState.setConfig(config);
 
         gameMap.createMap();
         //gameMap.printMap();
         gameState.setup();
         gameState.gameloop();
+        gameState.endGame();
+
 
 
 
@@ -109,7 +115,8 @@ public class Main {
 //public class Main {
 //    public static void main(String[] args) throws LexicalError, EvalError {
 //        StatementParser p = new StatementParser(new ExprTokenizer("""
-//                t = t + 1
+//                t = 0
+//		          t = t + 1
 //                m = 0
 //                while (3 - m) {
 //                  if (budget - 100) then {} else done

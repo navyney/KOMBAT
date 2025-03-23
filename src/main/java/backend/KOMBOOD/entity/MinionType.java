@@ -56,4 +56,8 @@ public class MinionType {
     public Strategy getStrategy() {
         return strategy;
     }
+
+    public static MinionType[] getAllMinionTypes() {
+        return minionTypes.values().toArray(new MinionType[0]);
+    }
 }

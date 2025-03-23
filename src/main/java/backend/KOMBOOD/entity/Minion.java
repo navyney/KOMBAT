@@ -1,6 +1,7 @@
 package backend.KOMBOOD.entity;
 
 import backend.KOMBOOD.config.ConfigFile;
+import backend.KOMBOOD.game.GameState;
 import backend.KOMBOOD.map.HexHex;
 import backend.KOMBOOD.map.MapMap;
 import backend.KOMBOOD.game.Main;
@@ -16,6 +17,7 @@ public class Minion {
     private int col = -1 ;
     private Player owner;
     private HashMap<String,Long> hmIdentifier = new HashMap<>();
+    private static HashMap<String,Long> hmGlobalIdentifier = new HashMap<>();
     private MapMap map;
     private ConfigFile config = Main.getConfig();
     private boolean actedThisTurn = false;
@@ -26,6 +28,14 @@ public class Minion {
         this.hp = hp;
         this.owner = owner;
         this.map = map;
+    }
+
+    public Minion(Minion other){
+        this.name = other.type.getTypeName();
+        this.type = other.type;
+        this.hp = other.hp;
+        this.owner = other.owner;
+        this.map = other.map;
     }
 
     //for debug
@@ -59,11 +69,17 @@ public class Minion {
     }
 
     public boolean onMap(int r, int c) {
+        if(r>7 || c>7 || r<0 || c<0){return false;}
         return this.map.isMinionHere(r, c);
     }
 
     public void assign(String identifier,long val){
-        hmIdentifier.put(identifier,val);
+        if(Character.isUpperCase(identifier.charAt(0))){
+            hmGlobalIdentifier.put(identifier,val);
+        }
+        else{
+            hmIdentifier.put(identifier,val);
+        }
     }
 
     public int getHp() {
@@ -84,6 +100,10 @@ public class Minion {
 
     public long getValueIdentifier(String identifier){
         return hmIdentifier.get(identifier);
+    }
+
+    public static long getValueGlobalVariable(String identifier){
+        return hmGlobalIdentifier.get(identifier);
     }
 
     public boolean spawn(int r, int c) throws IOException {
@@ -199,6 +219,8 @@ public class Minion {
         if (hp <= 0) {
             owner.getMinion().remove(this);
             map.removeMinion(this.row, this.col);
+            owner.removeMinion(this);
+            GameState.MinionOnMapMap.remove(this);
             System.out.println(name + " has been destroyed!");
         }
     }
@@ -212,23 +234,38 @@ public class Minion {
 
         int targetRow = this.row ;
         int targetCol = this.col ;
-
         if (direction == 1) { // up
             targetRow -= 1;
         } else if (direction == 2) { // upright
-            targetRow -= 1;
-            targetCol += 1;
+            if ( this.col%2 == 1 ) {
+                targetCol += 1 ;
+                targetRow -= 1 ;
+            } else {
+                targetCol += 1 ;
+            }
         } else if (direction == 3) { // downright
-            targetRow += 1;
-            targetCol += 1;
+            if ( this.col%2 == 1 ) {
+                targetCol += 1 ;
+            } else {
+                targetCol += 1 ;
+                targetRow += 1 ;
+            }
         } else if (direction == 4) { // down
             targetRow += 1;
         } else if (direction == 5) { // downleft
-            targetRow += 1;
-            targetCol -= 1;
-        } else if (direction == 6) { // upleft
-            targetRow -= 1;
-            targetCol -= 1;
+            if ( this.col%2 == 1 ) {
+                targetCol -= 1 ;
+            } else {
+                targetCol -= 1;
+                targetRow += 1;
+            }
+            } else if (direction == 6) { // upleft
+            if ( this.col%2 == 1 ) {
+                targetCol -= 1 ;
+                targetRow -= 1 ;
+            } else {
+                targetCol -= 1 ;
+            }
         } else {
             throw new IllegalArgumentException("Invalid direction");
         }
@@ -236,6 +273,7 @@ public class Minion {
         if (targetRow < 0 || targetRow >= map.getRows() || targetCol < 0 || targetCol >= map.getCols()) {
             owner.setBudget(owner.getBudget() - damage);
             System.out.println("There is not on the map at all LOL");
+            return ;
         }
 
         if (Math.abs(targetRow - this.row) > 1 || Math.abs(targetCol - this.col) > 1) {
