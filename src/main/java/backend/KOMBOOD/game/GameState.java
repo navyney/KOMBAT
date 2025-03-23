@@ -19,8 +19,8 @@ import java.io.IOException;
 import java.util.Scanner;
 
 public class GameState { // player1 and player2 can play in terminal and show gameMap while playing turn blablabla
-    private static Player player1;
-    private Player player2;
+    public static Player player1;
+    public static Player player2;
 
     public static ArrayList<Minion> MinionOnMapMap = new ArrayList<>();
 

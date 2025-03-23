@@ -2,67 +2,125 @@
 
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
+import SockJS from "sockjs-client";
+import { Client } from "@stomp/stompjs";
+import { useAppDispatch, useAppSelector } from "@/stores/hook";
+import { updateConfig, confirmConfig } from "@/stores/slices/configSlice";
 
-// สาธุขอให้ push ได้
-
-export default function StartPage() {
+export default function ConfigPage() {
     const router = useRouter();
-    const [config, setConfig] = useState({
-        spawnedCost: "" as number | "",
-        hexPurchasedCost: "" as number | "",
-        initialBudget: "" as number | "",
-        initialHP: "" as number | "",
-        turnBudget: "" as number | "",
-        maxBudget: "" as number | "",
-        interestPercentage: "" as number | "",
-        maxTurn: "" as number | "",
-        maxSpawn: "" as number | "",
-    });
+    const dispatch = useAppDispatch();
+
+    const config = useAppSelector((state) => state.config.config || {});
+    const confirmedPlayers = useAppSelector((state) => state.config.confirmedPlayers);
 
     const [error, setError] = useState<string | null>(null);
-    const [isConfirmed, setIsConfirmed] = useState(false);
+    const [players, setPlayers] = useState(0);
+    const [stompClient, setStompClient] = useState<Client | null>(null);
+
+    const playerId = typeof window !== "undefined" ? localStorage.getItem("playerId") || "" : "";
+
+    const isBothConfirmed = Object.values(confirmedPlayers ?? {}).length === 2 &&
+        Object.values(confirmedPlayers ?? {}).every((val) => val);
 
     useEffect(() => {
-        const savedConfig = localStorage.getItem("gameConfig");
-        if (savedConfig) {
-            setConfig(JSON.parse(savedConfig));
-        }
-    }, []);
+        const socket = new SockJS("http://localhost:8080/ws");
+        const client = new Client({
+            webSocketFactory: () => socket,
+            reconnectDelay: 5000,
+        });
+
+        client.onConnect = () => {
+            console.log(`${playerId} is joined`);
+
+            client.publish({
+                destination: "/app/join-config-setup",
+                body: JSON.stringify({playerId}),
+            });
+
+            client.subscribe("/topic/player-count", (message) => {
+                const count = JSON.parse(message.body);
+                setPlayers(count);
+            });
+
+            client.subscribe("/topic/config-update", (message) => {
+                const newConfig = JSON.parse(message.body);
+                dispatch(updateConfig(newConfig));
+                dispatch(confirmConfig("reset"));
+            });
+
+            client.subscribe("/topic/config-confirmed", (message) => {
+                const { playerId: confirmId } = JSON.parse(message.body);
+                dispatch(confirmConfig(confirmId));
+            });
+
+            client.subscribe("/topic/navigate", (message) => {
+                const action = message.body;
+                if (action === "next") router.push("/select-type");
+                else if (action === "back") router.push("/select-mode");
+            });
+        };
+
+        client.activate();
+        setStompClient(client);
+
+        return () => {
+            client.deactivate();
+        };
+    }, [dispatch, router, playerId]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         if (value === "" || (!isNaN(Number(value)) && Number(value) >= 0)) {
-            setConfig({ ...config, [e.target.name]: value === "" ? "" : parseFloat(value) });
+            const updatedConfig = { ...config, [e.target.name]: value === "" ? "" : parseFloat(value) };
+            dispatch(updateConfig(updatedConfig));
+            dispatch(confirmConfig("reset"));
+
+            if (stompClient?.connected) {
+                stompClient.publish({
+                    destination: "/app/config-update",
+                    body: JSON.stringify(updatedConfig),
+                });
+            }
         }
-        setIsConfirmed(false);
     };
 
     const handleConfirm = () => {
         const hasError = Object.values(config).some(value => value === "" || isNaN(Number(value)));
         if (hasError) {
             setError("Allow only numbers. Please check your inputs.");
-            setIsConfirmed(false);
         } else {
             setError(null);
-            setIsConfirmed(true);
-            localStorage.setItem("gameConfig", JSON.stringify(config));
+            if (stompClient?.connected) {
+                stompClient.publish({
+                    destination: "/app/config-confirmed",
+                    body: JSON.stringify({ ...config, playerId }),
+                });
+            }
         }
     };
 
     const handleNext = () => {
-        if (isConfirmed) {
+        if (isBothConfirmed && stompClient?.connected) {
             localStorage.setItem("gameConfig", JSON.stringify(config));
-            router.push("/select-type");
+            stompClient.publish({ destination: "/topic/navigate", body: "next" });
+        }
+    };
+
+    const handleBack = () => {
+        if (stompClient?.connected) {
+            stompClient.publish({ destination: "/topic/navigate", body: "back" });
         }
     };
 
     return (
         <main className="flex flex-col items-center justify-center min-h-screen bg-cover bg-center w-full h-full p-8"
-              style={{backgroundImage: "url('/image/config.png')"}}>
+              style={{ backgroundImage: "url('/image/config.png')" }}>
 
             <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg mt-16 space-y-4 space-x-5">
                 <h1 className="text-xl font-bold text-center">Set Up Your Game Configuration</h1>
+                <p className="text-center text-gray-600">Players Connected: {players} / 2</p>
                 {Object.keys(config).map((key) => (
                     <div key={key} className="flex justify-between items-center">
                         <label className="font-medium capitalize">{key.replace(/([A-Z])/g, ' $1')} :</label>
@@ -86,11 +144,10 @@ export default function StartPage() {
                         Confirm Config
                     </button>
                 </div>
-
             </div>
 
             <div
-                onClick={() => router.push("/select-mode")}
+                onClick={handleBack}
                 className="absolute cursor-pointer bottom-10 left-20"
             >
                 <Image
@@ -103,9 +160,9 @@ export default function StartPage() {
             </div>
 
             <div
-                onClick={handleNext}
-                className={`absolute cursor-pointer bottom-10 right-20 ${
-                    !isConfirmed ? "opacity-50 cursor-not-allowed" : "hover:opacity-75 transition-opacity"
+                onClick={isBothConfirmed ? handleNext : undefined}
+                className={`absolute cursor-pointer bottom-10 right-20 transition-opacity ${
+                    isBothConfirmed ? "hover:opacity-75" : "opacity-50 cursor-not-allowed"
                 }`}
             >
                 <Image
@@ -113,7 +170,6 @@ export default function StartPage() {
                     alt="next"
                     width={150}
                     height={150}
-                    className="hover:opacity-75 transition-opacity"
                 />
             </div>
         </main>

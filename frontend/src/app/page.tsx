@@ -7,7 +7,7 @@
 //       </div>
 //   );
 // }
-
+"use client";
 // @ts-ignore
 import Page from "./start/page";
 
