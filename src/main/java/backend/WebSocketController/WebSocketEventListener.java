@@ -33,7 +33,8 @@ public class WebSocketEventListener {
         if (sessionId != null && sessionIds.contains(sessionId)) {
             sessionIds.remove(sessionId);
             int remaining = Math.max(0, playerCount.decrementAndGet());
-            System.out.println("🔌 A user disconnected. Remaining: " + remaining);
+            System.out.println("⛔️ Player disconnected: " + sessionPlayerMap.get(sessionId));
+            System.out.println("🔌 Remaining players: " + remaining);
             messagingTemplate.convertAndSend("/topic/player-count", remaining);
 
             // ✅ ใช้ sessionId ไปหา playerId
@@ -46,6 +47,9 @@ public class WebSocketEventListener {
                 } else if (playerId.equals(WebSocketController.getPlayer2Id())) {
                     WebSocketController.clearPlayer2();
                 }
+
+                // ส่งข้อความไปยัง /topic/lock-all เพื่อแจ้งให้ผู้เล่นอื่นทราบว่าห้องไม่เต็มแล้ว
+                messagingTemplate.convertAndSend("/topic/lock-all", Map.of("locked", false));
             }
         }
     }

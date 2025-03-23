@@ -13,68 +13,76 @@ export default function SelectModePage() {
     const [roomFull, setFull] = useState(false);
 
     useEffect(() => {
-        // ✅ ดึงจาก localStorage ก่อนเพื่อ render ปุ่มแบบถูกต้อง
-        const storedLockedMode = localStorage.getItem("lockedMode");
-        const storedRoomFull = localStorage.getItem("roomFull");
+        const storedLockedMode = sessionStorage.getItem("lockedMode");
+        const storedRoomFull = sessionStorage.getItem("roomFull");
 
         if (storedLockedMode) {
             setLockedMode(storedLockedMode);
+        } else {
+            setLockedMode(null); // Ensure lockedMode is null if not set
         }
 
         if (storedRoomFull === "true") {
             setDisableAll(true);
             setFull(true);
+        } else {
+            setDisableAll(false);
+            setFull(false);
         }
 
-        let playerId = localStorage.getItem("playerId");
+        let playerId = sessionStorage.getItem("playerId");
         if (!playerId) {
             playerId = crypto.randomUUID();
-            localStorage.setItem("playerId", playerId);
+            sessionStorage.setItem("playerId", playerId);
         }
 
         const socket = new SockJS("http://localhost:8080/ws");
         const stompClient = new Client({
             webSocketFactory: () => socket,
             reconnectDelay: 5000,
-        });
+            onConnect: () => {
+                console.log("✅ Connected to WebSocket successfully");
+                stompClient.subscribe("/topic/role-assigned", (message) => {
+                    const { role, playerId: targetId, disableButtons } = JSON.parse(message.body);
+                    const localId = sessionStorage.getItem("playerId");
+                    if (targetId === localId) {
+                        console.log(`${role} is joined`);
+                        sessionStorage.setItem("playerRole", role);
+                        setDisableAll(disableButtons);
+                    }
+                });
 
-        stompClient.onConnect = () => {
-            stompClient.subscribe("/topic/role-assigned", (message) => {
-                const { role, playerId: targetId, disableButtons } = JSON.parse(message.body);
-                const localId = localStorage.getItem("playerId");
-                if (targetId === localId) {
-                    console.log(`${role} is joined`);
-                    localStorage.setItem("playerRole", role);
-                    setDisableAll(disableButtons);
-                }
-            });
+                stompClient.subscribe("/topic/lock-mode", (message) => {
+                    const { selectedMode } = JSON.parse(message.body);
+                    setLockedMode(selectedMode);
+                    sessionStorage.setItem("lockedMode", selectedMode);
+                });
 
-            stompClient.subscribe("/topic/lock-mode", (message) => {
-                const { selectedMode } = JSON.parse(message.body);
-                setLockedMode(selectedMode);
-                localStorage.setItem("lockedMode", selectedMode);
-            });
+                stompClient.subscribe("/topic/lock-all", () => {
+                    setDisableAll(true);
+                    setFull(true);
+                    sessionStorage.setItem("roomFull", "true");
+                });
 
-            stompClient.subscribe("/topic/lock-all", () => {
-                setDisableAll(true);
-                setFull(true);
-                localStorage.setItem("roomFull", "true");
-            });
-
-            // ✅ Sync lock state when connect
-            if (playerId) {
+                // Request current state when connecting
                 stompClient.publish({
                     destination: "/app/request-lock-status",
                     body: JSON.stringify({ playerId }),
                 });
-            }
-        };
+            },
+            onDisconnect: () => {
+                console.log("⛔️ Disconnected from WebSocket");
+            },
+        });
 
         stompClient.activate();
         setClient(stompClient);
 
         return () => {
             stompClient.deactivate();
+            // Clear lockedMode when leaving the page
+            sessionStorage.removeItem("lockedMode");
+            sessionStorage.removeItem("roomFull");
         };
     }, []);
 

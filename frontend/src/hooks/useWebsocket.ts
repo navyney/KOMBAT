@@ -1,7 +1,7 @@
 import { useDispatch } from "react-redux";
 import SockJS from "sockjs-client";
 import { Client, Message } from "@stomp/stompjs";
-import {Subscription} from "stompjs";
+import { Subscription } from "stompjs";
 
 export const useWebSocket = () => {
     const dispatch = useDispatch();
@@ -50,14 +50,14 @@ export const useWebSocket = () => {
             webSocketFactory: () => socket,
             reconnectDelay: 5000,
             onConnect: () => {
-                console.log("✅ WebSocket connected");
+                console.log("✅ Connected to WebSocket successfully");
                 stompClient?.publish({
                     destination: "/app/join-game",
                     body: playerId,
                 });
             },
             onDisconnect: () => {
-                console.log("🔌 WebSocket disconnected");
+                console.log("⛔️ Disconnected from WebSocket");
             },
         });
 
@@ -69,9 +69,9 @@ export const useWebSocket = () => {
             activeSubscriptions.forEach(sub => sub.unsubscribe());
             activeSubscriptions = [];
             stompClient.deactivate();
-            console.log("🔌 WebSocket manually disconnected");
+            console.log("⛔️ WebSocket manually disconnected");
         } else {
-            console.warn("Cannot disconnect: WebSocket not connected.");
+            console.warn("⛔️Cannot disconnect: WebSocket not connected.");
         }
     };
 

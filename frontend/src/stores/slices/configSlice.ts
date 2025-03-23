@@ -1,15 +1,15 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface GameConfig {
-    spawnedCost: number;
-    hexPurchasedCost: number;
-    initialBudget: number;
-    initialHP: number;
-    turnBudget: number;
-    maxBudget: number;
-    interestPercentage: number;
-    maxTurn: number;
-    maxSpawn: number;
+    spawnedCost: number | "";
+    hexPurchasedCost: number | "";
+    initialBudget: number | "";
+    initialHP: number | "";
+    turnBudget: number | "";
+    maxBudget: number | "";
+    interestPercentage: number | "";
+    maxTurn: number | "";
+    maxSpawn: number | "";
 }
 
 interface ConfigState {

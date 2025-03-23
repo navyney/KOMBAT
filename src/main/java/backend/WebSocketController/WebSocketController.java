@@ -41,6 +41,7 @@ public class WebSocketController {
         if (!sessionIds.contains(sessionId)) {
             sessionIds.add(sessionId);
             sessionPlayerMap.put(sessionId, playerId);
+            System.out.println("✅ Player connected: " + playerId);
         }
 
         // Send current state to the new player
@@ -50,6 +51,14 @@ public class WebSocketController {
 
         if (player1Id != null && player2Id != null) {
             messagingTemplate.convertAndSendToUser(sessionId, "/topic/lock-all", Map.of("locked", true));
+            messagingTemplate.convertAndSendToUser(sessionId, "/topic/role-assigned", Map.of(
+                    "role", "spectator",
+                    "playerId", playerId,
+                    "disableButtons", true
+            ));
+        } else if (player1Id != null) {
+            // หากมี player1 อยู่แล้ว แต่ยังไม่มี player2
+            messagingTemplate.convertAndSendToUser(sessionId, "/topic/lock-mode", Map.of("selectedMode", selectedMode));
         }
     }
 
@@ -60,13 +69,13 @@ public class WebSocketController {
         String mode = payload.get("mode");
 
         if (player1Id != null && player2Id != null) {
-            System.out.println("❌ Room is full. Assigning spectator to: " + playerId);
+            messagingTemplate.convertAndSend("/topic/lock-all", Map.of("locked", true));
             messagingTemplate.convertAndSend("/topic/role-assigned", Map.of(
                     "role", "spectator",
                     "playerId", playerId,
                     "disableButtons", true
             ));
-            messagingTemplate.convertAndSend("/topic/lock-all", Map.of("locked", true));
+            System.out.println("❌ Room is full. Assigning spectator to: " + playerId);
             return;
         }
 
@@ -79,6 +88,8 @@ public class WebSocketController {
                     "disableButtons", false
             ));
             messagingTemplate.convertAndSend("/topic/lock-mode", Map.of("selectedMode", selectedMode));
+            System.out.println("🎮 select-mode: " + playerId + " -> " + mode);
+            System.out.println("✅ current player1: " + player1Id + ", player2: " + player2Id);
             return;
         }
 
@@ -90,6 +101,8 @@ public class WebSocketController {
                     "disableButtons", true
             ));
             messagingTemplate.convertAndSend("/topic/lock-all", Map.of("locked", true));
+            System.out.println("🎮 select-mode: " + playerId + " -> " + mode);
+            System.out.println("✅ current player1: " + player1Id + ", player2: " + player2Id);
             return;
         }
 
@@ -98,7 +111,6 @@ public class WebSocketController {
                 "playerId", playerId,
                 "disableButtons", true
         ));
-
         System.out.println("🎮 select-mode: " + playerId + " -> " + mode);
         System.out.println("✅ current player1: " + player1Id + ", player2: " + player2Id);
     }
