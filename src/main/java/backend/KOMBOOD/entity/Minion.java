@@ -100,7 +100,7 @@ public class Minion {
         return hmIdentifier.get(identifier);
     }
 
-    public long getValueGlobalVariable(String identifier){
+    public static long getValueGlobalVariable(String identifier){
         return hmGlobalIdentifier.get(identifier);
     }
 

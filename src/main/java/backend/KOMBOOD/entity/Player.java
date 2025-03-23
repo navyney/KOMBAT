@@ -370,8 +370,8 @@ public class Player {
     private void buyRandomArea(MapMap map) {
         ArrayList<Hex> availableAreas = new ArrayList<>();
 
-        for (int r = 0; r < map.getRows(); r++) {
-            for (int c = 0; c < map.getCols(); c++) {
+        for (int r = 0; r <= map.getRows(); r++) {
+            for (int c = 0; c <= map.getCols(); c++) {
                 HexHex hex = (HexHex) map.getHexAt(r, c);
                 if (hex != null && hex.owner() == 0 && isAdjacentToOwnedArea(r, c, map)) {
                     availableAreas.add(hex);
