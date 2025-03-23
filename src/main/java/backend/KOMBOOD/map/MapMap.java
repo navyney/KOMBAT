@@ -70,7 +70,8 @@ public class MapMap {
     }
 
     public Minion getMinionAt(int row, int col) {
-
+        if(row>7 || col>7 || row<0 || col<0){
+            return null;}
         return minions[row][col];
     }
 
