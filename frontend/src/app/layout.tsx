@@ -1,12 +1,11 @@
 import React from "react";
-import { useDispatch } from "react-redux";
-import { connectWebSocket } from "@/stores/slices/webSocketSlice";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+
 import ClientRoot from "@/components/ClientRoot";
 import Providers from "./provider/providers";
-import WebSocketProvider from "@/providers/WebSocketProvider";
+import WebSocketProvider from "@/providers/WebSocketProvider"; // ✅ ของนาน
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -31,15 +30,15 @@ export default function RootLayout({
     return (
         <html lang="en">
         <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-y-hidden`}
+            className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-y-hidden`} // ✅ ใช้ backtick ครอบ
         >
-
         <Providers>
-            <ClientRoot>
-                {children}
-            </ClientRoot>
+            <WebSocketProvider> {/* ✅ ครอบ children ทั้งหมด */}
+                <ClientRoot>
+                    {children}
+                </ClientRoot>
+            </WebSocketProvider>
         </Providers>
-
         </body>
         </html>
     );

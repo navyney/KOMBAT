@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import {use, useEffect, useState} from "react";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
+import {useWebSocket} from "@/hooks/useWebsocket";
 
 export default function SelectModePage() {
     const router = useRouter();
@@ -11,6 +12,11 @@ export default function SelectModePage() {
     const [disableAll, setDisableAll] = useState(false);
     const [lockedMode, setLockedMode] = useState<string | null>(null);
     const [roomFull, setFull] = useState(false);
+    const { connect, sendMessage, subscribe } = useWebSocket();
+
+    useEffect(() => {
+        connect();
+    }, [connect]);
 
     useEffect(() => {
         const storedLockedMode = sessionStorage.getItem("lockedMode");
@@ -19,7 +25,7 @@ export default function SelectModePage() {
         if (storedLockedMode) {
             setLockedMode(storedLockedMode);
         } else {
-            setLockedMode(null); // Ensure lockedMode is null if not set
+            setLockedMode(null);
         }
 
         if (storedRoomFull === "true") {
@@ -30,76 +36,54 @@ export default function SelectModePage() {
             setFull(false);
         }
 
-        let playerId = sessionStorage.getItem("playerId");
+        let playerId = localStorage.getItem("playerId");
         if (!playerId) {
             playerId = crypto.randomUUID();
-            sessionStorage.setItem("playerId", playerId);
+            localStorage.setItem("playerId", playerId);
         }
 
-        const socket = new SockJS("http://localhost:8080/ws");
-        const stompClient = new Client({
-            webSocketFactory: () => socket,
-            reconnectDelay: 5000,
-            onConnect: () => {
-                console.log("✅ Connected to WebSocket successfully");
-                stompClient.subscribe("/topic/role-assigned", (message) => {
-                    const { role, playerId: targetId, disableButtons } = JSON.parse(message.body);
-                    const localId = sessionStorage.getItem("playerId");
-                    if (targetId === localId) {
-                        console.log(`${role} is joined`);
-                        sessionStorage.setItem("playerRole", role);
-                        setDisableAll(disableButtons);
-                    }
-                });
-
-                stompClient.subscribe("/topic/lock-mode", (message) => {
-                    const { selectedMode } = JSON.parse(message.body);
-                    setLockedMode(selectedMode);
-                    sessionStorage.setItem("lockedMode", selectedMode);
-                });
-
-                stompClient.subscribe("/topic/lock-all", () => {
-                    setDisableAll(true);
-                    setFull(true);
-                    sessionStorage.setItem("roomFull", "true");
-                });
-
-                // Request current state when connecting
-                stompClient.publish({
-                    destination: "/app/request-lock-status",
-                    body: JSON.stringify({ playerId }),
-                });
-            },
-            onDisconnect: () => {
-                console.log("⛔️ Disconnected from WebSocket");
-            },
+        // ✅ subscribe topic
+        const roleSub = subscribe("/topic/role-assigned", (message) => {
+            const { role, playerId: targetId, disableButtons } = JSON.parse(message.body);
+            const localId = sessionStorage.getItem("playerId")
+            if (targetId === localId) {
+                console.log(`${role} is joined`);
+                sessionStorage.setItem("playerRole", role);
+                setDisableAll(disableButtons);
+            }
         });
 
-        stompClient.activate();
-        setClient(stompClient);
+        const lockModeSub = subscribe("/topic/lock-mode", (message) => {
+            const { selectedMode } = JSON.parse(message.body);
+            setLockedMode(selectedMode);
+            sessionStorage.setItem("lockedMode", selectedMode);
+        });
+
+        const lockAllSub = subscribe("/topic/lock-all", () => {
+            setDisableAll(true);
+            setFull(true);
+            sessionStorage.setItem("roomFull", "true");
+        });
+
+        // ✅ แจ้ง join และขอข้อมูลล่าสุด
+        sendMessage("/app/request-lock-status", JSON.stringify({ playerId }));
 
         return () => {
-            stompClient.deactivate();
+            roleSub?.unsubscribe();
+            lockModeSub?.unsubscribe();
+            lockAllSub?.unsubscribe();
             // Clear lockedMode when leaving the page
             sessionStorage.removeItem("lockedMode");
             sessionStorage.removeItem("roomFull");
         };
-    }, []);
+
+    }, [sendMessage, subscribe]);
 
     const handleModeSelect = (mode: string) => {
-        if (!client || !client.connected || disableAll || roomFull) {
-            console.log("⛔️ Cannot select mode. Room is full or disabled.");
-            return;
-        }
-
         const playerId = localStorage.getItem("playerId");
-        if (!playerId) return;
+        if (!playerId || disableAll || roomFull) return;
 
-        client.publish({
-            destination: "/app/select-mode",
-            body: JSON.stringify({ mode, playerId }),
-        });
-
+        sendMessage("/app/select-mode", { mode, playerId });
         router.push("/Config-set-up");
     };
 

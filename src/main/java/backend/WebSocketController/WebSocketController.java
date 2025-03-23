@@ -156,9 +156,19 @@ public class WebSocketController {
     }
 
     @MessageMapping("/navigate")
-    public void handleNavigation(@Payload String action) {
-        messagingTemplate.convertAndSend("/topic/navigate", action);
+    public void handleNavigation(@Payload Map<String, String> payload) {
+        String action = payload.get("action");
+
+        Map<String, String> navPayload = new HashMap<>();
+        navPayload.put("action", action);
+        navPayload.put("playerId", payload.get("playerId"));
+        navPayload.put("player1", player1Id != null ? player1Id : "");
+        navPayload.put("player2", player2Id != null ? player2Id : "");
+
+        messagingTemplate.convertAndSend("/topic/navigate", navPayload);
     }
+
+
 
     public static void clearPlayer1() {
         player1Id = null;
@@ -169,4 +179,29 @@ public class WebSocketController {
         player2Id = null;
     }
 
+    @MessageMapping("/join-select-minion-type")
+    public void handleJoinSelectMinionType(@Payload Map<String, String> payload, SimpMessageHeaderAccessor headerAccessor) {
+        String playerId = payload.get("playerId");
+        String sessionId = headerAccessor.getSessionId();
+
+        if(!sessionPlayerMap.containsKey(sessionId)) {
+            sessionIds.add(sessionId);
+            sessionPlayerMap.put(sessionId, playerId);
+            int count = playerCount.incrementAndGet();
+            messagingTemplate.convertAndSend("/topic/player-count", Math.min(count, 2));
+        }
+
+        if (!sessionIds.contains(sessionId)) {
+            sessionIds.add(sessionId);
+            sessionPlayerMap.put(sessionId, playerId);
+            System.out.println("✅ Player connected: " + playerId);
+        }
+    }
+
+    @MessageMapping("/select-minion-type-update")
+    public void handleSelectMinionTypeUpdate(@Payload WebSocketDTO config) {
+        System.out.println("📥 MINION TYPE RECEIVED FROM FRONTEND: " + config);
+        messagingTemplate.convertAndSend("/topic/config-update", config);
+        messagingTemplate.convertAndSend("/topic/config-reset-confirmed", config.getPlayerId());
+    }
 }

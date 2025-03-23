@@ -94,12 +94,12 @@ public class GameState { // player1 and player2 can play in terminal and show ga
 
         //add their area
         player1.setArea(1, 1, gameMap);
-        player1.setArea(1, 2, gameMap);
+        player1.setArea(7, 7, gameMap);
         player1.setArea(1, 3, gameMap);
         player1.setArea(2, 1, gameMap);
         player1.setArea(2, 2, gameMap);
 
-        player2.setArea(7, 7, gameMap);
+        player2.setArea(1, 2, gameMap);
         player2.setArea(7, 8, gameMap);
         player2.setArea(8, 6, gameMap);
         player2.setArea(8, 7, gameMap);

@@ -5,7 +5,7 @@ import { Subscription } from "stompjs";
 
 export const useWebSocket = () => {
     const dispatch = useDispatch();
-    const serverUrl = process.env.API_BASE_URL;
+    const serverUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
     let stompClient: Client | null = null;
     let activeSubscriptions: Subscription[] = [];
 

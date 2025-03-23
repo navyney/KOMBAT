@@ -9,7 +9,7 @@ public class MinionType {
     private String name;
     private int defense;
     private Strategy strategy; // Strategy ของมินเนี่ยน
-    private static Map<String, MinionType> minionTypes = new HashMap<>();
+    public static Map<String, MinionType> minionTypes = new HashMap<>();
 
     public MinionType(String name, int defense, Strategy strategy) {
         this.name = name;
