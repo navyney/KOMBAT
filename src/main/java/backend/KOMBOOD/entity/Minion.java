@@ -69,7 +69,10 @@ public class Minion {
     }
 
     public boolean onMap(int r, int c) {
-        if(r>7 || c>7 || r<0 || c<0){return false;}
+        if(r>7 || c>7 || r<0 || c<0){
+//            System.out.println("False");
+            return false;}
+        //System.out.println("True");
         return this.map.isMinionHere(r, c);
     }
 
@@ -121,6 +124,7 @@ public class Minion {
             if (!map.isWall(this.row, this.col) && !map.isMinionHere(this.row, this.col)) {
                 map.placeMinion(this.row, this.col, this);
                 owner.addMinion(this);
+//                map.printMinions(8,8);
                 return true;
             } else {
                 System.out.println("Cannot spawn minion here!");
@@ -130,6 +134,7 @@ public class Minion {
             System.out.println("You do not own this area!");
             return false;
         }
+
     }
 
     public void move(int direction) {

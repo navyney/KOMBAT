@@ -65,7 +65,7 @@ public class Main {
         Player player1 = new Player("Player1");
         Player player2 = new Player("Player2");
         GameMode gameMode = new GameMode();
-        gameMode.setGameMode(GameModeType.AUTO);
+        gameMode.setGameMode(GameModeType.DUEL);
         GameModeType gameModeType = gameMode.getGameMode();
         GameState gameState = new GameState(player1, player2, gameMap, gameModeType);
         gameState.setConfig(config);
