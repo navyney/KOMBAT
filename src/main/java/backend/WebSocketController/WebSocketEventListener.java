@@ -27,19 +27,19 @@ public class WebSocketEventListener {
         String sessionId = headerAccessor.getSessionId();
 
         Set<String> sessionIds = WebSocketController.getSessionIds();
-        AtomicInteger playerCount = WebSocketController.getPlayerCount();
         Map<String, String> sessionPlayerMap = WebSocketController.getSessionPlayerMap();
 
         if (sessionId != null && sessionIds.contains(sessionId)) {
             sessionIds.remove(sessionId);
-            int remaining = Math.max(0, playerCount.decrementAndGet());
-            System.out.println("⛔️ Player disconnected: " + sessionPlayerMap.get(sessionId));
-            System.out.println("🔌 Remaining players: " + remaining);
-            messagingTemplate.convertAndSend("/topic/player-count", remaining);
 
-            // ✅ ใช้ sessionId ไปหา playerId
             String playerId = sessionPlayerMap.get(sessionId);
-            sessionPlayerMap.remove(sessionId); // ล้าง mapping
+            sessionPlayerMap.remove(sessionId);
+
+            System.out.println("⛔️ Player disconnected: " + playerId);
+
+            long count = sessionPlayerMap.values().stream().distinct().count();
+            messagingTemplate.convertAndSend("/topic/player-count", Math.min((int) count, 2));
+            System.out.println("👥 Updated player count: " + count);
 
             if (playerId != null) {
                 if (playerId.equals(WebSocketController.getPlayer1Id())) {
@@ -48,7 +48,6 @@ public class WebSocketEventListener {
                     WebSocketController.clearPlayer2();
                 }
 
-                // ส่งข้อความไปยัง /topic/lock-all เพื่อแจ้งให้ผู้เล่นอื่นทราบว่าห้องไม่เต็มแล้ว
                 messagingTemplate.convertAndSend("/topic/lock-all", Map.of("locked", false));
             }
         }
@@ -58,20 +57,31 @@ public class WebSocketEventListener {
 //    public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
 //        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 //        String sessionId = headerAccessor.getSessionId();
-//        String playerId = WebSocketController.getSessionPlayerMap().get(sessionId);
+//
 //        Set<String> sessionIds = WebSocketController.getSessionIds();
 //        AtomicInteger playerCount = WebSocketController.getPlayerCount();
+//        Map<String, String> sessionPlayerMap = WebSocketController.getSessionPlayerMap();
 //
 //        if (sessionId != null && sessionIds.contains(sessionId)) {
 //            sessionIds.remove(sessionId);
 //            int remaining = Math.max(0, playerCount.decrementAndGet());
-//            System.out.println("🔌 A user disconnected. Remaining: " + remaining);
+//            System.out.println("⛔️ Player disconnected: " + sessionPlayerMap.get(sessionId));
+//            System.out.println("🔌 Remaining players: " + remaining);
 //            messagingTemplate.convertAndSend("/topic/player-count", remaining);
 //
-//            if (sessionId.equals(WebSocketController.getPlayer1Id())) {
-//                WebSocketController.clearPlayer1();
-//            } else if (sessionId.equals(WebSocketController.getPlayer2Id())) {
-//                WebSocketController.clearPlayer2();
+//            // ✅ ใช้ sessionId ไปหา playerId
+//            String playerId = sessionPlayerMap.get(sessionId);
+//            sessionPlayerMap.remove(sessionId); // ล้าง mapping
+//
+//            if (playerId != null) {
+//                if (playerId.equals(WebSocketController.getPlayer1Id())) {
+//                    WebSocketController.clearPlayer1();
+//                } else if (playerId.equals(WebSocketController.getPlayer2Id())) {
+//                    WebSocketController.clearPlayer2();
+//                }
+//
+//                // ส่งข้อความไปยัง /topic/lock-all เพื่อแจ้งให้ผู้เล่นอื่นทราบว่าห้องไม่เต็มแล้ว
+//                messagingTemplate.convertAndSend("/topic/lock-all", Map.of("locked", false));
 //            }
 //        }
 //    }

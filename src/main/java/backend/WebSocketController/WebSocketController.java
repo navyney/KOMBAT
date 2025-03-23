@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Controller
@@ -22,7 +23,8 @@ public class WebSocketController {
     private final SimpMessagingTemplate messagingTemplate;
 
     @Getter
-    private static final Set<String> sessionIds = new HashSet<>();
+    //private static final Set<String> sessionIds = new HashSet<>();
+    private static final Set<String> sessionIds = ConcurrentHashMap.newKeySet();
     @Getter
     private static final AtomicInteger playerCount = new AtomicInteger(0);
     @Getter
@@ -32,7 +34,8 @@ public class WebSocketController {
     @Getter
     private static String selectedMode = null;
     @Getter
-    private static final Map<String, String> sessionPlayerMap = new HashMap<>();
+    //private static final Map<String, String> sessionPlayerMap = new HashMap<>();
+    private static final Map<String, String> sessionPlayerMap = new ConcurrentHashMap<>();
 
     @MessageMapping("/join-game")
     public void handleJoinGame(@Payload Map<String, String> payload, SimpMessageHeaderAccessor accessor) {
@@ -129,17 +132,47 @@ public class WebSocketController {
         }
     }
 
+//    @MessageMapping("/join-config-setup")
+//    public void handleJoinConfig(@Payload Map<String, String> payload, SimpMessageHeaderAccessor headerAccessor) {
+//        String sessionId = headerAccessor.getSessionId();
+//        String playerId = payload.get("playerId");
+////        if (!sessionIds.contains(sessionId)) {
+////            sessionIds.add(sessionId);
+////            sessionPlayerMap.put(sessionId, playerId);
+////            int count = playerCount.incrementAndGet();
+////            messagingTemplate.convertAndSend("/topic/player-count", Math.min(count, 2));
+////        }
+//
+//        if (!sessionPlayerMap.containsKey(sessionId)) {
+//            sessionIds.add(sessionId);
+//            sessionPlayerMap.put(sessionId, playerId);
+//        }
+//
+//        long count = sessionPlayerMap.values().stream().distinct().count();
+//        messagingTemplate.convertAndSend("/topic/player-count", Math.min((int) count, 2));
+//    }
+
     @MessageMapping("/join-config-setup")
     public void handleJoinConfig(@Payload Map<String, String> payload, SimpMessageHeaderAccessor headerAccessor) {
         String sessionId = headerAccessor.getSessionId();
         String playerId = payload.get("playerId");
 
-        if (!sessionIds.contains(sessionId)) {
-            sessionIds.add(sessionId);
-            sessionPlayerMap.put(sessionId, playerId);
-            int count = playerCount.incrementAndGet();
-            messagingTemplate.convertAndSend("/topic/player-count", Math.min(count, 2));
+        // ตรวจสอบว่ามี sessionId นี้หรือยัง
+        if (!sessionPlayerMap.containsKey(sessionId)) {
+            sessionIds.add(sessionId); // สำหรับ tracking session
+            sessionPlayerMap.put(sessionId, playerId); // ผูก sessionId กับ playerId
         }
+
+        // ✅ นับจำนวน playerId ที่ไม่ซ้ำกัน (distinct) จากทุก session
+        long distinctPlayerCount = sessionPlayerMap.values().stream().distinct().count();
+
+        // ✅ จำกัดไว้ไม่ให้เกิน 2 คน
+        int limitedCount = Math.min((int) distinctPlayerCount, 2);
+
+        // ส่งจำนวนผู้เล่นไปยัง frontend
+        messagingTemplate.convertAndSend("/topic/player-count", limitedCount);
+
+        System.out.println("👥 Players in Config-set-up: " + distinctPlayerCount);
     }
 
     @MessageMapping("/config-update")

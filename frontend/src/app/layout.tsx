@@ -36,7 +36,9 @@ export default function RootLayout({
 
         <Providers>
             <ClientRoot>
-                {children}
+                <WebSocketProvider>
+                    {children}
+                </WebSocketProvider>
             </ClientRoot>
         </Providers>
 
