@@ -24,6 +24,11 @@ export default function ConfigPage() {
     const isBothConfirmed = Object.values(confirmedPlayers ?? {}).length === 2 &&
         Object.values(confirmedPlayers ?? {}).every((val) => val);
 
+    const youConfirmed = playerId && confirmedPlayers[playerId];
+    const opponentConfirmed = Object.entries(confirmedPlayers).some(
+        ([id, confirmed]) => id !== playerId && confirmed
+    );
+
     useEffect(() => {
         const socket = new SockJS("http://localhost:8080/ws");
         const client = new Client({
@@ -47,7 +52,6 @@ export default function ConfigPage() {
             client.subscribe("/topic/config-update", (message) => {
                 const newConfig = JSON.parse(message.body);
                 dispatch(updateConfig(newConfig));
-                dispatch(confirmConfig("reset"));
             });
 
             client.subscribe("/topic/config-confirmed", (message) => {
@@ -60,6 +64,11 @@ export default function ConfigPage() {
                 if (action === "next") router.push("/select-type");
                 else if (action === "back") router.push("/select-mode");
             });
+
+            client.subscribe("/topic/config-reset-confirmed", () => {
+                dispatch(confirmConfig("reset"));
+            });
+
         };
 
         client.activate();
@@ -71,33 +80,33 @@ export default function ConfigPage() {
     }, [dispatch, router, playerId]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
+        const { name, value } = e.target;
+        const key = name as keyof typeof config;
+
         if (value === "" || (!isNaN(Number(value)) && Number(value) >= 0)) {
-            const updatedConfig = { ...config, [e.target.name]: value === "" ? "" : parseFloat(value) };
+            const parsedValue = value === "" ? "" : parseFloat(value);
+            const updatedConfig = { ...config, [key]: parsedValue };
+
             dispatch(updateConfig(updatedConfig));
-            dispatch(confirmConfig("reset"));
+            //dispatch(confirmConfig("reset"));
 
             if (stompClient?.connected) {
                 stompClient.publish({
                     destination: "/app/config-update",
-                    body: JSON.stringify(updatedConfig),
+                    // body: JSON.stringify(updatedConfig),
+                    body: JSON.stringify({ ...updatedConfig, playerId }),
                 });
             }
         }
     };
 
     const handleConfirm = () => {
-        const hasError = Object.values(config).some(value => value === "" || isNaN(Number(value)));
-        if (hasError) {
-            setError("Allow only numbers. Please check your inputs.");
-        } else {
-            setError(null);
-            if (stompClient?.connected) {
-                stompClient.publish({
-                    destination: "/app/config-confirmed",
-                    body: JSON.stringify({ ...config, playerId }),
-                });
-            }
+        if (playerId) {
+            //dispatch(confirmConfig(playerId));
+            stompClient?.publish({
+                destination: "/app/config-confirmed",
+                body: JSON.stringify({ playerId }),
+            });
         }
     };
 
@@ -121,7 +130,7 @@ export default function ConfigPage() {
             <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg mt-16 space-y-4 space-x-5">
                 <h1 className="text-xl font-bold text-center">Set Up Your Game Configuration</h1>
                 <p className="text-center text-gray-600">Players Connected: {players} / 2</p>
-                {Object.keys(config).map((key) => (
+                {Object.keys(config).filter(key => key !== "playerId").map((key) => (
                     <div key={key} className="flex justify-between items-center">
                         <label className="font-medium capitalize">{key.replace(/([A-Z])/g, ' $1')} :</label>
                         <input
@@ -133,6 +142,19 @@ export default function ConfigPage() {
                         />
                     </div>
                 ))}
+
+                <div className='flex justify-between mt-4'>
+                    <div className='flex items-center gap-2'>
+                        <div
+                            className={`w-4 h-4 border-2 rounded ${youConfirmed ? 'bg-green-500 border-green-700' : 'bg-white'}`}/>
+                        <span className='text-sm'>You</span>
+                    </div>
+                    <div className='flex items-center gap-2'>
+                        <div
+                            className={`w-4 h-4 border-2 rounded ${opponentConfirmed ? 'bg-green-500 border-green-700' : 'bg-white'}`}/>
+                        <span className='text-sm'>Opponent</span>
+                    </div>
+                </div>
 
                 {error && <p className="text-red-500 text-center font-bold">{error}</p>}
 

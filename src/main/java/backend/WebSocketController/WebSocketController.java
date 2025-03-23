@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
@@ -143,8 +144,15 @@ public class WebSocketController {
 
     @MessageMapping("/config-update")
     public void handleConfigUpdate(@Payload WebSocketDTO config) {
+        System.out.println("📥 CONFIG RECEIVED FROM FRONTEND: " + config);
         messagingTemplate.convertAndSend("/topic/config-update", config);
-        messagingTemplate.convertAndSend("/topic/config-confirmed", config);
+        messagingTemplate.convertAndSend("/topic/config-reset-confirmed", config.getPlayerId());
+    }
+
+    @MessageMapping("/config-confirmed")
+    public void handleConfigConfirmed(@Payload WebSocketDTO dto) {
+        System.out.println("✅ CONFIRM RECEIVED FROM: " + dto.getPlayerId());
+        messagingTemplate.convertAndSend("/topic/config-confirmed", dto);
     }
 
     @MessageMapping("/navigate")

@@ -42,14 +42,14 @@ const configSlice = createSlice({
     reducers: {
         updateConfig: (state, action: PayloadAction<GameConfig>) => {
             state.config = action.payload;
-            state.confirmedBy = []; // reset confirmed status when config is updated
         },
-        confirmConfig: (state, action: PayloadAction<string | "reset">) => {
+        confirmConfig: (state, action: PayloadAction<string | "reset" | { type: "unconfirm", playerId: string }>) => {
             if (action.payload === "reset") {
                 state.confirmedPlayers = {};
-            } else {
-                const playerId = action.payload;
-                state.confirmedPlayers[playerId] = true;
+            } else if (typeof action.payload === "object" && action.payload.type === "unconfirm") {
+                delete state.confirmedPlayers[action.payload.playerId];
+            } else if (typeof action.payload === "string") {
+                state.confirmedPlayers[action.payload] = true;
             }
         },
         resetConfigConfirmation: (state) => {
