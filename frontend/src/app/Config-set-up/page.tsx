@@ -7,6 +7,9 @@ import { useAppDispatch, useAppSelector } from "@/stores/hook";
 import { updateConfig, confirmConfig } from "@/stores/slices/configSlice";
 import { useWebSocket } from "@/hooks/useWebsocket";
 import { usePlayerId } from "@/hooks/usePlayerId";
+import {resetPlayer} from "@/stores/slices/playerSlice";
+import { resetConfig } from "@/stores/slices/configSlice";
+import { resetGame } from "@/stores/slices/gameSlice";
 
 export default function ConfigPage() {
     const router = useRouter();
@@ -51,6 +54,12 @@ export default function ConfigPage() {
             const action = message.body;
             if (action === "next") router.push("/select-type");
             else if (action === "back") router.push("/select-mode");
+            else if (action === "start") {
+                dispatch(resetPlayer());
+                dispatch(resetGame());
+                dispatch(resetConfig());
+                router.push("/");
+            }
         });
 
         const subReset = subscribe("/topic/config-reset-confirmed", () => {

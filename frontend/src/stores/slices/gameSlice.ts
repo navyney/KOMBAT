@@ -25,8 +25,13 @@ const gameSlice = createSlice({
         setFull: (state, action: PayloadAction<boolean>) => {
             state.roomFull = action.payload;
         },
+        resetGame: (state) => {
+            state.lockedMode = null;
+            state.disableAll = false;
+            state.roomFull = false;
+        },
     },
 });
 
-export const { setLockedMode, setDisableAll, setFull } = gameSlice.actions;
+export const { setLockedMode, setDisableAll, setFull, resetGame } = gameSlice.actions;
 export default gameSlice.reducer;

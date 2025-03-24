@@ -42,11 +42,9 @@ public class WebSocketController {
         String sessionId = accessor.getSessionId();
         String playerId = payload.get("playerId");
 
-        if (!sessionIds.contains(sessionId)) {
-            sessionIds.add(sessionId);
-            sessionPlayerMap.put(sessionId, playerId);
-            System.out.println("✅ Player connected: " + playerId);
-        }
+        sessionIds.add(sessionId); // ใส่ซ้ำได้ เพราะใช้ Set
+        sessionPlayerMap.put(sessionId, playerId); // ✅ always map sessionId → playerId
+        System.out.println("✅ Player connected: " + playerId);
 
         // Send current state to the new player
         if (selectedMode != null) {
@@ -72,6 +70,8 @@ public class WebSocketController {
         String playerId = payload.get("playerId");
         String mode = payload.get("mode");
 
+        boolean assigned = false;
+
         if (player1Id != null && player2Id != null) {
             messagingTemplate.convertAndSend("/topic/lock-all", Map.of("locked", true));
             messagingTemplate.convertAndSend("/topic/role-assigned", Map.of(
@@ -80,10 +80,7 @@ public class WebSocketController {
                     "disableButtons", true
             ));
             System.out.println("❌ Room is full. Assigning spectator to: " + playerId);
-            return;
-        }
-
-        if (player1Id == null) {
+        } else if (player1Id == null) {
             player1Id = playerId;
             selectedMode = mode;
             messagingTemplate.convertAndSend("/topic/role-assigned", Map.of(
@@ -93,11 +90,8 @@ public class WebSocketController {
             ));
             messagingTemplate.convertAndSend("/topic/lock-mode", Map.of("selectedMode", selectedMode));
             System.out.println("🎮 select-mode: " + playerId + " -> " + mode);
-            System.out.println("✅ current player1: " + player1Id + ", player2: " + player2Id);
-            return;
-        }
-
-        if ("pvp".equals(selectedMode) && player2Id == null && !playerId.equals(player1Id)) {
+            assigned = true;
+        } else if ("pvp".equals(selectedMode) && player2Id == null && !playerId.equals(player1Id)) {
             player2Id = playerId;
             messagingTemplate.convertAndSend("/topic/role-assigned", Map.of(
                     "role", "player2",
@@ -106,17 +100,24 @@ public class WebSocketController {
             ));
             messagingTemplate.convertAndSend("/topic/lock-all", Map.of("locked", true));
             System.out.println("🎮 select-mode: " + playerId + " -> " + mode);
-            System.out.println("✅ current player1: " + player1Id + ", player2: " + player2Id);
-            return;
+            assigned = true;
+        } else {
+            messagingTemplate.convertAndSend("/topic/role-assigned", Map.of(
+                    "role", "spectator",
+                    "playerId", playerId,
+                    "disableButtons", true
+            ));
+            System.out.println("👀 Assigned spectator to: " + playerId);
         }
 
-        messagingTemplate.convertAndSend("/topic/role-assigned", Map.of(
-                "role", "spectator",
-                "playerId", playerId,
-                "disableButtons", true
-        ));
-        System.out.println("🎮 select-mode: " + playerId + " -> " + mode);
-        System.out.println("✅ current player1: " + player1Id + ", player2: " + player2Id);
+        // ✅ Always update player count after role assignment
+        int count = 0;
+        if (player1Id != null) count++;
+        if (player2Id != null) count++;
+
+        messagingTemplate.convertAndSend("/topic/player-count", count);
+        System.out.println("👥 Updated player count: " + count);
+        System.out.println("🧍 player1: " + player1Id + ", 🧍 player2: " + player2Id);
     }
 
     @MessageMapping("/request-lock-status")
@@ -152,27 +153,47 @@ public class WebSocketController {
 //        messagingTemplate.convertAndSend("/topic/player-count", Math.min((int) count, 2));
 //    }
 
+//    @MessageMapping("/join-config-setup")
+//    public void handleJoinConfig(@Payload Map<String, String> payload, SimpMessageHeaderAccessor headerAccessor) {
+//        String sessionId = headerAccessor.getSessionId();
+//        String playerId = payload.get("playerId");
+//
+//        // ตรวจสอบว่ามี sessionId นี้หรือยัง
+//        if (!sessionPlayerMap.containsKey(sessionId)) {
+//            sessionIds.add(sessionId); // สำหรับ tracking session
+//            sessionPlayerMap.put(sessionId, playerId); // ผูก sessionId กับ playerId
+//        }
+//
+//        // ✅ นับจำนวน playerId ที่ไม่ซ้ำกัน (distinct) จากทุก session
+//        long distinctPlayerCount = sessionPlayerMap.values().stream().distinct().count();
+//
+//        // ✅ จำกัดไว้ไม่ให้เกิน 2 คน
+//        int limitedCount = Math.min((int) distinctPlayerCount, 2);
+//
+//        // ส่งจำนวนผู้เล่นไปยัง frontend
+//        messagingTemplate.convertAndSend("/topic/player-count", limitedCount);
+//
+//        System.out.println("👥 Players in Config-set-up: " + distinctPlayerCount);
+//    }
+
     @MessageMapping("/join-config-setup")
     public void handleJoinConfig(@Payload Map<String, String> payload, SimpMessageHeaderAccessor headerAccessor) {
         String sessionId = headerAccessor.getSessionId();
         String playerId = payload.get("playerId");
 
-        // ตรวจสอบว่ามี sessionId นี้หรือยัง
+        // เก็บ sessionId กับ playerId เพื่อใช้งานอื่น (optional)
         if (!sessionPlayerMap.containsKey(sessionId)) {
-            sessionIds.add(sessionId); // สำหรับ tracking session
-            sessionPlayerMap.put(sessionId, playerId); // ผูก sessionId กับ playerId
+            sessionIds.add(sessionId);
+            sessionPlayerMap.put(sessionId, playerId);
         }
 
-        // ✅ นับจำนวน playerId ที่ไม่ซ้ำกัน (distinct) จากทุก session
-        long distinctPlayerCount = sessionPlayerMap.values().stream().distinct().count();
+        // ✅ นับจำนวน player จริง (ที่เลือก mode แล้ว)
+        int count = 0;
+        if (player1Id != null) count++;
+        if (player2Id != null) count++;
 
-        // ✅ จำกัดไว้ไม่ให้เกิน 2 คน
-        int limitedCount = Math.min((int) distinctPlayerCount, 2);
-
-        // ส่งจำนวนผู้เล่นไปยัง frontend
-        messagingTemplate.convertAndSend("/topic/player-count", limitedCount);
-
-        System.out.println("👥 Players in Config-set-up: " + distinctPlayerCount);
+        messagingTemplate.convertAndSend("/topic/player-count", count);
+        System.out.println("👥 Players in Config-set-up (real players): " + count);
     }
 
     @MessageMapping("/config-update")
@@ -200,6 +221,15 @@ public class WebSocketController {
 
     public static void clearPlayer2() {
         player2Id = null;
+    }
+
+    public static void resetGameState() {
+        player1Id = null;
+        player2Id = null;
+        selectedMode = null;
+        sessionPlayerMap.clear();
+        sessionIds.clear();
+        System.out.println("🔁 Game state has been fully reset.");
     }
 
 }
