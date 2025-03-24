@@ -3,6 +3,10 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import HexGrid from "@/component/HexGrid";
+import {updateConfig} from "@/stores/slices/configSlice";
+import {useWebSocket} from "@/hooks/useWebsocket";
+import {usePlayerId} from "@/hooks/usePlayerId";
+import {useAppDispatch} from "@/stores/hook";
 
 // สาธุขอให้ push ได้
 
@@ -19,6 +23,9 @@ export default function GamePage() {
     const [turn, setTurn] = useState(1);
     const [currentPlayer, setCurrentPlayer] = useState(1);
     const [winner, setWinner] = useState<number | null>(null);
+    const { subscribe, sendMessage, connect, isConnected, unsubscribe } = useWebSocket();
+    const playerId = usePlayerId();
+    const dispatch = useAppDispatch();
 
     const [gameConfig, setGameConfig] = useState({
         spawnedCost: 0,
@@ -57,6 +64,21 @@ export default function GamePage() {
     const [boardMinions, setBoardMinions] = useState<{ id: number, type: string, player: number }[]>([]);
     const [allyNeighbors, setAllyNeighbors] = useState<number[]>([]);
     const [opponentNeighbors, setOpponentNeighbors] = useState<number[]>([]);
+
+    useEffect(() => {
+        if (playerId && isConnected()) {
+            sendMessage("/request-current-config", {});
+        }
+
+        const subConfig = subscribe("/topic/config-update", (message) => {
+            const config = JSON.parse(message.body);
+            dispatch(updateConfig(config));
+        });
+
+        return () => {
+            unsubscribe(subConfig);
+        };
+    }, [playerId, isConnected]);
 
     useEffect(() => {
         const savedConfig = localStorage.getItem("gameConfig");

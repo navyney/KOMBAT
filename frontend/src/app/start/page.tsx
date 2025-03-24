@@ -3,92 +3,65 @@
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useEffect } from "react";
-import SockJS from "sockjs-client";
-import { Client } from "@stomp/stompjs";
+import { useWebSocket } from "@/hooks/useWebsocket";
+import { usePlayerId } from "@/hooks/usePlayerId";
 
 export default function StartPage() {
     const router = useRouter();
+    const {
+        connect,
+        sendMessage,
+        subscribe,
+        isConnected,
+        unsubscribe,
+    } = useWebSocket();
+    const playerId = usePlayerId();
 
     useEffect(() => {
-        let playerId = localStorage.getItem("playerId");
-        if (!playerId) {
-            playerId = crypto.randomUUID();
-            localStorage.setItem("playerId", playerId);
-        }
+        // แสดง playerId ที่ถูกสร้างไว้ตอนโหลด
+        console.log("🎮 Player ID:", playerId);
+    }, [playerId]);
 
-        const socket = new SockJS("http://localhost:8080/ws");
-        const client = new Client({
-            webSocketFactory: () => socket,
-            reconnectDelay: 5000,
+    useEffect(() => {
+        if (!playerId) return;
+        if (!isConnected()) connect();
+
+        const subRole = subscribe("/topic/role-assigned", (message) => {
+            const { role, playerId: targetId, disableButtons } = JSON.parse(message.body);
+            if (targetId === playerId) {
+                localStorage.setItem("playerRole", role);
+            }
         });
 
-        client.onConnect = () => {
-            client.publish({
-                destination: "/app/join-game",
-                body: JSON.stringify({ playerId }),
-            });
+        const subLockAll = subscribe("/topic/lock-all", () => {
+            localStorage.setItem("roomFull", "true");
+        });
 
-            // ✅ Subscribe เพื่อรับ role
-            client.subscribe("/topic/role-assigned", (message) => {
-                const { role, playerId: targetId, disableButtons } = JSON.parse(message.body);
-                if (targetId === playerId) {
-                    localStorage.setItem("playerRole", role);
-                }
-            });
+        const subLockMode = subscribe("/topic/lock-mode", (message) => {
+            const { selectedMode } = JSON.parse(message.body);
+            localStorage.setItem("lockedMode", selectedMode);
+        });
 
-            // ✅ Subscribe เพื่อ sync lock status เผื่อหน้า select-mode ต้องใช้
-            client.subscribe("/topic/lock-all", () => {
-                localStorage.setItem("roomFull", "true");
-            });
+        // ส่งเฉพาะเมื่อมี playerId ที่ถูกต้องแล้วเท่านั้น
+        if (playerId) {
+            console.log("📨 Sending request-lock-status with:", playerId);
+            sendMessage("/request-lock-status", { playerId });
+        }
 
-            client.subscribe("/topic/lock-mode", (message) => {
-                const { selectedMode } = JSON.parse(message.body);
-                localStorage.setItem("lockedMode", selectedMode);
-            });
-
-            // ✅ Sync lock state แบบ request
-            client.publish({
-                destination: "/app/request-lock-status",
-                body: JSON.stringify({ playerId }),
-            });
+        return () => {
+            unsubscribe(subRole);
+            unsubscribe(subLockAll);
+            unsubscribe(subLockMode);
         };
-
-        client.activate();
-    }, []);
-
-    // useEffect(() => {
-    //     const socket = new SockJS("http://localhost:8080/ws");
-    //     const client = new Client({
-    //         webSocketFactory: () => socket,
-    //         reconnectDelay: 5000,
-    //     });
-    //
-    //     client.onConnect = () => {
-    //         client.publish({
-    //             destination: "/app/join-game" ,
-    //             body: JSON.stringify({ playerId: "?" })
-    //         });
-    //
-    //         client.subscribe("/topic/role-assigned", (message) => {
-    //             const { role, rejected } = JSON.parse(message.body);
-    //             if (rejected) {
-    //                 router.push("/game-started");
-    //             } else {
-    //                 localStorage.setItem("playerId", role);
-    //             }
-    //         });
-    //     };
-    //     client.activate();
-    // }, [router]);
+    }, [playerId]);
 
     return (
         <main>
             <div
                 className="flex flex-col items-center justify-center min-h-screen bg-cover bg-center w-full h-full"
                 style={{
-                backgroundImage: "url('/image/Desktop - 1.png')",
-                //backgroundSize: "1920px 1080px",
-                backgroundPosition: "center",
+                    backgroundImage: "url('/image/Desktop - 1.png')",
+                    backgroundPosition: "center",
                 }}
             ></div>
             <div

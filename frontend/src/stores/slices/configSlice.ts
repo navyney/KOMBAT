@@ -15,9 +15,7 @@ export interface GameConfig {
 interface ConfigState {
     confirmedPlayers: Record<string, boolean>;
     config: GameConfig;
-    confirmedBy: string[]; // array of playerIds
-
-    // confirmed: Record<string, boolean>; // key: playerId, value: isConfirmed
+    confirmedBy: string[];
 }
 
 const initialState: ConfigState = {
@@ -55,8 +53,23 @@ const configSlice = createSlice({
         resetConfigConfirmation: (state) => {
             state.confirmedBy = [];
         },
+        resetConfig: (state) => {
+            state.config = {
+                spawnedCost: 0,
+                hexPurchasedCost: 0,
+                initialBudget: 0,
+                initialHP: 0,
+                turnBudget: 0,
+                maxBudget: 0,
+                interestPercentage: 0,
+                maxTurn: 0,
+                maxSpawn: 0,
+            };
+            state.confirmedPlayers = {};
+            state.confirmedBy = [];
+        },
     },
 });
 
-export const { updateConfig, confirmConfig, resetConfigConfirmation } = configSlice.actions;
+export const { updateConfig, confirmConfig, resetConfigConfirmation, resetConfig } = configSlice.actions;
 export default configSlice.reducer;

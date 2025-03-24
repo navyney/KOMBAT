@@ -3,23 +3,25 @@
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import SockJS from "sockjs-client";
-import { Client } from "@stomp/stompjs";
 import { useAppDispatch, useAppSelector } from "@/stores/hook";
 import { updateConfig, confirmConfig } from "@/stores/slices/configSlice";
+import { useWebSocket } from "@/hooks/useWebsocket";
+import { usePlayerId } from "@/hooks/usePlayerId";
+import { resetPlayer } from "@/stores/slices/playerSlice";
+import { resetConfig } from "@/stores/slices/configSlice";
+import { resetGame } from "@/stores/slices/gameSlice";
 
 export default function ConfigPage() {
     const router = useRouter();
     const dispatch = useAppDispatch();
+    const { subscribe, sendMessage, connect, isConnected, unsubscribe } = useWebSocket();
 
     const config = useAppSelector((state) => state.config.config || {});
     const confirmedPlayers = useAppSelector((state) => state.config.confirmedPlayers);
 
     const [error, setError] = useState<string | null>(null);
     const [players, setPlayers] = useState(0);
-    const [stompClient, setStompClient] = useState<Client | null>(null);
-
-    const playerId = typeof window !== "undefined" ? localStorage.getItem("playerId") || "" : "";
+    const playerId = usePlayerId();
 
     const isBothConfirmed = Object.values(confirmedPlayers ?? {}).length === 2 &&
         Object.values(confirmedPlayers ?? {}).every((val) => val);
@@ -30,97 +32,120 @@ export default function ConfigPage() {
     );
 
     useEffect(() => {
-        const socket = new SockJS("http://localhost:8080/ws");
-        const client = new Client({
-            webSocketFactory: () => socket,
-            reconnectDelay: 5000,
+        if (!playerId) return;
+        if (!isConnected()) connect();
+
+        const subCount = subscribe("/topic/player-count", (message) => {
+            const count = JSON.parse(message.body);
+            setPlayers(count);
         });
 
-        client.onConnect = () => {
-            console.log(`${playerId} is joined`);
+        const subUpdate = subscribe("/topic/config-update", (message) => {
+            const newConfig = JSON.parse(message.body);
+            dispatch(updateConfig(newConfig));
+        });
 
-            client.publish({
-                destination: "/app/join-config-setup",
-                body: JSON.stringify({playerId}),
-            });
+        const subConfirm = subscribe("/topic/config-confirmed", (message) => {
+            const { playerId: confirmId } = JSON.parse(message.body);
+            dispatch(confirmConfig(confirmId));
+        });
 
-            client.subscribe("/topic/player-count", (message) => {
-                const count = JSON.parse(message.body);
-                setPlayers(count);
-            });
+        const subNav = subscribe("/topic/navigate", (message) => {
+            const action = message.body;
+            if (action === "next") window.location.href = "/select-type";
+            else if (action === "back") {
+                dispatch(resetPlayer());
+                dispatch(resetGame());
+                dispatch(resetConfig());
+                window.location.href = "/select-mode";
+            }
+            else if (action === "start") {
+                dispatch(resetPlayer());
+                dispatch(resetGame());
+                dispatch(resetConfig());
+                window.location.href = "/";
+            }
+        });
 
-            client.subscribe("/topic/config-update", (message) => {
-                const newConfig = JSON.parse(message.body);
-                dispatch(updateConfig(newConfig));
-            });
+        const subReset = subscribe("/topic/config-reset-confirmed", () => {
+            dispatch(confirmConfig("reset"));
+        });
 
-            client.subscribe("/topic/config-confirmed", (message) => {
-                const { playerId: confirmId } = JSON.parse(message.body);
-                dispatch(confirmConfig(confirmId));
-            });
-
-            client.subscribe("/topic/navigate", (message) => {
-                const action = message.body;
-                if (action === "next") router.push("/select-type");
-                else if (action === "back") router.push("/select-mode");
-            });
-
-            client.subscribe("/topic/config-reset-confirmed", () => {
-                dispatch(confirmConfig("reset"));
-            });
-
-        };
-
-        client.activate();
-        setStompClient(client);
+        sendMessage("/join-config-setup", { playerId });
 
         return () => {
-            client.deactivate();
+            unsubscribe(subCount);
+            unsubscribe(subUpdate);
+            unsubscribe(subConfirm);
+            unsubscribe(subNav);
+            unsubscribe(subReset);
         };
     }, [dispatch, router, playerId]);
+
+    // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const { name, value } = e.target;
+    //     const key = name as keyof typeof config;
+    //
+    //     if (value === "" || (!isNaN(Number(value)) && Number(value) >= 0)) {
+    //         const parsedValue = value === "" ? "" : parseFloat(value);
+    //         const updatedConfig = { ...config, [key]: parsedValue };
+    //
+    //         dispatch(updateConfig(updatedConfig));
+    //
+    //         sendMessage("/app/config-update", JSON.stringify({ ...updatedConfig, playerId }));
+    //     }
+    // };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         const key = name as keyof typeof config;
 
         if (value === "" || (!isNaN(Number(value)) && Number(value) >= 0)) {
-            const parsedValue = value === "" ? "" : parseFloat(value);
+            const parsedValue = value === "" ? 0 : parseFloat(value);
             const updatedConfig = { ...config, [key]: parsedValue };
 
             dispatch(updateConfig(updatedConfig));
-            //dispatch(confirmConfig("reset"));
 
-            if (stompClient?.connected) {
-                stompClient.publish({
-                    destination: "/app/config-update",
-                    // body: JSON.stringify(updatedConfig),
-                    body: JSON.stringify({ ...updatedConfig, playerId }),
-                });
-            }
+            const sanitizedConfig = {
+                ...updatedConfig,
+                spawnedCost: Number(updatedConfig.spawnedCost || 0),
+                hexPurchasedCost: Number(updatedConfig.hexPurchasedCost || 0),
+                initialBudget: Number(updatedConfig.initialBudget || 0),
+                initialHP: Number(updatedConfig.initialHP || 0),
+                turnBudget: Number(updatedConfig.turnBudget || 0),
+                maxBudget: Number(updatedConfig.maxBudget || 0),
+                interestPercentage: Number(updatedConfig.interestPercentage || 0),
+                maxTurn: Number(updatedConfig.maxTurn || 0),
+                maxSpawn: Number(updatedConfig.maxSpawn || 0),
+                playerId,
+            };
+
+            sendMessage("/config-update", sanitizedConfig);
+            console.log("📤 Sent config:", sanitizedConfig);
         }
     };
 
     const handleConfirm = () => {
         if (playerId) {
-            //dispatch(confirmConfig(playerId));
-            stompClient?.publish({
-                destination: "/app/config-confirmed",
-                body: JSON.stringify({ playerId }),
-            });
+            sendMessage("/config-confirmed", { playerId });
         }
     };
 
     const handleNext = () => {
-        if (isBothConfirmed && stompClient?.connected) {
+        if (isBothConfirmed) {
             localStorage.setItem("gameConfig", JSON.stringify(config));
-            stompClient.publish({ destination: "/topic/navigate", body: "next" });
+            sendMessage("/topic/navigate", "next");
         }
     };
 
     const handleBack = () => {
-        if (stompClient?.connected) {
-            stompClient.publish({ destination: "/topic/navigate", body: "back" });
-        }
+        sendMessage("/navigate", "back");
+        console.log("🔁 Resetting game state and navigating back to select-mode");
+        dispatch(resetPlayer());
+        dispatch(resetGame());
+        dispatch(resetConfig());
+        window.location.href = "/select-mode";
+        // sendMessage("/topic/navigate", "back");
     };
 
     return (
