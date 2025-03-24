@@ -22,7 +22,9 @@ public class GameState { // player1 and player2 can play in terminal and show ga
     public static Player player1;
     public static Player player2;
 
-    public static ArrayList<Minion> MinionOnMapMap = new ArrayList<>();
+//    public static ArrayList<Minion> MinionOnMapMap = new ArrayList<>();
+    public static ArrayList<Minion> Player1Minions = new ArrayList<>();
+    public static ArrayList<Minion> Player2Minions = new ArrayList<>();
 
     private static int current_turns;
     private int max_turns;
@@ -51,6 +53,10 @@ public class GameState { // player1 and player2 can play in terminal and show ga
 
     public static int getCurrent_turns() {
         return current_turns;
+    }
+
+    public static Player getCurrentPlayer() {
+        return currentPlayer;
     }
 
 //    private ConfigFile config; // use this later
@@ -260,23 +266,18 @@ public class GameState { // player1 and player2 can play in terminal and show ga
         }
     }
 
-    public void executeMinion(ArrayList<Minion> minions) throws EvalError {
-        int totalCost = 0;
-        for (Minion minion : minions) {
-            // check ว่า minion ถูก spawn แล้วหรือยัง
-            if (minion.isSpawned()) {
-                // for Debug
-                System.out.println("Executing strategy for minion: " + minion.getName() + " (" + minion.getRow() + "," + minion.getCol() + ")");
+    public void executeMinion(Player player) throws EvalError {
 
+        for (Minion minion : player.getAllSpawnedMinion()) {
+            if (minion.isSpawned()) {
+                System.out.println("Executing strategy for minion: " + minion.getName());
                 Strategy strategy = minion.getType().getStrategy();
                 strategy.evaluator(minion);
-
-                totalCost += 1;
             } else {
-                System.out.println("Minion " + minion.getName() + " has not been spawned yet!");
+                System.out.println("Minion " + minion.getName() + " has not been spawned.");
             }
         }
-        currentPlayer.deductActionCost(totalCost);
+
     }
 
     //public void gameloop () throws LexicalError, EvalError { // not done
@@ -296,13 +297,13 @@ public class GameState { // player1 and player2 can play in terminal and show ga
                 player1.takeTurn(gameMap);
             }
             gameMap.printMap();
-
+//            printMinion(Player1Minions);
+            executeMinion(player1);
             // Check Winner after Player 1's turn
             if (checkWinner()) {
                 endGame();
                 break;
             }
-
             player1.setHasNOTBoughtareaThisTurn() ;
             player1.setHasNOTSpawnedMinionThisTurn() ;
 
@@ -323,9 +324,9 @@ public class GameState { // player1 and player2 can play in terminal and show ga
                 player2.takeTurn(gameMap);
             }
             gameMap.printMap();
-
+//            printMinion(Player2Minions);
             // Execute Minions by Strategy
-            executeMinion(MinionOnMapMap);
+            executeMinion(player2);
             gameMap.printMap();
 
             // Check Winner after Player 2's turn
@@ -352,6 +353,11 @@ public class GameState { // player1 and player2 can play in terminal and show ga
             }
         }
 
+        public void printMinion(ArrayList<Minion> minions) {
+        for (Minion minion : minions) {
+            System.out.println("Minion " + minion.getName() + "," + minion.getRow() + "," + minion.getCol());
+        }
+        }
 //    public void endTurn() {
 //        // check มินเนี่ยนที่ไม่ทำอะไรเลย
 //        for (Minion minion : currentPlayer.getMinion()) {
