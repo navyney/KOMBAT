@@ -1,20 +1,21 @@
 package backend.WebSocketController;
 
+import backend.WebSocketDTOs.MinionConfigMessage;
 import backend.WebSocketDTOs.WebSocketDTO;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import backend.WebSocketDTOs.MinionType;
 
 @Controller
 @RequiredArgsConstructor
@@ -244,6 +245,86 @@ public class WebSocketController {
         sessionPlayerMap.clear();
         sessionIds.clear();
         System.out.println("🔁 Game state has been fully reset.");
+    }
+
+    @MessageMapping("/minion-config")
+    public void handleMinionConfig(@Payload MinionConfigMessage message, Message<?> rawMessage) {
+        String playerId = message.getPlayerId();
+        List<MinionType> minions = message.getMinions();
+
+        System.out.println("🧠 ได้รับ Minion config จาก playerId: " + playerId);
+
+        if (minions == null || minions.isEmpty()) {
+            System.out.println("⚠️ ไม่พบ Minions ที่ถูกส่งมา");
+            return;
+        }
+
+        for (MinionType minion : minions) {
+            System.out.println("➡️ Minion ID: " + minion.getId());
+            System.out.println("   Name     : " + minion.getName());
+            System.out.println("   DEF      : " + minion.getDef());
+            System.out.println("   Strategy : " + minion.getStrategy());
+            System.out.println("------------------------------");
+        }
+
+        messagingTemplate.convertAndSend("/topic/minion-updated", message);
+    }
+
+    @MessageMapping("/join-select-minion-type")
+    public void handleJoinSelectMinionType(@Payload Map<String, String> payload, SimpMessageHeaderAccessor headerAccessor) {
+        String sessionId = headerAccessor.getSessionId();
+        String playerId = payload.get("playerId");
+
+        // เก็บ sessionId กับ playerId เพื่อใช้งานอื่น (optional)
+        if (!sessionPlayerMap.containsKey(sessionId)) {
+            sessionIds.add(sessionId);
+            sessionPlayerMap.put(sessionId, playerId);
+        }
+
+        // ✅ นับจำนวน player จริง (ที่เลือก mode แล้ว)
+        int count = 0;
+        if (player1Id != null) count++;
+        if (player2Id != null) count++;
+
+        messagingTemplate.convertAndSend("/topic/player-count", count);
+        System.out.println("👥 Players in Config-set-up (real players): " + count);
+    }
+
+    @MessageMapping("/minion-select")
+    public void handleMinionToggle(@Payload Map<String, Object> payload) {
+        String playerId = (String) payload.get("playerId");
+        String buttonId = (String) payload.get("id");
+        Boolean isSelected = (Boolean) payload.get("isSelected");
+
+        System.out.println("🔘 [Toggle] Player: " + playerId + " toggled " + buttonId +
+                " -> isSelected: " + isSelected);
+
+        // ✅ ส่งให้ทุกคน
+        messagingTemplate.convertAndSend("/topic/minion-select", payload);
+    }
+
+    @MessageMapping("/minion-customize")
+    public void handleCustomize(@Payload Map<String, Object> payload) {
+        String playerId = (String) payload.get("playerId");
+
+        System.out.println("🔘 [Toggle] Player: " + playerId + " customized ");
+        messagingTemplate.convertAndSend("/topic/minion-customize", payload);
+    }
+
+    @MessageMapping("/topic/minion-customize-apply")
+    public void handleCustomizeApply(@Payload Map<String, Object> payload) {
+        String playerId = (String) payload.get("playerId");
+
+        System.out.println("🔘 Player: " + playerId + "has modal");
+        messagingTemplate.convertAndSend("/topic/minion-customize-apply", payload);
+    }
+
+    @MessageMapping("/minion-close-modal")
+    public void handleCloseModal(@Payload Map<String, Object> payload) {
+        String playerId = (String) payload.get("playerId");
+
+        System.out.println("🔘 Player: " + playerId + "has close modal");
+        messagingTemplate.convertAndSend("/topic/minion-close-modal", payload);
     }
 
 }
