@@ -9,6 +9,7 @@ import backend.KOMBOOD.map.MapMap;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Random;
 
 import static backend.KOMBOOD.game.GameState.MinionOnMapMap;
@@ -29,6 +30,7 @@ public class Player {
     private boolean hasSpawnedMinionThisTurn = false;
     private String sessionId;
     private Random random = new Random();
+    private MapMap map;
 
     public Player(String name) {
         this.name = name;
@@ -105,6 +107,9 @@ public class Player {
 //        }
 
         this.minion.add(m);
+    }
+    public Minion getOneMinion() {
+        return this.minion.get(0);
     }
 
     public void removeMinion(Minion m) {
@@ -337,6 +342,8 @@ public class Player {
     public ArrayList<Minion> getAllMinions() {
         return minion;
     }
+
+    public MapMap getMapMap(){return map; }
 
     //dummy done()
     public void done() {

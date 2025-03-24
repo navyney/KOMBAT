@@ -6,7 +6,6 @@ public class GameMode{
 
     public GameMode() {
         this.gameMode = GameModeType.DUEL;
-        System.out.println("Game mode set to: " + this.gameMode);
     }
 
     public GameMode(GameModeType gameMode) {

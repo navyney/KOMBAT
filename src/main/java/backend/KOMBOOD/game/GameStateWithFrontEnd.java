@@ -18,7 +18,7 @@ import java.util.List;
 import java.io.IOException;
 import java.util.Scanner;
 
-public class GameState { // player1 and player2 can play in terminal and show gameMap while playing turn blablabla
+public class GameStateWithFrontEnd { // player1 and player2 can play in terminal and show gameMap while playing turn blablabla
     public static Player player1;
     public static Player player2;
 
@@ -59,7 +59,7 @@ public class GameState { // player1 and player2 can play in terminal and show ga
 
     //Choose Mode before GameState
 
-    public GameState(Player player1, Player player2, MapMap gameMap, GameModeType gameMode) { // not done
+    public GameStateWithFrontEnd(Player player1, Player player2, MapMap gameMap, GameModeType gameMode) { // not done
         this.player1 = player1;
         this.player2 = player2;
         this.gameMap = gameMap;
@@ -88,9 +88,6 @@ public class GameState { // player1 and player2 can play in terminal and show ga
         // both player get budget
 
         // start turn 1
-        System.out.println("How many minions type do you want to play?");// type of minion
-        Scanner s = new Scanner(System.in);
-        int minionsType = s.nextInt();
 
         //add their area
         player1.setArea(1, 1, gameMap);
@@ -107,8 +104,6 @@ public class GameState { // player1 and player2 can play in terminal and show ga
 
         //both player spawn first minion
         //minion setup
-        setupMinion(minionsType);
-
         //initial budget
         player1.setBudget(init_budget);
         player2.setBudget(init_budget);
@@ -117,40 +112,31 @@ public class GameState { // player1 and player2 can play in terminal and show ga
         //Game Start
     }
 
-    public void setupMinion(int amountMinions) throws LexicalError, EvalError, IOException {
-        Scanner s = new Scanner(System.in);
+    public void setupMinion(Minion minion,String Strstrategy) throws LexicalError, EvalError, IOException {
+        String name = minion.getName();
+        int def = minion.getType().getDefense();
+        String strategyInput = Strstrategy;
 
-        for (int i = 0; i < amountMinions; i++) {
-            System.out.println("Enter minion name:");
-            String name = s.nextLine();
-
-            System.out.println("Enter minion def:");
-            int def = s.nextInt();
-            s.nextLine();
-
-            System.out.println("Enter minion strategy:");
-            String strategyInput = s.nextLine();
-
-            StatementParser q = new StatementParser(new ExprTokenizer(strategyInput));
-            Strategy strategy = q.parse();
+        StatementParser q = new StatementParser(new ExprTokenizer(strategyInput));
+        Strategy strategy = q.parse();
 
 
-            MinionType minionType1 = new MinionType(name, def, strategy);
-            Minion minion1 = new Minion(minionType1, init_hp, player1, gameMap);
-            Minion minion2 = new Minion(minionType1, init_hp, player2, gameMap);
+        MinionType minionType1 = new MinionType(name, def, strategy);
+        Minion minion1 = new Minion(minionType1, init_hp, player1, gameMap);
+        Minion minion2 = new Minion(minionType1, init_hp, player2, gameMap);
 
-            MinionType.addMinionType(name, def, strategy);
+        MinionType.addMinionType(name, def, strategy);
 
-            player1.addMinion(minion1);
-            player2.addMinion(minion2);
+        player1.addMinion(minion1);
+        player2.addMinion(minion2);
 
-            // for  Debug
-            System.out.println("Minion created for Player1: " + minion1.getName());
-            System.out.println("Minion created for Player2: " + minion2.getName());
+        // for  Debug
+        System.out.println("Minion created for Player1: " + minion1.getName());
+        System.out.println("Minion created for Player2: " + minion2.getName());
 
 //            player1.setMinion(minion1, 1, 1);
 //            player2.setMinion(minion2,11,8);
-        }
+
     }
 
 
@@ -343,14 +329,14 @@ public class GameState { // player1 and player2 can play in terminal and show ga
         }
     }
 
-        public void endGame () { // fixed
-            if (checkWinner() || checkWinnerBySumOfHP() || checkWinnerByBudget()) {
-                System.out.println(winner + " win!!!");
+    public void endGame () { // fixed
+        if (checkWinner() || checkWinnerBySumOfHP() || checkWinnerByBudget()) {
+            System.out.println(winner + " win!!!");
 //            this.gameStatus = "End";
-            }else if (!checkWinner()) {
-                System.out.println(winner);
-            }
+        }else if (!checkWinner()) {
+            System.out.println(winner);
         }
+    }
 
 //    public void endTurn() {
 //        // check มินเนี่ยนที่ไม่ทำอะไรเลย

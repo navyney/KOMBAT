@@ -10,7 +10,7 @@ export const useWebSocket = () => {
     const dispatch = useDispatch();
     const serverUrl = process.env.API_BASE_URL || "http://localhost:8080";
 
-    const subscribe = (destination: string, callback: (payload: Message) => void) => {
+    const subscribe = (destination: string, callback: (payload: Message) => void, p0: number[]) => {
         if (stompClient && stompClient.connected) {
             const subscription = stompClient.subscribe(destination, callback);
             activeSubscriptions.push(subscription);
