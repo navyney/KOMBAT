@@ -10,8 +10,8 @@ import backend.KOMBOOD.map.MapMap;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
-
-import static backend.KOMBOOD.game.GameState.MinionOnMapMap;
+import static backend.KOMBOOD.game.GameState.player1;
+import static backend.KOMBOOD.game.GameState.player2;
 
 public class Player {
     String name;
@@ -234,7 +234,11 @@ public class Player {
 
             if (success) {
                 addSpawnedMinion(newMinion);
-                MinionOnMapMap.add(newMinion);
+                if(GameState.getCurrentPlayer().equals(player1)){
+                    player1.getAllMinions().add(newMinion);}
+                else{
+                    player2.getAllMinions().add(newMinion);
+                }
                 this.setSpawnRemaining();
                 hasSpawnedMinionThisTurn = true;
                 lastSpawnMinionTurn = GameState.getCurrent_turns();
@@ -260,7 +264,11 @@ public class Player {
 
         if (success) {
             addSpawnedMinion(newMinion);
-            MinionOnMapMap.add(newMinion);
+            if(GameState.getCurrentPlayer().equals(player1)){
+                player1.getAllMinions().add(newMinion);}
+            else{
+                player2.getAllMinions().add(newMinion);
+            }
             setBudget(this.getBudget() - config.spawn_cost());
             this.setSpawnRemaining();
             hasSpawnedMinionThisTurn = true;
@@ -336,6 +344,10 @@ public class Player {
 
     public ArrayList<Minion> getAllMinions() {
         return minion;
+    }
+
+    public ArrayList<Minion> getAllSpawnedMinion() {
+        return spawnedMinions;
     }
 
     //dummy done()

@@ -9,6 +9,9 @@ import backend.KOMBOOD.game.Main;
 import java.io.IOException;
 import java.util.HashMap;
 
+import static backend.KOMBOOD.game.GameState.player1;
+import static backend.KOMBOOD.game.GameState.player2;
+
 public class Minion {
     private String name;
     private MinionType type;
@@ -216,17 +219,22 @@ public class Minion {
             } else {
                 this.hp -= reducedDamage;
             }
-            System.out.println(this.owner.getName() + " Minion HP: " + this.stringGetHp());
+            System.out.println(this.owner.getName() + " Minion: (" + (this.row+1) + "," + (this.col+1) + ") HP: " + this.stringGetHp());
         } else {
             this.hp -= damage;
-            System.out.println(this.owner.getName() + " Minion HP: " + this.stringGetHp());
+            System.out.println(this.owner.getName() + " Minion: (" + (this.row+1) + "," + (this.col+1) + ") HP: " + this.stringGetHp());
         }
         if (hp <= 0) {
             owner.getMinion().remove(this);
             map.removeMinion(this.row, this.col);
             owner.removeMinion(this);
-            GameState.MinionOnMapMap.remove(this);
+            if(GameState.getCurrentPlayer().equals(player1)){
+                player2.getSpawnedMinions().remove(this);}
+            else{
+                player1.getSpawnedMinions().remove(this);
+            }
             System.out.println(name + " has been destroyed!");
+            System.out.println(name + " -----------------------------------------");
         }
     }
 
@@ -288,7 +296,7 @@ public class Minion {
 
         Minion target = map.getMinionAt(targetRow, targetCol);
         if (target != null) {
-            System.out.println(name + " shoots at " + target.name);
+            System.out.println(name + "(" + (this.row+1) + "," + (this.col+1) + ")" + " shoots at " + target.name + "(" + (target.row+1) + "," + (target.col+1) + ")");
             target.takeDamage(damage);
             owner.setBudget(owner.getBudget() - damage);
         } else {
