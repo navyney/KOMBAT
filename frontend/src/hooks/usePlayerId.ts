@@ -1,22 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "@/stores/hook";
+import { setPlayerId } from "@/stores/slices/playerSlice";
 
-export function usePlayerId(): string | null {
-    const [playerId, setPlayerId] = useState<string | null>(null);
+export const usePlayerId = () => {
+    const dispatch = useAppDispatch();
+    const playerId = useAppSelector((state) => state.player.playerId);
 
     useEffect(() => {
-        const existing = sessionStorage.getItem("playerId");
-
-        if (existing) {
-            setPlayerId(existing);
-        } else {
-            const isOnStartPage = window.location.pathname === "/";
-            if (isOnStartPage) {
-                const newId = crypto.randomUUID(); // 🔄 ใช้อันนี้แทน uuidv4()
-                sessionStorage.setItem("playerId", newId);
-                setPlayerId(newId);
-            }
+        if (!playerId && typeof window !== "undefined") {
+            const stored = localStorage.getItem("playerId");
+            if (stored) dispatch(setPlayerId(stored));
         }
-    }, []);
+    }, [playerId, dispatch]);
 
     return playerId;
-}
+};

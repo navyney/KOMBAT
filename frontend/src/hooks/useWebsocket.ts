@@ -55,8 +55,14 @@ export const useWebSocket = () => {
         if (stompClient) {
             stompClient.deactivate();
         }
-        const playerId = localStorage.getItem("playerId") || crypto.randomUUID();
-        localStorage.setItem("playerId", playerId);
+
+        let playerId = localStorage.getItem("playerId");
+
+        if (!playerId) {
+            // สร้าง playerId ใหม่ ถ้ายังไม่มี (เช่นใช้ UUID หรือ timestamp)
+            playerId = crypto.randomUUID(); // หรือ Date.now().toString()
+            localStorage.setItem("playerId", playerId);
+        }
 
         const socket = new SockJS(`${serverUrl}/ws`);
         stompClient = new Client({

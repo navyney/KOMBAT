@@ -19,6 +19,7 @@ export default function SelectModePage() {
     useEffect(() => {
         if (!playerId || isConnected()) return;
         connect();
+        //console.log("🎮 Player ID:", playerId);
     }, [playerId, connect, isConnected]);
 
     const handleModeSelect = (mode: string) => {
