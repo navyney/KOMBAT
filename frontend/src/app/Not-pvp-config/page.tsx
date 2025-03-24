@@ -51,7 +51,7 @@ export default function NotPVPConfigPage() {
                 dispatch(resetConfig());
                 window.location.href = "/select-mode";
             } else if (action === "next") {
-                window.location.href = "/Waiting-Player";
+                window.location.href = "/Not-pvp-select-type";
             }
         });
 

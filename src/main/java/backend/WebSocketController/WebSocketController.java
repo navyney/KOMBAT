@@ -302,7 +302,7 @@ public class WebSocketController {
             System.out.println("   Name     : " + minion.getName());
             System.out.println("   DEF      : " + minion.getDef());
             System.out.println("   Strategy : " + minion.getStrategy());
-            System.out.println("------------------------------");
+            System.out.println();
         }
 
         messagingTemplate.convertAndSend("/topic/minion-updated", message);

@@ -50,21 +50,28 @@ export default function ConfigPage() {
             dispatch(confirmConfig(confirmId));
         });
 
+        // const subNav = subscribe("/topic/navigate", (message) => {
+        //     const action = message.body;
+        //     if (action === "next") window.location.href = "/select-type";
+        //     else if (action === "back") {
+        //         dispatch(resetPlayer());
+        //         dispatch(resetGame());
+        //         dispatch(resetConfig());
+        //         window.location.href = "/select-mode";
+        //     }
+        //     else if (action === "start") {
+        //         dispatch(resetPlayer());
+        //         dispatch(resetGame());
+        //         dispatch(resetConfig());
+        //         window.location.href = "/";
+        //     }
+        // });
+
         const subNav = subscribe("/topic/navigate", (message) => {
             const action = message.body;
-            if (action === "next") window.location.href = "/select-type";
-            else if (action === "back") {
-                dispatch(resetPlayer());
-                dispatch(resetGame());
-                dispatch(resetConfig());
-                window.location.href = "/select-mode";
-            }
-            else if (action === "start") {
-                dispatch(resetPlayer());
-                dispatch(resetGame());
-                dispatch(resetConfig());
-                window.location.href = "/";
-            }
+            if (action === "next") router.push("/select-type");
+            else if (action === "back") router.push("/select-mode");
+            else if (action === "start") router.push("/");
         });
 
         const subReset = subscribe("/topic/config-reset-confirmed", () => {
