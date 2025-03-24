@@ -11,8 +11,8 @@ import java.util.Random;
 public class Bot extends Player {
     private Random random = new Random();
 
-    public Bot(String name) {
-        super(name);
+    public Bot(String name, String Id) {
+        super(name, Id);
     }
 
     public void takeTurn(MapMap map) throws IOException {
@@ -48,21 +48,21 @@ public class Bot extends Player {
         }
     }
 
-    private void buyRandomMinion(ArrayList<Minion> minions) {
-        if (getBudget() < Main.getConfig().buy_minion_cost()) {
-            return;
-        }
-
-        MinionType[] types = MinionType.getAllMinionTypes();
-
-        if (types.length == 0) {
-            return;
-        }
-
-        MinionType randomType = types[random.nextInt(types.length)];
-        Minion minion = minions.get(random.nextInt(minions.size()));
-        buyMinion(randomType, minion);
-    }
+//    private void buyRandomMinion(ArrayList<Minion> minions) {
+//        if (getBudget() < Main.getConfig().buy_minion_cost()) {
+//            return;
+//        }
+//
+//        MinionType[] types = MinionType.getAllMinionTypes();
+//
+//        if (types.length == 0) {
+//            return;
+//        }
+//
+//        MinionType randomType = types[random.nextInt(types.length)];
+//        Minion minion = minions.get(random.nextInt(minions.size()));
+//        buyMinion(randomType, minion);
+//    }
 
     private void spawnRandomMinion(ArrayList<Minion> minions) throws IOException {
         if (getMinion().isEmpty() || getBudget() < Main.getConfig().spawn_cost()) {

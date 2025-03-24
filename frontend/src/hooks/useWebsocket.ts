@@ -2,6 +2,10 @@ import { useDispatch } from "react-redux";
 import SockJS from "sockjs-client";
 import { Client, Message } from "@stomp/stompjs";
 import { Subscription } from "stompjs";
+import {setPlayerId} from "@/stores/slices/playerSlice";
+
+let stompClient: Client | null = null;
+let activeSubscriptions: Subscription[] = [];
 
 let stompClient: Client | null = null;
 let activeSubscriptions: Subscription[] = [];
@@ -71,6 +75,7 @@ export const useWebSocket = () => {
         stompClient = new Client({
             webSocketFactory: () => socket,
             reconnectDelay: 5000,
+
             onConnect: () => {
                 console.log("✅ Connected to WebSocket successfully");
                 stompClient?.publish({
@@ -78,6 +83,7 @@ export const useWebSocket = () => {
                     body: JSON.stringify({ playerId }), // ✅ fixed: send as JSON object
                 });
                 console.log("🌐 Connecting to WebSocket at:", serverUrl);
+                dispatch(setPlayerId(playerId)); // เมื่อ connect สำเร็จแล้ว
             },
             onDisconnect: () => {
                 console.log("⛔️ Disconnected from WebSocket");
