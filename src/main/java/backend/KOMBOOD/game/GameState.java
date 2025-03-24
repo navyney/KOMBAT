@@ -267,7 +267,7 @@ public class GameState { // player1 and player2 can play in terminal and show ga
     }
 
 
-    public void executeMinion(Player player) throws EvalError {
+    public static void executeMinion(Player player) throws EvalError {
 
         for (Minion minion : player.getAllSpawnedMinion()) {
             if (minion.isSpawned()) {

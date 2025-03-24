@@ -233,14 +233,14 @@ public class WebSocketController {
 
 
     @MessageMapping("/gameState/setup")
-    public void setUpGameStage() throws LexicalError, EvalError, IOException {
-        String nameP1 = "Player1";
-        String nameP2 = "Player2";
-        Player player1 = new Player(nameP1);
-        Player player2 = new Player(nameP2);
+    public void setUpGameStage(@Payload WebSocketDTO dto) throws LexicalError, EvalError, IOException {
+        String id1 = dto.getPlayerId();
+        String id2 = dto.getPlayerId();
+        Player player1 = new Player("Player1",id1);
+        Player player2 = new Player("Player2",id2);
         GameMode gameMode = new GameMode();
         gameMode.setGameMode(GameModeType.DUEL);
-        gameState = new SetUpGameStage(player1,player2,gameMode);
+        gameState = new SetUpGameStage(player1, player2, gameMode);
         gameState.setUP();
         System.out.println("setup complete");
     }
@@ -252,12 +252,12 @@ public class WebSocketController {
         int curPlayer = action.getCurPlayer();
         int row = action.getRow();
         int col = action.getCol();
-        if(curPlayer == 1) {
+        if (curPlayer == 1) {
             Player player = gameState.getPlayer1();
-            player.buyArea(row,col, gameState.getGameMap() );
-        }else{
+            player.buyArea(row, col, gameState.getGameMap());
+        } else {
             Player player = gameState.getPlayer2();
-            player.buyArea(row,col, gameState.getGameMap());
+            player.buyArea(row, col, gameState.getGameMap());
         }
         System.out.println("buy area complete");
     }
@@ -270,13 +270,12 @@ public class WebSocketController {
         int col = action.getCol();
         String minionName = action.getMinion();
 
-        if(curPlayer == 1) {
+        if (curPlayer == 1) {
             Player player = gameState.getPlayer1();
-            player.spawnMinion(player.getMinionByName(minionName),row,col);
-        }
-        else{
+            player.spawnMinion(player.getMinionByName(minionName), row, col);
+        } else {
             Player player = gameState.getPlayer2();
-            player.spawnMinion(player.getMinionByName(minionName),row,col);
+            player.spawnMinion(player.getMinionByName(minionName), row, col);
         }
         System.out.println("spawn minion complete");
     }
@@ -285,38 +284,38 @@ public class WebSocketController {
     @SendTo("/topic/executeMinion")
     public void ExecuteMinion(ActionOnHexGrid action) throws EvalError {
         int curPlayer = action.getCurPlayer();
-        if(curPlayer == 1) {
+        if (curPlayer == 1) {
             Player player = gameState.getPlayer1();
-            GameState.executeMinion(player.getAllMinions());
+            GameState.executeMinion(player);
             int current_turns = GameState.getCurrent_turns();
             player.calculateInterest(current_turns);
-        }
-        else{
+        } else {
             Player player = gameState.getPlayer2();
-            GameState.executeMinion(player.getAllMinions());
+            GameState.executeMinion(player);
             int current_turns = GameState.getCurrent_turns();
             player.calculateInterest(current_turns);
         }
         System.out.println("execute minion complete");
         messagingTemplate.convertAndSend("/topic/executeMinion", curPlayer);
+    }
+        @MessageMapping("/request-current-config")
+        @SendTo("/topic/config-update")
+        public WebSocketDTO getCurrentConfig () {
+            return currentConfig;
+        }
 
-    @MessageMapping("/request-current-config")
-    @SendTo("/topic/config-update")
-    public WebSocketDTO getCurrentConfig() {
-        return currentConfig;
+        public static void resetGameState () {
+            player1Id = null;
+            player2Id = null;
+            selectedMode = null;
+            sessionPlayerMap.clear();
+            sessionIds.clear();
+            System.out.println("🔁 Game state has been fully reset.");
+        }
+
+        public static WebSocketDTO getCurrentConfigGame () {
+            return currentConfig;
+
+        }
     }
 
-    public static void resetGameState() {
-        player1Id = null;
-        player2Id = null;
-        selectedMode = null;
-        sessionPlayerMap.clear();
-        sessionIds.clear();
-        System.out.println("🔁 Game state has been fully reset.");
-    }
-
-    public static WebSocketDTO getCurrentConfigGame() {
-        return currentConfig;
-
-    }
-}

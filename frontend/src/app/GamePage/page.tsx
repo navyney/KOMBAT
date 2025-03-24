@@ -9,7 +9,6 @@ import { useWebSocket } from "@/hooks/useWebsocket";
 import { usePlayerId } from "@/hooks/usePlayerId";
 import {useRouter} from "next/navigation";
 
-import {useAppDispatch} from "@/stores/hook";
 
 // สาธุขอให้ push ได้
 
@@ -29,7 +28,6 @@ export default function GamePage() {
     const [currentPlayer, setCurrentPlayer] = useState(1);
     const [winner, setWinner] = useState<number | null>(null);
 
-    const { subscribe, sendMessage, connect, isConnected, unsubscribe } = useWebSocket();
     const playerId = usePlayerId();
     const dispatch = useAppDispatch();
     const [gameConfig, setGameConfig] = useState({
