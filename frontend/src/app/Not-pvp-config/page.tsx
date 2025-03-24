@@ -1,35 +1,23 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/stores/hook";
-import { updateConfig, confirmConfig } from "@/stores/slices/configSlice";
+import {confirmConfig, updateConfig} from "@/stores/slices/configSlice";
 import { useWebSocket } from "@/hooks/useWebsocket";
 import { usePlayerId } from "@/hooks/usePlayerId";
 import { resetPlayer } from "@/stores/slices/playerSlice";
 import { resetConfig } from "@/stores/slices/configSlice";
 import { resetGame } from "@/stores/slices/gameSlice";
+import Image from "next/image";
 
-export default function ConfigPage() {
-    const router = useRouter();
+export default function NotPVPConfigPage() {
     const dispatch = useAppDispatch();
     const { subscribe, sendMessage, connect, isConnected, unsubscribe } = useWebSocket();
-
     const config = useAppSelector((state) => state.config.config || {});
-    const confirmedPlayers = useAppSelector((state) => state.config.confirmedPlayers);
-
-    const [error, setError] = useState<string | null>(null);
     const [players, setPlayers] = useState(0);
     const playerId = usePlayerId();
-
-    const isBothConfirmed = Object.values(confirmedPlayers ?? {}).length === 2 &&
-        Object.values(confirmedPlayers ?? {}).every((val) => val);
-
-    const youConfirmed = playerId && confirmedPlayers[playerId];
-    const opponentConfirmed = Object.entries(confirmedPlayers).some(
-        ([id, confirmed]) => id !== playerId && confirmed
-    );
+    const [ youConfirmed , setYouConfirmed ] = useState<boolean | null>(null) ;
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!playerId) return;
@@ -42,7 +30,7 @@ export default function ConfigPage() {
 
         const subUpdate = subscribe("/topic/config-update", (message) => {
             const newConfig = JSON.parse(message.body);
-            dispatch(updateConfig({ ...config, ...newConfig }));
+            dispatch(updateConfig(newConfig));
         });
 
         const subConfirm = subscribe("/topic/config-confirmed", (message) => {
@@ -52,23 +40,27 @@ export default function ConfigPage() {
 
         const subNav = subscribe("/topic/navigate", (message) => {
             const action = message.body;
-            if (action === "next") window.location.href = "/select-type";
-            else if (action === "back") {
-                dispatch(resetPlayer());
-                dispatch(resetGame());
-                dispatch(resetConfig());
-                window.location.href = "/select-mode";
-            }
-            else if (action === "start") {
+            if (action === "start") {
                 dispatch(resetPlayer());
                 dispatch(resetGame());
                 dispatch(resetConfig());
                 window.location.href = "/";
+            } else if (action === "back") {
+                dispatch(resetPlayer());
+                dispatch(resetGame());
+                dispatch(resetConfig());
+                window.location.href = "/select-mode";
+            } else if (action === "next") {
+                window.location.href = "/Waiting-Player";
             }
         });
 
-        const subReset = subscribe("/topic/config-reset-confirmed", () => {
-            dispatch(confirmConfig("reset"));
+        const subReset = subscribe("/topic/mode-reset", () => {
+            dispatch(resetPlayer());
+            dispatch(resetGame());
+            dispatch(resetConfig());
+            console.log("🔃 Received global reset from server");
+            window.location.href = "/select-mode";
         });
 
         sendMessage("/join-config-setup", { playerId });
@@ -80,25 +72,10 @@ export default function ConfigPage() {
             unsubscribe(subNav);
             unsubscribe(subReset);
         };
-    }, [dispatch, router, playerId]);
-
-    // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //     const { name, value } = e.target;
-    //     const key = name as keyof typeof config;
-    //
-    //     if (value === "" || (!isNaN(Number(value)) && Number(value) >= 0)) {
-    //         const parsedValue = value === "" ? "" : parseFloat(value);
-    //         const updatedConfig = { ...config, [key]: parsedValue };
-    //
-    //         dispatch(updateConfig(updatedConfig));
-    //
-    //         sendMessage("/app/config-update", JSON.stringify({ ...updatedConfig, playerId }));
-    //     }
-    // };
+    }, [dispatch, playerId]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        console.log(name, value)
         const key = name as keyof typeof config;
 
         if (value === "" || (!isNaN(Number(value)) && Number(value) >= 0)) {
@@ -126,19 +103,6 @@ export default function ConfigPage() {
         }
     };
 
-    const handleConfirm = () => {
-        if (playerId) {
-            sendMessage("/config-confirmed", { playerId });
-        }
-    };
-
-    const handleNext = () => {
-        if (isBothConfirmed) {
-            localStorage.setItem("gameConfig", JSON.stringify(config));
-            sendMessage("/topic/navigate", "next");
-        }
-    };
-
     const handleBack = () => {
         sendMessage("/navigate", "back");
         console.log("🔁 Resetting game state and navigating back to select-mode");
@@ -146,16 +110,30 @@ export default function ConfigPage() {
         dispatch(resetGame());
         dispatch(resetConfig());
         window.location.href = "/select-mode";
-        // sendMessage("/topic/navigate", "back");
+    };
+
+    const handleConfirm = () => {
+        if (playerId) {
+            sendMessage("/config-confirmed", { playerId });
+        }
+    };
+
+    const handleNext = () => {
+        const sanitizedConfig = {
+            ...config,
+            playerId,
+        };
+        sendMessage("/config-update", sanitizedConfig);
+        sendMessage("/navigate", "next");
     };
 
     return (
         <main className="flex flex-col items-center justify-center min-h-screen bg-cover bg-center w-full h-full p-8"
-              style={{ backgroundImage: "url('/image/config.png')" }}>
+              style={{backgroundImage: "url('/image/config.png')"}}>
 
             <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg mt-16 space-y-4 space-x-5">
                 <h1 className="text-xl font-bold text-center text-black">Set Up Your Game Configuration</h1>
-                <p className="text-center text-gray-600">Players Connected: {players} / 2</p>
+                <p className="text-center text-gray-600">Players Connected: {players} / 1</p>
                 {Object.keys(config).filter(key => key !== "playerId").map((key) => (
                     <div key={key} className="flex justify-between items-center">
                         <label className="font-medium capitalize text-black">{key.replace(/([A-Z])/g, ' $1')} :</label>
@@ -168,30 +146,25 @@ export default function ConfigPage() {
                         />
                     </div>
                 ))}
+            </div>
 
-                <div className='flex justify-between mt-4'>
-                    <div className='flex items-center gap-2'>
-                        <div
-                            className={`w-4 h-4 border-2 rounded ${youConfirmed ? 'bg-green-500 border-green-700' : 'bg-white'}`}/>
-                        <span className='text-sm text-black'>You</span>
-                    </div>
-                    <div className='flex items-center gap-2'>
-                        <div
-                            className={`w-4 h-4 border-2 rounded ${opponentConfirmed ? 'bg-green-500 border-green-700' : 'bg-white'}`}/>
-                        <span className='text-sm text-black'>Opponent</span>
-                    </div>
-                </div>
+            {/*<div className='flex justify-between mt-4'>*/}
+            {/*    <div className='flex items-center gap-2'>*/}
+            {/*        <div*/}
+            {/*            className={`w-4 h-4 border-2 rounded ${youConfirmed ? 'bg-green-500 border-green-700' : 'bg-white'}`}/>*/}
+            {/*        <span className='text-sm text-black'>You</span>*/}
+            {/*    </div>*/}
+            {/*</div>*/}
 
-                {error && <p className="text-red-500 text-center font-bold">{error}</p>}
+            {error && <p className="text-red-500 text-center font-bold">{error}</p>}
 
-                <div className="mt-4 flex justify-end">
-                    <button
-                        onClick={handleConfirm}
-                        className="mt-4 bg-blue-500 text-white py-2 px-10 rounded hover:bg-blue-700 transition"
-                    >
-                        Confirm Config
-                    </button>
-                </div>
+            <div className="mt-4 flex justify-end">
+                <button
+                    onClick={handleConfirm}
+                    className="mt-4 bg-blue-500 text-white py-2 px-10 rounded hover:bg-blue-700 transition"
+                >
+                    Confirm Config
+                </button>
             </div>
 
             <div
@@ -207,11 +180,15 @@ export default function ConfigPage() {
                 />
             </div>
 
+            {/*<div*/}
+            {/*    onClick={youConfirmed ? handleNext : undefined}*/}
+            {/*    className={`absolute cursor-pointer bottom-10 right-20 transition-opacity ${*/}
+            {/*        youConfirmed? "hover:opacity-75" : "opacity-50 cursor-not-allowed"*/}
+            {/*    }`}*/}
+            {/*>*/}
             <div
-                onClick={isBothConfirmed ? handleNext : undefined}
-                className={`absolute cursor-pointer bottom-10 right-20 transition-opacity ${
-                    isBothConfirmed ? "hover:opacity-75" : "opacity-50 cursor-not-allowed"
-                }`}
+                onClick={handleNext}
+                className="absolute cursor-pointer bottom-10 right-20"
             >
                 <Image
                     src="/image/next-button.png"
