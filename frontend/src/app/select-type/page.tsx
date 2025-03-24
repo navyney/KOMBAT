@@ -1,12 +1,12 @@
 "use client";
-import { useState } from "react";
+import {useEffect, useState} from "react";
 import { useRouter } from "next/navigation";
 
 import { updateMinion, resetMinion,MinionType } from "@/stores/slices/minionTypeSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/stores/store";
 
-
+import { useWebSocket } from "@/hooks/useWebsocket"; // หรือ path ที่ใช้จริงในโปรเจกต์
 
 const minions = [
     { id: 1, name: "pawn", image: "/image/minions/white-pawn.jpeg", color: "white" },
@@ -29,6 +29,12 @@ export default function SelectMinions() {
     const minionsFromRedux = useSelector((state: RootState) => state.miniontype);
     const dispatch = useDispatch();
 
+    const { connect, sendMessage, isConnected } = useWebSocket();
+
+    useEffect(() => {
+        console.log("🌐 [SelectMinionsPage] WebSocket Connected:", isConnected());
+    }, []);
+
     const toggleSelectMinion = (id: number) => {
         setSelectedMinions((prev) =>
             prev.includes(id) ? prev.filter((m) => m !== id) : [...prev, id]
@@ -44,7 +50,8 @@ export default function SelectMinions() {
             const baseMinion = minions.find(m => m.id === minionId);
             if (!baseMinion) return;
 
-            const reduxMinion = minionsFromRedux.find(m => m.id === minionId);
+            const reduxMinion = minionsFromRedux.find((m) => m.id === minionId);
+
 
             if (reduxMinion) {
                 setCustomName(reduxMinion.name);
@@ -82,20 +89,41 @@ export default function SelectMinions() {
         setShowModal(false);
     };
 
-    const isReadyToStart =
-        selectedMinions.length > 0 &&
-        selectedMinions.every((id) => {
-            const baseMinion = minions.find((m) => m.id === id);
-            if (!baseMinion) return false;
-            const reduxMinion = minionsFromRedux.find((m) => m.name === baseMinion.name);
-            return reduxMinion && reduxMinion.strategy.trim() !== "";
-        });
+    const isReadyToStart = selectedMinions.length > 0;
+
+    // const handleStartGame = () => {
+    //     const selectedMinionData = selectedMinions.map(id => minions.find(m => m.id === id));
+    //     const queryParams = new URLSearchParams({
+    //         selectedMinions: JSON.stringify(selectedMinionData)
+    //     });
+    //     router.push(`/GamePage?${queryParams.toString()}`);
+    // };
 
     const handleStartGame = () => {
+        // 👇 ส่งข้อมูลผ่าน WebSocket ก่อน
+        const cleanMinions = minionsFromRedux
+            .filter((m) => selectedMinions.includes(m.id)) // ✅ filter เฉพาะที่เลือก
+            .map(({ id, name, def, strategy }) => ({
+                id,
+                name,
+                def,
+                strategy,
+            }));
+
+
+        sendMessage("/app/minion-config", {
+            playerId: localStorage.getItem("playerId"),
+            minions: cleanMinions,
+        });
+
+        // 👇 จากนั้นค่อยเปลี่ยนหน้า
         const selectedMinionData = selectedMinions.map(id => minions.find(m => m.id === id));
         const queryParams = new URLSearchParams({
             selectedMinions: JSON.stringify(selectedMinionData)
         });
+
+        console.log("🚀 Sending minions: ", cleanMinions);
+
         router.push(`/GamePage?${queryParams.toString()}`);
     };
 
@@ -106,10 +134,9 @@ export default function SelectMinions() {
             <div className="grid grid-cols-5 gap-12">
                 {minions.map((minion) => (
                     <div key={minion.id}
-                         className="bg-white p-6 w-80 h-120 rounded-lg shadow-md text-center flex flex-col items-center">
-                        <img src={minion.image} alt={minion.name} className="w-64 h-64 mx-auto mb-4"/>
+                         className="bg-white p-6 w-80 h-120 rounded-lg shadow-md text-center flex flex-col items-center border-2 border-black">
+                        <img src={minion.image} alt={minion.name} className="w-64 h-64 mx-auto mb-4 border-2 border-black rounded-lg"/>
 
-                        {/* ปรับให้ปุ่มพอดีกับกรอบ */}
                         <button
                             className={`w-full py-3 rounded-lg text-lg ${selectedMinions.includes(minion.id) ? 'bg-green-500 text-white' : 'bg-gray-300'}`}
                             onClick={() => toggleSelectMinion(minion.id)}
@@ -125,67 +152,79 @@ export default function SelectMinions() {
                             Customize
                         </button>
                     </div>
-
-
                 ))}
             </div>
 
             {showModal && currentMinionIndex !== null && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center w-auto h-auto">
-                    <div className="bg-white p-8 rounded-lg shadow-md max-w-2xl w-[800px] h-[90vh]">
-                        <h2 className="text-3xl font-bold text-gray-800 mb-6">
-                            Customize {minions.find(m => m.id === selectedMinions[currentMinionIndex])?.name}
-                        </h2>
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center w-full h-full">
+                    <div className="bg-white rounded-lg shadow-md flex flex-row w-[80vw] h-[90vh] overflow-hidden font-[Verdana] border-[3px] border-black">
 
-                        {/* รูป Minion ใหญ่ขึ้น */}
-                        <img src={minions.find(m => m.id === selectedMinions[currentMinionIndex])?.image}
-                             alt="Minion"
-                             className="w-32 h-32 mx-auto mb-4"/>
+                        {/* 🟡 ซ้าย: รูปมินเนียน */}
+                        <div
+                            className="flex flex-col items-center justify-start p-6 w-1/2 border-r-[3px] border-black relative">
+                            <h1 className="text-4xl font-bold text-gray-800 mt-10 mb-4 text-center">
+                                Customize Minion
+                            </h1>
 
-                        {/* กล่อง Minion Name และ Defense อยู่ข้างกัน */}
-                        <div className="flex gap-4">
-                            {/* Minion Name */}
-                            <div className="flex-1">
-                                <label className="block text-xl text-black mb-2">Minion's Name:</label>
-                                <input
-                                    className="w-full text-gray-700 p-3 border rounded text-lg"
-                                    type="text"
-                                    value={customName}
-                                    onChange={(e) => setCustomName(e.target.value)}
-                                />
-                            </div>
-
-                            {/* Minion Defense */}
-                            <div className="flex-1">
-                                <label className="block text-xl text-black mb-2">Minion's Defense:</label>
-                                <input
-                                    className="w-full text-gray-700 p-3 border rounded text-lg"
-                                    type="number"
-                                    value={customDefense}
-                                    onChange={(e) => setCustomDefense(e.target.value)}
+                            <div
+                                className="w-[500px] h-[500px] border-[3px] border-gray-700 rounded-lg flex items-center justify-center bg-white shadow-md mt-20">
+                                <img
+                                    src={minions.find(m => m.id === selectedMinions[currentMinionIndex])?.image}
+                                    alt="Minion"
+                                    className="w-[400px] h-[400px] object-contain"
                                 />
                             </div>
                         </div>
 
-                        {/* Strategy ช่องเต็มความกว้าง */}
-                        <label className="block text-xl text-black mt-4 mb-2">Strategy:</label>
-                        <textarea
-                            className="w-full h-[45vh] text-gray-700 mb-4 p-3 border rounded text-lg"
-                            rows={4}
-                            value={customStrategy}
-                            onChange={(e) => setCustomStrategy(e.target.value)}
-                        />
 
-                        {/* ปุ่มใหญ่ขึ้น */}
-                        <button
-                            onClick={handleConfirm}
-                            className="w-full py-3 px-6 bg-green-500 text-white rounded-lg text-xl"
-                        >
-                            Apply
-                        </button>
+                        {/* 🔵 ขวา: แบบฟอร์มกรอก */}
+                        <div className="flex flex-col justify-between p-6 w-1/2">
+                            <div className="space-y-4 text-black">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-lg font-bold lowercase">minion’s name :</label>
+                                    <input
+                                        className="border border-black rounded px-2 py-1 w-1/2 text-sm"
+                                        type="text"
+                                        value={customName}
+                                        onChange={(e) => setCustomName(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                    <label className="text-lg font-bold lowercase">minion’s defense :</label>
+                                    <input
+                                        className="border border-black rounded px-2 py-1 w-1/2 text-sm"
+                                        type="number"
+                                        value={customDefense}
+                                        onChange={(e) => setCustomDefense(e.target.value)}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-lg font-bold lowercase block mb-1">
+                                        write your minion’s strategy down here ...
+                                    </label>
+                                    <textarea
+                                        className="w-full h-[65vh] border border-black rounded px-2 py-1 text-sm"
+                                        value={customStrategy}
+                                        onChange={(e) => setCustomStrategy(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end mt-4">
+                                <button
+                                    onClick={handleConfirm}
+                                    className="bg-green-700 hover:bg-green-800 text-white text-sm font-bold py-3 px-6 rounded-full tracking-widest mb-10"
+                                >
+                                    APPLY
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
+
 
             <div className="mt-10 items-center justify-center">
                 <button
