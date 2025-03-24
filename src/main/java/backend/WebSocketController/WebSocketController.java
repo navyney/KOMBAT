@@ -9,10 +9,13 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import backend.KOMBOOD.config.Confi;
+import java.lang.module.Configuration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Controller
@@ -20,9 +23,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class WebSocketController {
 
     private final SimpMessagingTemplate messagingTemplate;
+    private static WebSocketDTO currentConfig;
 
     @Getter
-    private static final Set<String> sessionIds = new HashSet<>();
+    //private static final Set<String> sessionIds = new HashSet<>();
+    private static final Set<String> sessionIds = ConcurrentHashMap.newKeySet();
     @Getter
     private static final AtomicInteger playerCount = new AtomicInteger(0);
     @Getter
@@ -32,18 +37,17 @@ public class WebSocketController {
     @Getter
     private static String selectedMode = null;
     @Getter
-    private static final Map<String, String> sessionPlayerMap = new HashMap<>();
+    //private static final Map<String, String> sessionPlayerMap = new HashMap<>();
+    private static final Map<String, String> sessionPlayerMap = new ConcurrentHashMap<>();
 
     @MessageMapping("/join-game")
     public void handleJoinGame(@Payload Map<String, String> payload, SimpMessageHeaderAccessor accessor) {
         String sessionId = accessor.getSessionId();
         String playerId = payload.get("playerId");
 
-        if (!sessionIds.contains(sessionId)) {
-            sessionIds.add(sessionId);
-            sessionPlayerMap.put(sessionId, playerId);
-            System.out.println("✅ Player connected: " + playerId);
-        }
+        sessionIds.add(sessionId); // ใส่ซ้ำได้ เพราะใช้ Set
+        sessionPlayerMap.put(sessionId, playerId); // ✅ always map sessionId → playerId
+        System.out.println("✅ Player connected: " + playerId);
 
         // Send current state to the new player
         if (selectedMode != null) {
@@ -69,51 +73,66 @@ public class WebSocketController {
         String playerId = payload.get("playerId");
         String mode = payload.get("mode");
 
-        if (player1Id != null && player2Id != null) {
-            messagingTemplate.convertAndSend("/topic/lock-all", Map.of("locked", true));
-            messagingTemplate.convertAndSend("/topic/role-assigned", Map.of(
-                    "role", "spectator",
-                    "playerId", playerId,
-                    "disableButtons", true
-            ));
-            System.out.println("❌ Room is full. Assigning spectator to: " + playerId);
-            return;
+        // 💡 Check if someone already selected pvb or bvb
+        if (selectedMode != null && (selectedMode.equals("pvb") || selectedMode.equals("bvb"))) {
+            // ❌ Reject any new players
+            if (player1Id != null && !player1Id.equals(playerId)) {
+                messagingTemplate.convertAndSendToUser(sessionId, "/topic/role-assigned", Map.of(
+                        "role", "spectator",
+                        "playerId", playerId,
+                        "disableButtons", true
+                ));
+                messagingTemplate.convertAndSendToUser(sessionId, "/topic/lock-all", Map.of("locked", true));
+                System.out.println("👀 Spectator rejected due to mode: " + selectedMode);
+                return;
+            }
         }
 
+        // 🟢 Assign player1
         if (player1Id == null) {
             player1Id = playerId;
             selectedMode = mode;
+
             messagingTemplate.convertAndSend("/topic/role-assigned", Map.of(
                     "role", "player1",
                     "playerId", playerId,
                     "disableButtons", false
             ));
             messagingTemplate.convertAndSend("/topic/lock-mode", Map.of("selectedMode", selectedMode));
+
             System.out.println("🎮 select-mode: " + playerId + " -> " + mode);
-            System.out.println("✅ current player1: " + player1Id + ", player2: " + player2Id);
+
+            // ✅ Lock room immediately for PvB or BvB
+            if (!"pvp".equals(mode)) {
+                messagingTemplate.convertAndSend("/topic/lock-all", Map.of("locked", true));
+                System.out.println("🔒 Room locked for 1-player mode");
+            }
             return;
         }
 
+        // 🟢 Assign player2 for PvP only
         if ("pvp".equals(selectedMode) && player2Id == null && !playerId.equals(player1Id)) {
             player2Id = playerId;
+
             messagingTemplate.convertAndSend("/topic/role-assigned", Map.of(
                     "role", "player2",
                     "playerId", playerId,
                     "disableButtons", true
             ));
             messagingTemplate.convertAndSend("/topic/lock-all", Map.of("locked", true));
+
             System.out.println("🎮 select-mode: " + playerId + " -> " + mode);
-            System.out.println("✅ current player1: " + player1Id + ", player2: " + player2Id);
             return;
         }
 
+        // ❌ Otherwise, assign as spectator
         messagingTemplate.convertAndSend("/topic/role-assigned", Map.of(
                 "role", "spectator",
                 "playerId", playerId,
                 "disableButtons", true
         ));
-        System.out.println("🎮 select-mode: " + playerId + " -> " + mode);
-        System.out.println("✅ current player1: " + player1Id + ", player2: " + player2Id);
+        messagingTemplate.convertAndSend("/topic/lock-all", Map.of("locked", true));
+        System.out.println("👀 Spectator rejected due to room full or invalid request");
     }
 
     @MessageMapping("/request-lock-status")
@@ -122,6 +141,9 @@ public class WebSocketController {
 
         if (selectedMode != null) {
             messagingTemplate.convertAndSend("/topic/lock-mode", Map.of("selectedMode", selectedMode));
+            if (!"pvp".equals(selectedMode)) {
+                messagingTemplate.convertAndSend("/topic/lock-all", Map.of("locked", true));
+            }
         }
 
         if (player1Id != null && player2Id != null) {
@@ -134,16 +156,24 @@ public class WebSocketController {
         String sessionId = headerAccessor.getSessionId();
         String playerId = payload.get("playerId");
 
-        if (!sessionIds.contains(sessionId)) {
+        // เก็บ sessionId กับ playerId เพื่อใช้งานอื่น (optional)
+        if (!sessionPlayerMap.containsKey(sessionId)) {
             sessionIds.add(sessionId);
             sessionPlayerMap.put(sessionId, playerId);
-            int count = playerCount.incrementAndGet();
-            messagingTemplate.convertAndSend("/topic/player-count", Math.min(count, 2));
         }
+
+        // ✅ นับจำนวน player จริง (ที่เลือก mode แล้ว)
+        int count = 0;
+        if (player1Id != null) count++;
+        if (player2Id != null) count++;
+
+        messagingTemplate.convertAndSend("/topic/player-count", count);
+        System.out.println("👥 Players in Config-set-up (real players): " + count);
     }
 
     @MessageMapping("/config-update")
     public void handleConfigUpdate(@Payload WebSocketDTO config) {
+        currentConfig = config;
         System.out.println("📥 CONFIG RECEIVED FROM FRONTEND: " + config);
         messagingTemplate.convertAndSend("/topic/config-update", config);
         messagingTemplate.convertAndSend("/topic/config-reset-confirmed", config.getPlayerId());
@@ -153,10 +183,27 @@ public class WebSocketController {
     public void handleConfigConfirmed(@Payload WebSocketDTO dto) {
         System.out.println("✅ CONFIRM RECEIVED FROM: " + dto.getPlayerId());
         messagingTemplate.convertAndSend("/topic/config-confirmed", dto);
+        Confi.getSpawnCost();
+        Confi.getHexPurchasedCost();
+        Confi.getInitBudget();
+        Confi.getInit_hp();
+        Confi.getTurnBudget();
+        Confi.getMaxBudget();
+        Confi.getInterestPercentage();
+        Confi.getMaxTurn();
+        Confi.getMaxSpawn();
+        Confi.getMoveCost();
     }
 
     @MessageMapping("/navigate")
     public void handleNavigation(@Payload String action) {
+        if ("back".equals(action)) {
+            System.out.println("🔁 Resetting game state and navigating back to select-mode");
+            WebSocketController.clearPlayer1();
+            WebSocketController.clearPlayer2();
+            WebSocketController.resetGameState();
+            messagingTemplate.convertAndSend("/topic/mode-reset", "reset");
+        }
         messagingTemplate.convertAndSend("/topic/navigate", action);
     }
 
@@ -169,4 +216,22 @@ public class WebSocketController {
         player2Id = null;
     }
 
+    @MessageMapping("/request-current-config")
+    @SendTo("/topic/config-update")
+    public WebSocketDTO getCurrentConfig() {
+        return currentConfig;
+    }
+
+    public static void resetGameState() {
+        player1Id = null;
+        player2Id = null;
+        selectedMode = null;
+        sessionPlayerMap.clear();
+        sessionIds.clear();
+        System.out.println("🔁 Game state has been fully reset.");
+    }
+
+    public static WebSocketDTO getCurrentConfigGame() {
+        return currentConfig;
+    }
 }
