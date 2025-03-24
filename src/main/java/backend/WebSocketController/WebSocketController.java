@@ -141,6 +141,9 @@ public class WebSocketController {
 
         if (selectedMode != null) {
             messagingTemplate.convertAndSend("/topic/lock-mode", Map.of("selectedMode", selectedMode));
+            if (!"pvp".equals(selectedMode)) {
+                messagingTemplate.convertAndSend("/topic/lock-all", Map.of("locked", true));
+            }
         }
 
         if (player1Id != null && player2Id != null) {

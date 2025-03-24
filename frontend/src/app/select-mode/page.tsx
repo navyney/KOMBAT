@@ -27,8 +27,6 @@ export default function SelectModePage() {
     useEffect(() => {
         if (!playerId || !isConnected()) return;
 
-        sendMessage("/request-lock-status", { playerId });
-
         const subLockMode = subscribe("/topic/lock-mode", (message) => {
             const { selectedMode } = JSON.parse(message.body);
             dispatch(setLockedMode(selectedMode));
@@ -39,6 +37,10 @@ export default function SelectModePage() {
             dispatch(setDisableAll(true));
             dispatch(setLockedMode(null));
         });
+
+        setTimeout(() => {
+            sendMessage("/request-lock-status", { playerId });
+        }, 100);
 
         return () => {
             subLockMode?.unsubscribe();
@@ -52,6 +54,7 @@ export default function SelectModePage() {
 
         if (mode === "pvb" || mode === "bvb") {
             router.push("/Not-pvp-config");
+            dispatch(setDisableAll(true));
         } else if (mode === "pvp") {
             router.push("/Config-set-up");
         }
