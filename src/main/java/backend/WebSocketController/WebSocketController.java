@@ -202,6 +202,7 @@ public class WebSocketController {
             WebSocketController.clearPlayer1();
             WebSocketController.clearPlayer2();
             WebSocketController.resetGameState();
+            messagingTemplate.convertAndSend("/topic/mode-reset", "reset");
         }
         messagingTemplate.convertAndSend("/topic/navigate", action);
     }

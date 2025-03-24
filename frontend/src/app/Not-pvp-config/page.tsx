@@ -55,6 +55,14 @@ export default function NotPVPConfigPage() {
             }
         });
 
+        const subReset = subscribe("/topic/mode-reset", () => {
+            dispatch(resetPlayer());
+            dispatch(resetGame());
+            dispatch(resetConfig());
+            console.log("🔃 Received global reset from server");
+            window.location.href = "/select-mode";
+        });
+
         sendMessage("/join-config-setup", { playerId });
 
         return () => {
@@ -62,6 +70,7 @@ export default function NotPVPConfigPage() {
             unsubscribe(subUpdate);
             unsubscribe(subConfirm);
             unsubscribe(subNav);
+            unsubscribe(subReset);
         };
     }, [dispatch, playerId]);
 

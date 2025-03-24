@@ -6,7 +6,7 @@ import { useWebSocket } from "@/hooks/useWebsocket";
 import { usePlayerId } from "@/hooks/usePlayerId";
 import { useSelector } from "react-redux";
 import { RootState } from "@/stores/store";
-import {setDisableAll, setFull, setLockedMode} from "@/stores/slices/gameSlice";
+import {resetGame, setDisableAll, setFull, setLockedMode} from "@/stores/slices/gameSlice";
 import {useAppDispatch} from "@/stores/hook";
 
 export default function SelectModePage() {
@@ -38,6 +38,11 @@ export default function SelectModePage() {
             dispatch(setLockedMode(null));
         });
 
+        const subReset = subscribe("/topic/mode-reset", () => {
+            dispatch(resetGame()); // or setLockedMode(null), setDisableAll(false) แล้วแต่ Redux ของพี่
+            console.log("🔃 Game mode reset received");
+        });
+
         setTimeout(() => {
             sendMessage("/request-lock-status", { playerId });
         }, 100);
@@ -45,6 +50,7 @@ export default function SelectModePage() {
         return () => {
             subLockMode?.unsubscribe();
             subLockAll?.unsubscribe();
+            subReset?.unsubscribe();
         };
     }, [playerId, isConnected]);
 
