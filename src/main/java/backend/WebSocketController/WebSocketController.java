@@ -397,8 +397,6 @@ public class WebSocketController {
         return currentConfig;
     }
 
-}
-
     @MessageMapping("/minion/spawnMinion")
     @SendTo("/topic/minion")
     public void SpawnMinion(ActionOnHexGrid action) throws IOException {
@@ -450,9 +448,9 @@ public class WebSocketController {
             System.out.println("🔁 Game state has been fully reset.");
         }
 
-        public static WebSocketDTO getCurrentConfigGame () {
-            return currentConfig;
-
-        }
+//        public static WebSocketDTO getCurrentConfigGame () {
+//            return currentConfig;
+//
+//        }
     }
 
