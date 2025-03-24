@@ -17,9 +17,6 @@ export default function SelectModePage() {
     const roomFull = useSelector((state: RootState) => state.game.roomFull);
     const { connect, subscribe, sendMessage, isConnected } = useWebSocket();
     const dispatch = useAppDispatch();
-    const disableAll = useSelector((state: RootState) => state.game.disableAll);
-    const lockedMode = useSelector((state: RootState) => state.game.lockedMode);
-    const roomFull = useSelector((state: RootState) => state.game.roomFull);
 
     useEffect(() => {
         if (!playerId || isConnected()) return;

@@ -7,9 +7,6 @@ import {setPlayerId} from "@/stores/slices/playerSlice";
 let stompClient: Client | null = null;
 let activeSubscriptions: Subscription[] = [];
 
-let stompClient: Client | null = null;
-let activeSubscriptions: Subscription[] = [];
-
 export const useWebSocket = () => {
     const dispatch = useDispatch();
 
