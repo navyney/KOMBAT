@@ -1,35 +1,36 @@
 package backend.WebSocketController;
 
+
+import backend.WebSocketDTOs.MinionConfigMessage;
 import backend.KOMBOOD.entity.Player;
 import backend.KOMBOOD.error.EvalError;
 import backend.KOMBOOD.error.LexicalError;
 import backend.KOMBOOD.game.GameMode;
 import backend.KOMBOOD.game.GameModeType;
 import backend.KOMBOOD.game.GameState;
-
 import backend.KOMBOOD.game.SetUpGameStage;
 import backend.WebSocketDTOs.ActionOnHexGrid;
 import backend.WebSocketDTOs.WebSocketDTO;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-
+import java.util.*;
 import java.io.IOException;
-
 import backend.KOMBOOD.config.Confi;
 import java.lang.module.Configuration;
 import java.util.HashMap;
 import java.util.HashSet;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import backend.WebSocketDTOs.MinionType;
 
 @Controller
 @RequiredArgsConstructor
@@ -87,7 +88,6 @@ public class WebSocketController {
         String sessionId = accessor.getSessionId();
         String playerId = payload.get("playerId");
         String mode = payload.get("mode");
-
         // 💡 Check if someone already selected pvb or bvb
         if (selectedMode != null && (selectedMode.equals("pvb") || selectedMode.equals("bvb"))) {
             // ❌ Reject any new players
@@ -137,6 +137,14 @@ public class WebSocketController {
             messagingTemplate.convertAndSend("/topic/lock-all", Map.of("locked", true));
 
             System.out.println("🎮 select-mode: " + playerId + " -> " + mode);
+
+//         int count = 0;
+//         if (player1Id != null) count++;
+//         if (player2Id != null) count++;
+
+//         messagingTemplate.convertAndSend("/topic/player-count", count);
+//         System.out.println("👥 Updated player count: " + count);
+//         System.out.println("🧍 player1: " + player1Id + ", 🧍 player2: " + player2Id);
             return;
         }
 
@@ -165,6 +173,49 @@ public class WebSocketController {
             messagingTemplate.convertAndSend("/topic/lock-all", Map.of("locked", true));
         }
     }
+
+//    @MessageMapping("/join-config-setup")
+//    public void handleJoinConfig(@Payload Map<String, String> payload, SimpMessageHeaderAccessor headerAccessor) {
+//        String sessionId = headerAccessor.getSessionId();
+//        String playerId = payload.get("playerId");
+////        if (!sessionIds.contains(sessionId)) {
+////            sessionIds.add(sessionId);
+////            sessionPlayerMap.put(sessionId, playerId);
+////            int count = playerCount.incrementAndGet();
+////            messagingTemplate.convertAndSend("/topic/player-count", Math.min(count, 2));
+////        }
+//
+//        if (!sessionPlayerMap.containsKey(sessionId)) {
+//            sessionIds.add(sessionId);
+//            sessionPlayerMap.put(sessionId, playerId);
+//        }
+//
+//        long count = sessionPlayerMap.values().stream().distinct().count();
+//        messagingTemplate.convertAndSend("/topic/player-count", Math.min((int) count, 2));
+//    }
+
+//    @MessageMapping("/join-config-setup")
+//    public void handleJoinConfig(@Payload Map<String, String> payload, SimpMessageHeaderAccessor headerAccessor) {
+//        String sessionId = headerAccessor.getSessionId();
+//        String playerId = payload.get("playerId");
+//
+//        // ตรวจสอบว่ามี sessionId นี้หรือยัง
+//        if (!sessionPlayerMap.containsKey(sessionId)) {
+//            sessionIds.add(sessionId); // สำหรับ tracking session
+//            sessionPlayerMap.put(sessionId, playerId); // ผูก sessionId กับ playerId
+//        }
+//
+//        // ✅ นับจำนวน playerId ที่ไม่ซ้ำกัน (distinct) จากทุก session
+//        long distinctPlayerCount = sessionPlayerMap.values().stream().distinct().count();
+//
+//        // ✅ จำกัดไว้ไม่ให้เกิน 2 คน
+//        int limitedCount = Math.min((int) distinctPlayerCount, 2);
+//
+//        // ส่งจำนวนผู้เล่นไปยัง frontend
+//        messagingTemplate.convertAndSend("/topic/player-count", limitedCount);
+//
+//        System.out.println("👥 Players in Config-set-up: " + distinctPlayerCount);
+//    }
 
     @MessageMapping("/join-config-setup")
     public void handleJoinConfig(@Payload Map<String, String> payload, SimpMessageHeaderAccessor headerAccessor) {
@@ -261,6 +312,92 @@ public class WebSocketController {
         }
         System.out.println("buy area complete");
     }
+
+    @MessageMapping("/minion-config")
+    public void handleMinionConfig(@Payload MinionConfigMessage message, Message<?> rawMessage) {
+        String playerId = message.getPlayerId();
+        List<MinionType> minions = message.getMinions();
+
+        System.out.println("🧠 ได้รับ Minion config จาก playerId: " + playerId);
+
+        if (minions == null || minions.isEmpty()) {
+            System.out.println("⚠️ ไม่พบ Minions ที่ถูกส่งมา");
+            return;
+        }
+
+        for (MinionType minion : minions) {
+            System.out.println("➡️ Minion ID: " + minion.getId());
+            System.out.println("   Name     : " + minion.getName());
+            System.out.println("   DEF      : " + minion.getDef());
+            System.out.println("   Strategy : " + minion.getStrategy());
+            System.out.println();
+        }
+
+        messagingTemplate.convertAndSend("/topic/minion-updated", message);
+    }
+
+    @MessageMapping("/join-select-minion-type")
+    public void handleJoinSelectMinionType(@Payload Map<String, String> payload, SimpMessageHeaderAccessor headerAccessor) {
+        String sessionId = headerAccessor.getSessionId();
+        String playerId = payload.get("playerId");
+
+        // เก็บ sessionId กับ playerId เพื่อใช้งานอื่น (optional)
+        if (!sessionPlayerMap.containsKey(sessionId)) {
+            sessionIds.add(sessionId);
+            sessionPlayerMap.put(sessionId, playerId);
+        }
+
+        // ✅ นับจำนวน player จริง (ที่เลือก mode แล้ว)
+        int count = 0;
+        if (player1Id != null) count++;
+        if (player2Id != null) count++;
+
+        messagingTemplate.convertAndSend("/topic/player-count", count);
+        System.out.println("👥 Players in Config-set-up (real players): " + count);
+    }
+
+    @MessageMapping("/minion-select")
+    public void handleMinionToggle(@Payload Map<String, Object> payload) {
+        String playerId = (String) payload.get("playerId");
+        String buttonId = (String) payload.get("id");
+        Boolean isSelected = (Boolean) payload.get("isSelected");
+
+        System.out.println("🔘 [Toggle] Player: " + playerId + " toggled " + buttonId +
+                " -> isSelected: " + isSelected);
+
+        // ✅ ส่งให้ทุกคน
+        messagingTemplate.convertAndSend("/topic/minion-select", payload);
+    }
+
+    @MessageMapping("/minion-customize")
+    public void handleCustomize(@Payload Map<String, Object> payload) {
+        String playerId = (String) payload.get("playerId");
+
+        System.out.println("🔘 [Toggle] Player: " + playerId + " customized ");
+        messagingTemplate.convertAndSend("/topic/minion-customize", payload);
+    }
+
+    @MessageMapping("/topic/minion-customize-apply")
+    public void handleCustomizeApply(@Payload Map<String, Object> payload) {
+        String playerId = (String) payload.get("playerId");
+
+        System.out.println("🔘 Player: " + playerId + "has modal");
+        messagingTemplate.convertAndSend("/topic/minion-customize-apply", payload);
+    }
+
+    @MessageMapping("/minion-close-modal")
+    public void handleCloseModal(@Payload Map<String, Object> payload) {
+        String playerId = (String) payload.get("playerId");
+
+        System.out.println("🔘 Player: " + playerId + "has close modal");
+        messagingTemplate.convertAndSend("/topic/minion-close-modal", payload);
+    }
+
+    public static WebSocketDTO getCurrentConfigGame() {
+        return currentConfig;
+    }
+
+}
 
     @MessageMapping("/minion/spawnMinion")
     @SendTo("/topic/minion")

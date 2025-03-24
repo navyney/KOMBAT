@@ -5,9 +5,10 @@ import { useDispatch } from "react-redux";
 import { useWebSocket } from "@/hooks/useWebsocket";
 import {resetPlayer, setRole} from "@/stores/slices/playerSlice";
 import {setDisableAll, setLockedMode, setFull, resetGame} from "@/stores/slices/gameSlice";
-import { usePlayerId } from "@/hooks/usePlayerId";
+//import { usePlayerId } from "@/hooks/usePlayerId";
 import {resetConfig} from "@/stores/slices/configSlice";
 import {useRouter} from "next/navigation";
+import { usePersistentPlayerId } from "@/hooks/usePersistentPlayerId";
 
 interface Props {
     children: React.ReactNode;
@@ -15,7 +16,8 @@ interface Props {
 
 const WebSocketProvider: React.FC<Props> = ({ children }) => {
     const dispatch = useDispatch();
-    const playerId = usePlayerId();
+    const playerId = usePersistentPlayerId();;
+
     const { connect, subscribe, isConnected, sendMessage } = useWebSocket();
     const router = useRouter();
 
@@ -63,6 +65,8 @@ const WebSocketProvider: React.FC<Props> = ({ children }) => {
 
         const subLockMode = subscribe("/topic/lock-mode", (message) => {
             const { selectedMode } = JSON.parse(message.body);
+            // setLockedMode(selectedMode);
+            // sessionStorage.setItem("lockedMode", selectedMode);
             dispatch(setLockedMode(selectedMode));
             console.log("🔒 Locked mode set:", selectedMode)
         });
@@ -73,6 +77,7 @@ const WebSocketProvider: React.FC<Props> = ({ children }) => {
             // sessionStorage.setItem("roomFull", "true");
             dispatch(setDisableAll(true));
             dispatch(setFull(true));
+            //dispatch(setLockedMode(null))
             console.log("🔒 Room full - all controls disabled");
         });
 

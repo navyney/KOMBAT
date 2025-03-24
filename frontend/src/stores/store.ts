@@ -4,6 +4,9 @@ import webSocketReducer from "./slices/webSocketSlice";
 import gameReducer from "./slices/gameSlice";
 import playerReducer from "./slices/playerSlice";
 import configReducer from "./slices/configSlice"
+import minionTypeReducer from "./slices/minionTypeSlice";
+import selectionStateReducer from "./slices/selectionStateSlice";
+import customizeStateReducer from "@/stores/slices/customizeStateSlice";
 
 export const store = configureStore({
     reducer: {
@@ -12,6 +15,9 @@ export const store = configureStore({
         game: gameReducer,
         player: playerReducer,
         config: configReducer,
+        miniontype: minionTypeReducer,
+        selectionState: selectionStateReducer,
+        customizeState: customizeStateReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({ serializableCheck: false }),

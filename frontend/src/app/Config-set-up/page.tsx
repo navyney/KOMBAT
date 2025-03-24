@@ -50,21 +50,28 @@ export default function ConfigPage() {
             dispatch(confirmConfig(confirmId));
         });
 
+        // const subNav = subscribe("/topic/navigate", (message) => {
+        //     const action = message.body;
+        //     if (action === "next") window.location.href = "/select-type";
+        //     else if (action === "back") {
+        //         dispatch(resetPlayer());
+        //         dispatch(resetGame());
+        //         dispatch(resetConfig());
+        //         window.location.href = "/select-mode";
+        //     }
+        //     else if (action === "start") {
+        //         dispatch(resetPlayer());
+        //         dispatch(resetGame());
+        //         dispatch(resetConfig());
+        //         window.location.href = "/";
+        //     }
+        // });
+
         const subNav = subscribe("/topic/navigate", (message) => {
             const action = message.body;
-            if (action === "next") window.location.href = "/select-type";
-            else if (action === "back") {
-                dispatch(resetPlayer());
-                dispatch(resetGame());
-                dispatch(resetConfig());
-                window.location.href = "/select-mode";
-            }
-            else if (action === "start") {
-                dispatch(resetPlayer());
-                dispatch(resetGame());
-                dispatch(resetConfig());
-                window.location.href = "/";
-            }
+            if (action === "next") router.push("/select-type");
+            else if (action === "back") router.push("/select-mode");
+            else if (action === "start") router.push("/");
         });
 
         const subReset = subscribe("/topic/config-reset-confirmed", () => {
@@ -81,6 +88,20 @@ export default function ConfigPage() {
             unsubscribe(subReset);
         };
     }, [dispatch, router, playerId]);
+
+    // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const { name, value } = e.target;
+    //     const key = name as keyof typeof config;
+    //
+    //     if (value === "" || (!isNaN(Number(value)) && Number(value) >= 0)) {
+    //         const parsedValue = value === "" ? "" : parseFloat(value);
+    //         const updatedConfig = { ...config, [key]: parsedValue };
+    //
+    //         dispatch(updateConfig(updatedConfig));
+    //
+    //         sendMessage("/app/config-update", JSON.stringify({ ...updatedConfig, playerId }));
+    //     }
+    // };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
