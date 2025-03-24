@@ -7,7 +7,7 @@ import { useAppDispatch, useAppSelector } from "@/stores/hook";
 import { updateConfig, confirmConfig } from "@/stores/slices/configSlice";
 import { useWebSocket } from "@/hooks/useWebsocket";
 import { usePlayerId } from "@/hooks/usePlayerId";
-import {resetPlayer} from "@/stores/slices/playerSlice";
+import { resetPlayer } from "@/stores/slices/playerSlice";
 import { resetConfig } from "@/stores/slices/configSlice";
 import { resetGame } from "@/stores/slices/gameSlice";
 
@@ -52,13 +52,18 @@ export default function ConfigPage() {
 
         const subNav = subscribe("/topic/navigate", (message) => {
             const action = message.body;
-            if (action === "next") router.push("/select-type");
-            else if (action === "back") router.push("/select-mode");
+            if (action === "next") window.location.href = "/select-type";
+            else if (action === "back") {
+                dispatch(resetPlayer());
+                dispatch(resetGame());
+                dispatch(resetConfig());
+                window.location.href = "/select-mode";
+            }
             else if (action === "start") {
                 dispatch(resetPlayer());
                 dispatch(resetGame());
                 dispatch(resetConfig());
-                router.push("/");
+                window.location.href = "/";
             }
         });
 
@@ -134,7 +139,13 @@ export default function ConfigPage() {
     };
 
     const handleBack = () => {
-        sendMessage("/topic/navigate", "back");
+        sendMessage("/navigate", "back");
+        console.log("🔁 Resetting game state and navigating back to select-mode");
+        dispatch(resetPlayer());
+        dispatch(resetGame());
+        dispatch(resetConfig());
+        window.location.href = "/select-mode";
+        // sendMessage("/topic/navigate", "back");
     };
 
     return (

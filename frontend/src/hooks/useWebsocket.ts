@@ -8,7 +8,10 @@ let activeSubscriptions: Subscription[] = [];
 
 export const useWebSocket = () => {
     const dispatch = useDispatch();
-    const serverUrl = process.env.API_BASE_URL || "http://localhost:8080";
+
+    const host = process.env.NEXT_PUBLIC_API_HOST || "localhost";
+    const port = process.env.NEXT_PUBLIC_API_PORT || "8080";
+    const serverUrl = `http://${host}:${port}`;
 
     const subscribe = (destination: string, callback: (payload: Message) => void) => {
         if (stompClient && stompClient.connected) {
@@ -74,6 +77,7 @@ export const useWebSocket = () => {
                     destination: "/app/join-game",
                     body: JSON.stringify({ playerId }), // ✅ fixed: send as JSON object
                 });
+                console.log("🌐 Connecting to WebSocket at:", serverUrl);
             },
             onDisconnect: () => {
                 console.log("⛔️ Disconnected from WebSocket");

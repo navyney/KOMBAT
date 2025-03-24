@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class WebSocketController {
 
     private final SimpMessagingTemplate messagingTemplate;
+    private static WebSocketDTO currentConfig;
 
     @Getter
     //private static final Set<String> sessionIds = new HashSet<>();
@@ -198,6 +199,7 @@ public class WebSocketController {
 
     @MessageMapping("/config-update")
     public void handleConfigUpdate(@Payload WebSocketDTO config) {
+        currentConfig = config;
         System.out.println("📥 CONFIG RECEIVED FROM FRONTEND: " + config);
         messagingTemplate.convertAndSend("/topic/config-update", config);
         messagingTemplate.convertAndSend("/topic/config-reset-confirmed", config.getPlayerId());
@@ -211,6 +213,12 @@ public class WebSocketController {
 
     @MessageMapping("/navigate")
     public void handleNavigation(@Payload String action) {
+        if ("back".equals(action)) {
+            System.out.println("🔁 Resetting game state and navigating back to select-mode");
+            WebSocketController.clearPlayer1();
+            WebSocketController.clearPlayer2();
+            WebSocketController.resetGameState();
+        }
         messagingTemplate.convertAndSend("/topic/navigate", action);
     }
 
@@ -221,6 +229,12 @@ public class WebSocketController {
 
     public static void clearPlayer2() {
         player2Id = null;
+    }
+
+    @MessageMapping("/request-current-config")
+    @SendTo("/topic/config-update")
+    public WebSocketDTO getCurrentConfig() {
+        return currentConfig;
     }
 
     public static void resetGameState() {
