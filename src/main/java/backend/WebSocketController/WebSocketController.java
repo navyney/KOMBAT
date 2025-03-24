@@ -1,6 +1,15 @@
 package backend.WebSocketController;
 
+
 import backend.WebSocketDTOs.MinionConfigMessage;
+import backend.KOMBOOD.entity.Player;
+import backend.KOMBOOD.error.EvalError;
+import backend.KOMBOOD.error.LexicalError;
+import backend.KOMBOOD.game.GameMode;
+import backend.KOMBOOD.game.GameModeType;
+import backend.KOMBOOD.game.GameState;
+import backend.KOMBOOD.game.SetUpGameStage;
+import backend.WebSocketDTOs.ActionOnHexGrid;
 import backend.WebSocketDTOs.WebSocketDTO;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +21,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import java.util.*;
+import java.io.IOException;
 import backend.KOMBOOD.config.Confi;
 import java.lang.module.Configuration;
 import java.util.HashMap;
@@ -43,6 +53,8 @@ public class WebSocketController {
     @Getter
     //private static final Map<String, String> sessionPlayerMap = new HashMap<>();
     private static final Map<String, String> sessionPlayerMap = new ConcurrentHashMap<>();
+    @Getter
+    private static SetUpGameStage gameState;
 
     @MessageMapping("/join-game")
     public void handleJoinGame(@Payload Map<String, String> payload, SimpMessageHeaderAccessor accessor) {
@@ -270,19 +282,35 @@ public class WebSocketController {
         player2Id = null;
     }
 
-    @MessageMapping("/request-current-config")
-    @SendTo("/topic/config-update")
-    public WebSocketDTO getCurrentConfig() {
-        return currentConfig;
+
+    @MessageMapping("/gameState/setup")
+    public void setUpGameStage(@Payload WebSocketDTO dto) throws LexicalError, EvalError, IOException {
+        String id1 = dto.getPlayerId();
+        String id2 = dto.getPlayerId();
+        Player player1 = new Player("Player1",id1);
+        Player player2 = new Player("Player2",id2);
+        GameMode gameMode = new GameMode();
+        gameMode.setGameMode(GameModeType.DUEL);
+        gameState = new SetUpGameStage(player1, player2, gameMode);
+        gameState.setUP();
+        System.out.println("setup complete");
     }
 
-    public static void resetGameState() {
-        player1Id = null;
-        player2Id = null;
-        selectedMode = null;
-        sessionPlayerMap.clear();
-        sessionIds.clear();
-        System.out.println("🔁 Game state has been fully reset.");
+    @MessageMapping("/minion/buyArea")
+    @SendTo("/topic/area")
+    public void BuyArea(ActionOnHexGrid action) {
+
+        int curPlayer = action.getCurPlayer();
+        int row = action.getRow();
+        int col = action.getCol();
+        if (curPlayer == 1) {
+            Player player = gameState.getPlayer1();
+            player.buyArea(row, col, gameState.getGameMap());
+        } else {
+            Player player = gameState.getPlayer2();
+            player.buyArea(row, col, gameState.getGameMap());
+        }
+        System.out.println("buy area complete");
     }
 
     @MessageMapping("/minion-config")
@@ -370,3 +398,61 @@ public class WebSocketController {
     }
 
 }
+
+    @MessageMapping("/minion/spawnMinion")
+    @SendTo("/topic/minion")
+    public void SpawnMinion(ActionOnHexGrid action) throws IOException {
+        int curPlayer = action.getCurPlayer();
+        int row = action.getRow();
+        int col = action.getCol();
+        String minionName = action.getMinion();
+
+        if (curPlayer == 1) {
+            Player player = gameState.getPlayer1();
+            player.spawnMinion(player.getMinionByName(minionName), row, col);
+        } else {
+            Player player = gameState.getPlayer2();
+            player.spawnMinion(player.getMinionByName(minionName), row, col);
+        }
+        System.out.println("spawn minion complete");
+    }
+
+    @MessageMapping("/minion/endTurn")
+    @SendTo("/topic/executeMinion")
+    public void ExecuteMinion(ActionOnHexGrid action) throws EvalError {
+        int curPlayer = action.getCurPlayer();
+        if (curPlayer == 1) {
+            Player player = gameState.getPlayer1();
+            GameState.executeMinion(player);
+            int current_turns = GameState.getCurrent_turns();
+            player.calculateInterest(current_turns);
+        } else {
+            Player player = gameState.getPlayer2();
+            GameState.executeMinion(player);
+            int current_turns = GameState.getCurrent_turns();
+            player.calculateInterest(current_turns);
+        }
+        System.out.println("execute minion complete");
+        messagingTemplate.convertAndSend("/topic/executeMinion", curPlayer);
+    }
+        @MessageMapping("/request-current-config")
+        @SendTo("/topic/config-update")
+        public WebSocketDTO getCurrentConfig () {
+            return currentConfig;
+        }
+
+        public static void resetGameState () {
+            player1Id = null;
+            player2Id = null;
+            selectedMode = null;
+            sessionPlayerMap.clear();
+            sessionIds.clear();
+            System.out.println("🔁 Game state has been fully reset.");
+        }
+
+        public static WebSocketDTO getCurrentConfigGame () {
+            return currentConfig;
+
+        }
+    }
+

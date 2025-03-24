@@ -1,12 +1,14 @@
 'use client';
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { useAppDispatch, useAppSelector } from "@/stores/hook";
 import HexGrid from "@/component/HexGrid";
-import {updateConfig} from "@/stores/slices/configSlice";
-import {useWebSocket} from "@/hooks/useWebsocket";
-import {usePlayerId} from "@/hooks/usePlayerId";
-import {useAppDispatch} from "@/stores/hook";
+import {confirmConfig, updateConfig} from "@/stores/slices/configSlice";
+import { useWebSocket } from "@/hooks/useWebsocket";
+import { usePlayerId } from "@/hooks/usePlayerId";
+import {useRouter} from "next/navigation";
+
 
 // สาธุขอให้ push ได้
 
@@ -20,13 +22,14 @@ interface Minion {
 }
 
 export default function GamePage() {
+    const router = useRouter();
+    const { subscribe, sendMessage, connect, isConnected, unsubscribe } = useWebSocket();
     const [turn, setTurn] = useState(1);
     const [currentPlayer, setCurrentPlayer] = useState(1);
     const [winner, setWinner] = useState<number | null>(null);
-    const { subscribe, sendMessage, connect, isConnected, unsubscribe } = useWebSocket();
+
     const playerId = usePlayerId();
     const dispatch = useAppDispatch();
-
     const [gameConfig, setGameConfig] = useState({
         spawnedCost: 0,
         hexPurchasedCost: 0,
@@ -65,6 +68,14 @@ export default function GamePage() {
     const [allyNeighbors, setAllyNeighbors] = useState<number[]>([]);
     const [opponentNeighbors, setOpponentNeighbors] = useState<number[]>([]);
 
+
+    useEffect(() => {
+        sendMessage("/minion/setup",{
+            playerId:String
+        });
+    }, []);
+
+
     useEffect(() => {
         if (playerId && isConnected()) {
             sendMessage("/request-current-config", {});
@@ -93,6 +104,20 @@ export default function GamePage() {
         }
     }, []);
 
+    useEffect(() => {
+        if(!isConnected()) connect();
+        const subExe = subscribe("/topic/executeMinion", (message) => {
+            const minions = JSON.parse(message.body);
+
+
+        });
+
+        return () => {
+            unsubscribe(subExe);
+
+        }
+    },[currentPlayer]);
+
     // dummy winner checked
     useEffect(() => {
         if (turn > gameConfig.maxTurn) {
@@ -103,8 +128,7 @@ export default function GamePage() {
 
     useEffect(() => {
         const queryParams = new URLSearchParams(window.location.search);
-        const selectedMinionsParam = queryParams.get("selectedMinions");
-
+        const selectedMinionsParam = queryParams.get("selectedMinions")
         if (selectedMinionsParam) {
             const parsedMinions: Minion[] = JSON.parse(selectedMinionsParam);
             setMinions(parsedMinions);
@@ -114,6 +138,8 @@ export default function GamePage() {
         console.log("Selected Minions:", selectedMinions);
         console.log("Minions Data:", minions);
     }, []);
+
+
 
     const handleHexClick = (hexId: number) => {
         if (!selectedAction) {
@@ -139,7 +165,9 @@ export default function GamePage() {
                         ownedHexes: prev[currentPlayer].ownedHexes + 1
                     }
                 }));
-
+                sendMessage("/minion/buyArea",{
+                    curPlayer: currentPlayer,row: hexId/10,col: hexId%10
+                });
                 if (currentPlayer === 1) {
                     setAllyHexes([...allyHexes, hexId]);
                 } else {
@@ -186,13 +214,19 @@ export default function GamePage() {
                         const newBoardMinion = {
                             id: hexId,
                             type: selectedMinion.name,
-                            player: currentPlayer
+                            player: currentPlayer,
+                            minionId: selectedMinion.id
                         };
 
                         console.log("Adding new minion:", newBoardMinion);
                         setBoardMinions(prev => [...prev, newBoardMinion]);
                     }
+
+                    sendMessage("/minion/spawnMinion",{
+                        curPlayer: currentPlayer,row: hexId/10,col: hexId%10,minion: selectedMinion?.name
+                    });
                 }
+
                 setSelectedMinionType(prev => ({
                     ...prev,
                     [currentPlayer]: null
@@ -215,7 +249,9 @@ export default function GamePage() {
 
     const endTurn = () => {
         if (turn > gameConfig.maxTurn) return;
-
+        sendMessage("/minion/endTurn",{
+            curPlayer: currentPlayer
+        });
         setHasBought(false);
         setHasSpawned(false);
         setSelectedMinionType(prev => ({
