@@ -72,6 +72,7 @@ export const useWebSocket = () => {
         stompClient = new Client({
             webSocketFactory: () => socket,
             reconnectDelay: 5000,
+
             onConnect: () => {
                 console.log("✅ Connected to WebSocket successfully");
                 stompClient?.publish({

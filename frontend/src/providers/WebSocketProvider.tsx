@@ -5,7 +5,7 @@ import { useDispatch } from "react-redux";
 import { useWebSocket } from "@/hooks/useWebsocket";
 import {resetPlayer, setRole} from "@/stores/slices/playerSlice";
 import {setDisableAll, setLockedMode, setFull, resetGame} from "@/stores/slices/gameSlice";
-import { usePlayerId } from "@/hooks/usePlayerId";
+//import { usePlayerId } from "@/hooks/usePlayerId";
 import {resetConfig} from "@/stores/slices/configSlice";
 import {useRouter} from "next/navigation";
 import { usePersistentPlayerId } from "@/hooks/usePersistentPlayerId";
