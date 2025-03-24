@@ -4,6 +4,7 @@ import webSocketReducer from "./slices/webSocketSlice";
 import gameReducer from "./slices/gameSlice";
 import playerReducer from "./slices/playerSlice";
 import configReducer from "./slices/configSlice"
+import minionTypeReducer from "./slices/minionTypeSlice";
 
 export const store = configureStore({
     reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
         game: gameReducer,
         player: playerReducer,
         config: configReducer,
+        miniontype: minionTypeReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({ serializableCheck: false }),
