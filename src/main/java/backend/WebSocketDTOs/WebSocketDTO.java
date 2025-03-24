@@ -13,14 +13,33 @@ public class WebSocketDTO implements Serializable {
     @Setter
     private String playerId;
 
-    @Min(0) private int spawnedCost;
+    @Getter
+    @Setter
+    @Min(0) private static int spawnedCost;
+
+    @Getter
+    @Setter
     @Min(0) private int hexPurchasedCost;
+    @Getter
+    @Setter
     @Min(0) private int initialBudget;
+    @Getter
+    @Setter
     @Min(0) private int initialHP;
+    @Getter
+    @Setter
     @Min(0) private int turnBudget;
+    @Getter
+    @Setter
     @Min(0) private int maxBudget;
+    @Getter
+    @Setter
     @Min(0) private int interestPercentage;
+    @Getter
+    @Setter
     @Min(0) private int maxTurn;
+    @Getter
+    @Setter
     @Min(0) private int maxSpawn;
 
     @Override
@@ -38,4 +57,5 @@ public class WebSocketDTO implements Serializable {
                 ", maxSpawn=" + maxSpawn +
                 '}';
     }
+
 }

@@ -63,8 +63,6 @@ const WebSocketProvider: React.FC<Props> = ({ children }) => {
 
         const subLockMode = subscribe("/topic/lock-mode", (message) => {
             const { selectedMode } = JSON.parse(message.body);
-            // setLockedMode(selectedMode);
-            // sessionStorage.setItem("lockedMode", selectedMode);
             dispatch(setLockedMode(selectedMode));
             console.log("🔒 Locked mode set:", selectedMode)
         });
@@ -75,7 +73,6 @@ const WebSocketProvider: React.FC<Props> = ({ children }) => {
             // sessionStorage.setItem("roomFull", "true");
             dispatch(setDisableAll(true));
             dispatch(setFull(true));
-            dispatch(setLockedMode(null))
             console.log("🔒 Room full - all controls disabled");
         });
 

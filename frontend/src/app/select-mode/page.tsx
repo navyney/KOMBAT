@@ -6,12 +6,14 @@ import { useWebSocket } from "@/hooks/useWebsocket";
 import { usePlayerId } from "@/hooks/usePlayerId";
 import { useSelector } from "react-redux";
 import { RootState } from "@/stores/store";
+import {setDisableAll, setFull, setLockedMode} from "@/stores/slices/gameSlice";
+import {useAppDispatch} from "@/stores/hook";
 
 export default function SelectModePage() {
     const router = useRouter();
     const playerId = usePlayerId();
-    const { connect, sendMessage, isConnected } = useWebSocket();
-
+    const { connect, subscribe, sendMessage, isConnected } = useWebSocket();
+    const dispatch = useAppDispatch();
     const disableAll = useSelector((state: RootState) => state.game.disableAll);
     const lockedMode = useSelector((state: RootState) => state.game.lockedMode);
     const roomFull = useSelector((state: RootState) => state.game.roomFull);
@@ -20,16 +22,53 @@ export default function SelectModePage() {
         if (!playerId || isConnected()) return;
         connect();
         //console.log("🎮 Player ID:", playerId);
-    }, [playerId, connect, isConnected]);
+    }, [playerId]);
+
+    useEffect(() => {
+        if (!playerId || !isConnected()) return;
+
+        sendMessage("/request-lock-status", { playerId });
+
+        const subLockMode = subscribe("/topic/lock-mode", (message) => {
+            const { selectedMode } = JSON.parse(message.body);
+            dispatch(setLockedMode(selectedMode));
+        });
+
+        const subLockAll = subscribe("/topic/lock-all", () => {
+            dispatch(setFull(true));
+            dispatch(setDisableAll(true));
+            dispatch(setLockedMode(null));
+        });
+
+        return () => {
+            subLockMode?.unsubscribe();
+            subLockAll?.unsubscribe();
+        };
+    }, [playerId, isConnected]);
 
     const handleModeSelect = (mode: string) => {
-        if (!isConnected() || disableAll || roomFull) {
-            console.log("⛔️ Cannot select mode. Room is full or disabled.");
-            return;
+        if (!playerId) return;
+        sendMessage("/select-mode", { mode, playerId });
+
+        if (mode === "pvb" || mode === "bvb") {
+            router.push("/Not-pvp-config");
+        } else if (mode === "pvp") {
+            router.push("/Config-set-up");
+        }
+    };
+
+    const isModeDisabled = (mode: string) => {
+        if (disableAll || roomFull) return true;
+
+        if (lockedMode === "pvp") {
+            return mode !== "pvp";
+        } else if (lockedMode === "pvb") {
+            return mode !== "pvb";
+        } else if (lockedMode === "bvb") {
+            return mode !== "bvb";
         }
 
-        sendMessage("/select-mode", { mode, playerId });
-        router.push("/Config-set-up");
+        return false;
     };
 
     return (
@@ -39,36 +78,22 @@ export default function SelectModePage() {
             <div className="grid grid-cols-3 gap-6">
                 <button
                     onClick={() => handleModeSelect("pvp")}
-                    className={`px-6 py-3 rounded text-white text-lg font-semibold transition-colors ${
-                        disableAll || (lockedMode && lockedMode !== "pvp")
-                            ? "bg-gray-400 cursor-not-allowed"
-                            : "bg-orange-500 hover:bg-orange-400"
-                    }`}
-                    disabled={disableAll || (lockedMode !== null && lockedMode !== "pvp")}
+                    disabled={roomFull || lockedMode === "pvb" || lockedMode === "bvb"}
+                    className={`px-6 text-white py-2 rounded text-lg font-semibold transition-colors ${isModeDisabled("pvp") ? "bg-gray-400" : "bg-orange-500 hover:bg-orange-600"}`}
                 >
                     Player vs Player
                 </button>
-
                 <button
                     onClick={() => handleModeSelect("pvb")}
-                    className={`px-6 py-3 rounded text-white text-lg font-semibold transition-colors ${
-                        disableAll || lockedMode !== null
-                            ? "bg-gray-400 cursor-not-allowed"
-                            : "bg-orange-500 hover:bg-orange-400"
-                    }`}
-                    disabled={disableAll || lockedMode !== null}
+                    disabled={roomFull || lockedMode === "pvp" || lockedMode === "bvb"}
+                    className={`px-6 text-white py-2 rounded text-lg font-semibold transition-colors ${isModeDisabled("pvb") ? "bg-gray-400" : "bg-orange-500 hover:bg-orange-600"}`}
                 >
                     Player vs Bot
                 </button>
-
                 <button
                     onClick={() => handleModeSelect("bvb")}
-                    className={`px-6 py-3 rounded text-white text-lg font-semibold transition-colors ${
-                        disableAll || lockedMode !== null
-                            ? "bg-gray-400 cursor-not-allowed"
-                            : "bg-orange-500 hover:bg-orange-400"
-                    }`}
-                    disabled={disableAll || lockedMode !== null}
+                    disabled={roomFull || lockedMode === "pvp" || lockedMode === "pvb"}
+                    className={`px-6 text-white py-2 rounded text-lg font-semibold transition-colors ${isModeDisabled("bvb") ? "bg-gray-400" : "bg-orange-500 hover:bg-orange-600"}`}
                 >
                     Bot vs Bot
                 </button>

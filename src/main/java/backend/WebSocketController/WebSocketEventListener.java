@@ -16,6 +16,7 @@ public class WebSocketEventListener {
 
     private final SimpMessagingTemplate messagingTemplate;
 
+
     @Autowired
     public WebSocketEventListener(SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;

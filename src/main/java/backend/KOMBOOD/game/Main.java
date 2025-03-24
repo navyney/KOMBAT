@@ -6,15 +6,24 @@ import backend.KOMBOOD.entity.Player;
 import backend.KOMBOOD.error.EvalError;
 import backend.KOMBOOD.error.LexicalError;
 import backend.KOMBOOD.map.MapMap;
+import backend.WebSocketController.WebSocketController;
+import backend.WebSocketDTOs.WebSocketDTO;
 
 import java.io.IOException;
 
 public class Main {
 
     private static ConfigFile config = new ConfigFile(
-            100, 100, 1000, 100,
-            90, 23456, 5, 100,
-            47, 50, 75);
+            WebSocketDTO.getSpawnedCost()
+            , WebSocketController.getCurrentConfigGame().getHexPurchasedCost()
+            , WebSocketController.getCurrentConfigGame().getInitialBudget()
+            , WebSocketController.getCurrentConfigGame().getInitialHP()
+            , WebSocketController.getCurrentConfigGame().getTurnBudget()
+            , WebSocketController.getCurrentConfigGame().getMaxBudget()
+            , WebSocketController.getCurrentConfigGame().getInterestPercentage()
+            , WebSocketController.getCurrentConfigGame().getMaxTurn()
+            , WebSocketController.getCurrentConfigGame().getMaxSpawn()
+            , 1 );
 
     public static ConfigFile getConfig() {
         return config;
@@ -62,8 +71,8 @@ public class Main {
         */
 
         MapMap gameMap = new MapMap(8, 8);
-        Player player1 = new Player("Player1");
-        Player player2 = new Player("Player2");
+        Player player1 = new Player("Player1","111");
+        Player player2 = new Player("Player2","222");
         GameMode gameMode = new GameMode();
         gameMode.setGameMode(GameModeType.AUTO);
         GameModeType gameModeType = gameMode.getGameMode();
