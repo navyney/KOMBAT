@@ -8,6 +8,7 @@ import {setDisableAll, setLockedMode, setFull, resetGame} from "@/stores/slices/
 import { usePlayerId } from "@/hooks/usePlayerId";
 import {resetConfig} from "@/stores/slices/configSlice";
 import {useRouter} from "next/navigation";
+import { usePersistentPlayerId } from "@/hooks/usePersistentPlayerId";
 
 interface Props {
     children: React.ReactNode;
@@ -15,7 +16,7 @@ interface Props {
 
 const WebSocketProvider: React.FC<Props> = ({ children }) => {
     const dispatch = useDispatch();
-    const playerId = usePlayerId();
+    const playerId = usePersistentPlayerId();;
     const { connect, subscribe, isConnected, sendMessage } = useWebSocket();
     const router = useRouter();
 
