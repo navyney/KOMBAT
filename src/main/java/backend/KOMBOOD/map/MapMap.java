@@ -51,16 +51,27 @@ public class MapMap {
     }
 
     public boolean isMinionHere(int row, int col) {
-        if(row>0 || col>0 || row<8 || col<8) {return false;}
-        else {return minions[row][col] != null;}
+        return minions[row][col] != null;
     }
 
     public void placeMinion(int row, int col, Minion minion) {
         minions[row][col] = minion;
     }
+    public void printMinions(int row, int col) {
+        for (int i = 0; i < row; i++) {
+            for (int j = 0; j < col; j++) {
+                if (minions[i][j] != null) {
+                    System.out.println("1 " + i + " " + j);
+                }else {
+                    System.out.println("0");
+                }
+            }
+        }
+    }
 
     public Minion getMinionAt(int row, int col) {
-
+        if(row>7 || col>7 || row<0 || col<0){
+            return null;}
         return minions[row][col];
     }
 

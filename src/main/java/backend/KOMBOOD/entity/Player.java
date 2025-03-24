@@ -11,8 +11,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Random;
-
-import static backend.KOMBOOD.game.GameState.MinionOnMapMap;
+import static backend.KOMBOOD.game.GameState.player1;
+import static backend.KOMBOOD.game.GameState.player2;
 
 public class Player {
     String name;
@@ -28,24 +28,25 @@ public class Player {
     private int lastSpawnMinionTurn = -1;
     private boolean hasBoughtAreaThisTurn = false;
     private boolean hasSpawnedMinionThisTurn = false;
-    private String sessionId;
+    private String Id;
     private Random random = new Random();
     private MapMap map;
 
-    public Player(String name) {
+    public Player(String name, String Id) {
         this.name = name;
         this.budget = config.init_budget();
         this.maxBudget = config.max_budget();
         this.minion = new ArrayList<Minion>();
         this.area = new ArrayList<Hex>();
         this.spawnedMinions = new ArrayList<>();
+        this.Id = Id;
     }
     public Object get() {
         return this;
     }
 
-    public void set(String sessionId) {
-        this.sessionId = sessionId ;
+    public void set(String Id) {
+        this.Id = Id ;
     }
 
 
@@ -133,20 +134,20 @@ public class Player {
     }
 
     // no more buy minion
-    public void buyMinion(MinionType type, Minion m) {
-        if (!canBuyMinion()) {
-            System.out.println("You already bought this turn. Wait for next turn!");
-            return;
-        }
-        if (this.budget < config.buy_minion_cost()) {
-            System.out.println("Not enough money to buy minion");
-        } else {
-            setBudget(this.getBudget() - config.buy_minion_cost());
-            addMinion(m);
-            lastBuyMinionTurn = GameState.getCurrent_turns();
-            System.out.println("Minion " + m.getType().getTypeName() + " bought successfully");
-        }
-    }
+//    public void buyMinion(MinionType type, Minion m) {
+//        if (!canBuyMinion()) {
+//            System.out.println("You already bought this turn. Wait for next turn!");
+//            return;
+//        }
+//        if (this.budget < config.buy_minion_cost()) {
+//            System.out.println("Not enough money to buy minion");
+//        } else {
+//            setBudget(this.getBudget() - config.buy_minion_cost());
+//            addMinion(m);
+//            lastBuyMinionTurn = GameState.getCurrent_turns();
+//            System.out.println("Minion " + m.getType().getTypeName() + " bought successfully");
+//        }
+//    }
 
     public void setArea(int r, int c, MapMap map) {
         HexHex hex = (HexHex) map.getHexAt(r, c);
@@ -239,7 +240,11 @@ public class Player {
 
             if (success) {
                 addSpawnedMinion(newMinion);
-                MinionOnMapMap.add(newMinion);
+                if(GameState.getCurrentPlayer().equals(player1)){
+                    player1.getAllMinions().add(newMinion);}
+                else{
+                    player2.getAllMinions().add(newMinion);
+                }
                 this.setSpawnRemaining();
                 hasSpawnedMinionThisTurn = true;
                 lastSpawnMinionTurn = GameState.getCurrent_turns();
@@ -265,7 +270,11 @@ public class Player {
 
         if (success) {
             addSpawnedMinion(newMinion);
-            MinionOnMapMap.add(newMinion);
+            if(GameState.getCurrentPlayer().equals(player1)){
+                player1.getAllMinions().add(newMinion);}
+            else{
+                player2.getAllMinions().add(newMinion);
+            }
             setBudget(this.getBudget() - config.spawn_cost());
             this.setSpawnRemaining();
             hasSpawnedMinionThisTurn = true;
@@ -345,6 +354,11 @@ public class Player {
 
     public MapMap getMapMap(){return map; }
 
+    public ArrayList<Minion> getAllSpawnedMinion() {
+        return spawnedMinions;
+    }
+
+
     //dummy done()
     public void done() {
         System.out.println(this.name + " has finished!");
@@ -405,21 +419,21 @@ public class Player {
         }
     }
 
-    private void buyRandomMinion(ArrayList<Minion> minions) {
-        if (getBudget() < Main.getConfig().buy_minion_cost()) {
-            return;
-        }
-
-        MinionType[] types = MinionType.getAllMinionTypes();
-
-        if (types.length == 0) {
-            return;
-        }
-
-        MinionType randomType = types[random.nextInt(types.length)];
-        Minion minion = minions.get(random.nextInt(minions.size()));
-        buyMinion(randomType, minion);
-    }
+//    private void buyRandomMinion(ArrayList<Minion> minions) {
+//        if (getBudget() < Main.getConfig().buy_minion_cost()) {
+//            return;
+//        }
+//
+//        MinionType[] types = MinionType.getAllMinionTypes();
+//
+//        if (types.length == 0) {
+//            return;
+//        }
+//
+//        MinionType randomType = types[random.nextInt(types.length)];
+//        Minion minion = minions.get(random.nextInt(minions.size()));
+//        buyMinion(randomType, minion);
+//    }
 
     private void spawnRandomMinion(ArrayList<Minion> minions) throws IOException {
         if (getMinion().isEmpty() || getBudget() < Main.getConfig().spawn_cost()) {
