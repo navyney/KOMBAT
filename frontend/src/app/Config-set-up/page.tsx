@@ -82,6 +82,20 @@ export default function ConfigPage() {
         };
     }, [dispatch, router, playerId]);
 
+    // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const { name, value } = e.target;
+    //     const key = name as keyof typeof config;
+    //
+    //     if (value === "" || (!isNaN(Number(value)) && Number(value) >= 0)) {
+    //         const parsedValue = value === "" ? "" : parseFloat(value);
+    //         const updatedConfig = { ...config, [key]: parsedValue };
+    //
+    //         dispatch(updateConfig(updatedConfig));
+    //
+    //         sendMessage("/app/config-update", JSON.stringify({ ...updatedConfig, playerId }));
+    //     }
+    // };
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         console.log(name, value)

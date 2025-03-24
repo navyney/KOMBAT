@@ -7,6 +7,9 @@ import {setPlayerId} from "@/stores/slices/playerSlice";
 let stompClient: Client | null = null;
 let activeSubscriptions: Subscription[] = [];
 
+let stompClient: Client | null = null;
+let activeSubscriptions: Subscription[] = [];
+
 export const useWebSocket = () => {
     const dispatch = useDispatch();
 
@@ -81,7 +84,6 @@ export const useWebSocket = () => {
                 });
                 console.log("🌐 Connecting to WebSocket at:", serverUrl);
                 dispatch(setPlayerId(playerId)); // เมื่อ connect สำเร็จแล้ว
-
             },
             onDisconnect: () => {
                 console.log("⛔️ Disconnected from WebSocket");

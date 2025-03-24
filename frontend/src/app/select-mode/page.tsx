@@ -12,6 +12,9 @@ import {useAppDispatch} from "@/stores/hook";
 export default function SelectModePage() {
     const router = useRouter();
     const playerId = usePlayerId();
+    const disableAll = useSelector((state: RootState) => state.game.disableAll);
+    const lockedMode = useSelector((state: RootState) => state.game.lockedMode);
+    const roomFull = useSelector((state: RootState) => state.game.roomFull);
     const { connect, subscribe, sendMessage, isConnected } = useWebSocket();
     const dispatch = useAppDispatch();
     const disableAll = useSelector((state: RootState) => state.game.disableAll);
@@ -65,7 +68,6 @@ export default function SelectModePage() {
             router.push("/Config-set-up");
         }
     };
-
     const isModeDisabled = (mode: string) => {
         if (disableAll || roomFull) return true;
 
@@ -92,6 +94,7 @@ export default function SelectModePage() {
                 >
                     Player vs Player
                 </button>
+
                 <button
                     onClick={() => handleModeSelect("pvb")}
                     disabled={roomFull || lockedMode === "pvp" || lockedMode === "bvb"}
@@ -99,6 +102,7 @@ export default function SelectModePage() {
                 >
                     Player vs Bot
                 </button>
+
                 <button
                     onClick={() => handleModeSelect("bvb")}
                     disabled={roomFull || lockedMode === "pvp" || lockedMode === "pvb"}
