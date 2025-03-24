@@ -47,6 +47,7 @@ public class WebSocketController {
     private static final Map<String, String> sessionPlayerMap = new ConcurrentHashMap<>();
     @Getter
     private static SetUpGameStage gameState;
+
     @MessageMapping("/join-game")
     public void handleJoinGame(@Payload Map<String, String> payload, SimpMessageHeaderAccessor accessor) {
         String sessionId = accessor.getSessionId();
@@ -212,11 +213,10 @@ public class WebSocketController {
         player2Id = null;
     }
 
-    @MessageMapping("/minion/setup")
-    @SendTo("/topic/setup")
+    @MessageMapping("/gameState/setup")
     public void setUpGameStage() throws LexicalError, EvalError, IOException {
-        String nameP1 = "player1Id";
-        String nameP2 = "player2Id";
+        String nameP1 = "Player1";
+        String nameP2 = "Player2";
         Player player1 = new Player(nameP1);
         Player player2 = new Player(nameP2);
         GameMode gameMode = new GameMode();

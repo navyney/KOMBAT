@@ -65,7 +65,7 @@ export default function GamePage() {
     const [boardMinions, setBoardMinions] = useState<{ id: number, type: string, player: number }[]>([]);
     const [allyNeighbors, setAllyNeighbors] = useState<number[]>([]);
     const [opponentNeighbors, setOpponentNeighbors] = useState<number[]>([]);
-    let MinionId:number;
+
 
     useEffect(() => {
         sendMessage("/minion/setup",{
@@ -93,12 +93,12 @@ export default function GamePage() {
             const minions = JSON.parse(message.body);
 
 
-        },[currentPlayer]);
+        });
 
-        // return () => {
-        //
-        //
-        // }
+        return () => {
+            unsubscribe(subExe);
+
+        }
     },[currentPlayer]);
 
     // dummy winner checked
@@ -228,7 +228,6 @@ export default function GamePage() {
                 [currentPlayer]: String(selectedMinion.id)
             }));
         }
-        MinionId = minionId;
     };
 
     const endTurn = () => {
