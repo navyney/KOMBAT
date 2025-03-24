@@ -4,7 +4,7 @@ import backend.WebSocketController.WebSocketController;
 import backend.WebSocketDTOs.WebSocketDTO;
 
 public class Confi {
-    static int spawn_cost = WebSocketDTO.getSpawnedCost();
+    static int spawn_cost = WebSocketController.getCurrentConfigGame().getSpawnedCost();
     static int hex_purchase_cost = WebSocketController.getCurrentConfigGame().getHexPurchasedCost();
     static int init_budget = WebSocketController.getCurrentConfigGame().getInitialBudget();
     static int init_hp = WebSocketController.getCurrentConfigGame().getInitialHP();

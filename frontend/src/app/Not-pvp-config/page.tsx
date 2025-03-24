@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/stores/hook";
-import { updateConfig } from "@/stores/slices/configSlice";
+import {confirmConfig, updateConfig} from "@/stores/slices/configSlice";
 import { useWebSocket } from "@/hooks/useWebsocket";
 import { usePlayerId } from "@/hooks/usePlayerId";
 import { resetPlayer } from "@/stores/slices/playerSlice";
@@ -13,10 +13,11 @@ import Image from "next/image";
 export default function NotPVPConfigPage() {
     const dispatch = useAppDispatch();
     const { subscribe, sendMessage, connect, isConnected, unsubscribe } = useWebSocket();
-
     const config = useAppSelector((state) => state.config.config || {});
     const [players, setPlayers] = useState(0);
     const playerId = usePlayerId();
+    const [ youConfirmed , setYouConfirmed ] = useState<boolean | null>(null) ;
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!playerId) return;
@@ -30,6 +31,11 @@ export default function NotPVPConfigPage() {
         const subUpdate = subscribe("/topic/config-update", (message) => {
             const newConfig = JSON.parse(message.body);
             dispatch(updateConfig(newConfig));
+        });
+
+        const subConfirm = subscribe("/topic/config-confirmed", (message) => {
+            const { playerId: confirmId } = JSON.parse(message.body);
+            dispatch(confirmConfig(confirmId));
         });
 
         const subNav = subscribe("/topic/navigate", (message) => {
@@ -54,6 +60,7 @@ export default function NotPVPConfigPage() {
         return () => {
             unsubscribe(subCount);
             unsubscribe(subUpdate);
+            unsubscribe(subConfirm);
             unsubscribe(subNav);
         };
     }, [dispatch, playerId]);
@@ -96,6 +103,12 @@ export default function NotPVPConfigPage() {
         window.location.href = "/select-mode";
     };
 
+    const handleConfirm = () => {
+        if (playerId) {
+            sendMessage("/config-confirmed", { playerId });
+        }
+    };
+
     const handleNext = () => {
         const sanitizedConfig = {
             ...config,
@@ -107,7 +120,7 @@ export default function NotPVPConfigPage() {
 
     return (
         <main className="flex flex-col items-center justify-center min-h-screen bg-cover bg-center w-full h-full p-8"
-              style={{ backgroundImage: "url('/image/config.png')" }}>
+              style={{backgroundImage: "url('/image/config.png')"}}>
 
             <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg mt-16 space-y-4 space-x-5">
                 <h1 className="text-xl font-bold text-center text-black">Set Up Your Game Configuration</h1>
@@ -126,7 +139,29 @@ export default function NotPVPConfigPage() {
                 ))}
             </div>
 
-            <div className="absolute bottom-10 left-20 cursor-pointer" onClick={handleBack}>
+            {/*<div className='flex justify-between mt-4'>*/}
+            {/*    <div className='flex items-center gap-2'>*/}
+            {/*        <div*/}
+            {/*            className={`w-4 h-4 border-2 rounded ${youConfirmed ? 'bg-green-500 border-green-700' : 'bg-white'}`}/>*/}
+            {/*        <span className='text-sm text-black'>You</span>*/}
+            {/*    </div>*/}
+            {/*</div>*/}
+
+            {error && <p className="text-red-500 text-center font-bold">{error}</p>}
+
+            <div className="mt-4 flex justify-end">
+                <button
+                    onClick={handleConfirm}
+                    className="mt-4 bg-blue-500 text-white py-2 px-10 rounded hover:bg-blue-700 transition"
+                >
+                    Confirm Config
+                </button>
+            </div>
+
+            <div
+                onClick={handleBack}
+                className="absolute cursor-pointer bottom-10 left-20"
+            >
                 <Image
                     src="/image/back-button.png"
                     alt="back"
@@ -136,13 +171,21 @@ export default function NotPVPConfigPage() {
                 />
             </div>
 
-            <div className="absolute bottom-10 right-20 cursor-pointer" onClick={handleNext}>
+            {/*<div*/}
+            {/*    onClick={youConfirmed ? handleNext : undefined}*/}
+            {/*    className={`absolute cursor-pointer bottom-10 right-20 transition-opacity ${*/}
+            {/*        youConfirmed? "hover:opacity-75" : "opacity-50 cursor-not-allowed"*/}
+            {/*    }`}*/}
+            {/*>*/}
+            <div
+                onClick={handleNext}
+                className="absolute cursor-pointer bottom-10 right-20"
+            >
                 <Image
                     src="/image/next-button.png"
                     alt="next"
                     width={150}
                     height={150}
-                    className="hover:opacity-75 transition-opacity"
                 />
             </div>
         </main>

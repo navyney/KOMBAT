@@ -15,7 +15,7 @@ public class WebSocketDTO implements Serializable {
 
     @Getter
     @Setter
-    @Min(0) private static int spawnedCost;
+    @Min(0) private int spawnedCost;
 
     @Getter
     @Setter

@@ -84,6 +84,7 @@ export default function ConfigPage() {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
+        console.log(name, value)
         const key = name as keyof typeof config;
 
         if (value === "" || (!isNaN(Number(value)) && Number(value) >= 0)) {

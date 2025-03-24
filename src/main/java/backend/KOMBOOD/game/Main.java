@@ -14,7 +14,7 @@ import java.io.IOException;
 public class Main {
 
     private static ConfigFile config = new ConfigFile(
-            WebSocketDTO.getSpawnedCost()
+            WebSocketController.getCurrentConfigGame().getSpawnedCost()
             , WebSocketController.getCurrentConfigGame().getHexPurchasedCost()
             , WebSocketController.getCurrentConfigGame().getInitialBudget()
             , WebSocketController.getCurrentConfigGame().getInitialHP()
