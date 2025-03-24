@@ -11,5 +11,6 @@ export const usePersistentPlayerId = () => {
         }
         return id;
     }, []);
+
     return playerId;
 };
