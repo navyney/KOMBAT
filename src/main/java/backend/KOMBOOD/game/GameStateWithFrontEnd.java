@@ -47,7 +47,7 @@ public class GameStateWithFrontEnd { // player1 and player2 can play in terminal
 
     private GameModeType gameMode;
 
-    private List<MinionType> minionsShop = new ArrayList<MinionType>();
+    private List<MinionType> minionsAllType = new ArrayList<MinionType>();
 
     public static int getCurrent_turns() {
         return current_turns;
@@ -102,9 +102,8 @@ public class GameStateWithFrontEnd { // player1 and player2 can play in terminal
         player2.setArea(8, 7, gameMap);
         player2.setArea(8, 8, gameMap);
 
-        //both player spawn first minion
-        //minion setup
-        //initial budget
+
+
         player1.setBudget(init_budget);
         player2.setBudget(init_budget);
 
