@@ -409,6 +409,28 @@ public class WebSocketController {
         messagingTemplate.convertAndSend("/topic/minion-close-modal", payload);
     }
 
+    @MessageMapping("/minion-update")
+    public void handleMinionUpdate(@Payload MinionConfigMessage message) {
+        String playerId = message.getPlayerId();
+        List<MinionType> updatedMinions = message.getMinions();
+
+        if (updatedMinions == null || updatedMinions.isEmpty()) {
+            System.out.println("⚠️ ไม่มีข้อมูล minion ส่งมาที่ /minion-update");
+            return;
+        }
+
+        System.out.println("🛠️ อัปเดตมินเนียนจาก playerId: " + playerId);
+        for (MinionType minion : updatedMinions) {
+            System.out.println("🔧 Minion ID: " + minion.getId());
+            System.out.println("   Name     : " + minion.getName());
+            System.out.println("   DEF      : " + minion.getDef());
+            System.out.println("   Strategy : " + minion.getStrategy());
+        }
+
+        // ✅ กระจายค่าที่แก้ไขไปให้ทุก client
+        messagingTemplate.convertAndSend("/topic/minion-updated", message);
+    }
+
     public static WebSocketDTO getCurrentConfigGame() {
         return currentConfig;
     }

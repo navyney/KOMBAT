@@ -102,9 +102,16 @@ export default function GamePage() {
 
         });
 
-        return () => {
-            unsubscribe(subExe);
+        const subNav = subscribe("/topic/navigate", (message) => {
+            const action = message.body;
+            if (action === "next") router.push("/select-type");
+            else if (action === "back") router.push("/select-mode");
+            else if (action === "start") router.push("/");
+        });
 
+        return () => {
+            unsubscribe(subNav);
+            unsubscribe(subExe);
         }
     },[currentPlayer]);
 
