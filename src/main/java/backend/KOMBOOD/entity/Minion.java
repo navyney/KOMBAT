@@ -227,7 +227,7 @@ public class Minion {
         if (hp <= 0) {
             owner.getMinion().remove(this);
             map.removeMinion(this.row, this.col);
-            owner.removeMinion(this);
+            this.getType().removeStrategy();
             if(GameState.getCurrentPlayer().equals(player1)){
                 player2.getSpawnedMinions().remove(this);}
             else{

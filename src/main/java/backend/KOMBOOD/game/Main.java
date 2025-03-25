@@ -13,18 +13,21 @@ import java.io.IOException;
 
 public class Main {
 
-    private static ConfigFile config = new ConfigFile(
-            WebSocketController.getCurrentConfigGame().getSpawnedCost()
-            , WebSocketController.getCurrentConfigGame().getHexPurchasedCost()
-            , WebSocketController.getCurrentConfigGame().getInitialBudget()
-            , WebSocketController.getCurrentConfigGame().getInitialHP()
-            , WebSocketController.getCurrentConfigGame().getTurnBudget()
-            , WebSocketController.getCurrentConfigGame().getMaxBudget()
-            , WebSocketController.getCurrentConfigGame().getInterestPercentage()
-            , WebSocketController.getCurrentConfigGame().getMaxTurn()
-            , WebSocketController.getCurrentConfigGame().getMaxSpawn()
-            , 1 );
+//    private static ConfigFile config = new ConfigFile(
+//            WebSocketController.getCurrentConfigGame().getSpawnedCost()
+//            , WebSocketController.getCurrentConfigGame().getHexPurchasedCost()
+//            , WebSocketController.getCurrentConfigGame().getInitialBudget()
+//            , WebSocketController.getCurrentConfigGame().getInitialHP()
+//            , WebSocketController.getCurrentConfigGame().getTurnBudget()
+//            , WebSocketController.getCurrentConfigGame().getMaxBudget()
+//            , WebSocketController.getCurrentConfigGame().getInterestPercentage()
+//            , WebSocketController.getCurrentConfigGame().getMaxTurn()
+//            , WebSocketController.getCurrentConfigGame().getMaxSpawn()
+//            , 1 );
 
+    public static ConfigFile config = new ConfigFile(
+            100,100,500,100,50
+            ,1000,2,100,20,1);
     public static ConfigFile getConfig() {
         return config;
     }
@@ -74,7 +77,7 @@ public class Main {
         Player player1 = new Player("Player1","111");
         Player player2 = new Player("Player2","222");
         GameMode gameMode = new GameMode();
-        gameMode.setGameMode(GameModeType.AUTO);
+        gameMode.setGameMode(GameModeType.DUEL);
         GameModeType gameModeType = gameMode.getGameMode();
         GameState gameState = new GameState(player1, player2, gameMap, gameModeType);
         gameState.setConfig(config);
