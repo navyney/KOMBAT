@@ -445,8 +445,11 @@ export default function SelectMinions() {
 
     useEffect(() => {
         if (!playerId) return;
+
+        // ✅ Join minion type selection
         sendMessage("/join-select-minion-type", { playerId });
 
+        // 🔔 Subscribe: Minion select toggle
         const subToggle = subscribe("/topic/minion-select", (message) => {
             const { id, isSelected, playerId: senderId } = JSON.parse(message.body);
             if (senderId !== playerId) {
@@ -454,40 +457,27 @@ export default function SelectMinions() {
             }
         });
 
-        return () => unsubscribe(subToggle);
-
-    }, [dispatch, playerId]);
-
-    useEffect(() => {
+        // 🔔 Subscribe: Minion customize apply
         const subApply = subscribe("/topic/minion-customize-apply", (message) => {
             const { id } = JSON.parse(message.body);
-
+            // currently unused, but you can add logic here if needed
         });
 
-        return () => unsubscribe(subApply);
-    }, []);
-
-    useEffect(() => {
+        // 🔔 Subscribe: Close modal when needed
         const subClose = subscribe("/topic/minion-close-modal", (message) => {
             const { minionId } = JSON.parse(message.body);
-
-            // ✅ ปิด modal ถ้าเป็น minion เดียวกัน
             if (currentMinionId === minionId) {
                 setShowModal(false);
             }
         });
 
-        return () => unsubscribe(subClose);
-    }, [currentMinionId]);
-
-
-    useEffect(() => {
+        // 🔔 Subscribe: Open customize modal
         const subCustomize = subscribe("/topic/minion-customize", (message) => {
             const { minionId, playerId: senderId } = JSON.parse(message.body);
 
             setCurrentMinionId(minionId);
             setShowModal(true);
-            setCustomizingPlayer(senderId); // ✅ เก็บว่าใครเป็นคนกด
+            setCustomizingPlayer(senderId);
 
             const baseMinion = minions.find(m => m.id === minionId);
             const reduxMinion = minionsFromRedux.find(m => m.id === minionId);
@@ -503,9 +493,45 @@ export default function SelectMinions() {
             }
         });
 
-        return () => unsubscribe(subCustomize);
-    }, []);
+        // 🔔 Subscribe: Navigation
+        const subNav = subscribe("/topic/navigate", (message) => {
+            const action = message.body;
+            if (action === "next") router.push("/select-type");
+            else if (action === "back") router.push("/select-mode");
+            else if (action === "start") router.push("/");
+            else if (action === "gamepage") router.push("/GamePage");
+        });
 
+        const subMinionUpdated = subscribe("/topic/minion-updated", (message) => {
+            const { playerId: senderId, minions } = JSON.parse(message.body);
+            if (senderId === playerId) return; // ✅ ข้ามตัวเอง
+
+            for (const minion of minions) {
+                dispatch(updateMinion(minion));
+            }
+        });
+
+        const subUpdated = subscribe("/topic/minion-updated", (message) => {
+            const { minions, playerId: senderId } = JSON.parse(message.body);
+            if (senderId === playerId) return; // อย่าอัปเดตตัวเองซ้ำ
+
+            minions.forEach((minion: MinionType) => {
+                dispatch(updateMinion(minion));
+            });
+        });
+
+        // 🧼 Cleanup
+        return () => {
+            unsubscribe(subToggle);
+            unsubscribe(subApply);
+            unsubscribe(subClose);
+            unsubscribe(subCustomize);
+            unsubscribe(subNav);
+            unsubscribe(subMinionUpdated);
+            unsubscribe(subUpdated);
+        };
+
+    }, [dispatch, playerId, currentMinionId, router, minionsFromRedux]);
 
     const toggleSelectMinion = (id: number) => {
         const idStr = `select ${id}`;
@@ -539,10 +565,10 @@ export default function SelectMinions() {
             setCustomStrategy("");
         }
 
-        sendMessage("/minion-customize", {
-            playerId,
-            minionId,
-        });
+        // sendMessage("/minion-customize", {
+        //     playerId,
+        //     minionId,
+        // });
     };
 
     // const handleConfirm = () => {
@@ -576,7 +602,7 @@ export default function SelectMinions() {
             dispatch(updateMinion(updatedMinion));
 
             // ✅ Broadcast ไปยังทุกคนว่า modal นี้ปิดได้แล้ว
-            sendMessage("/minion-close-modal", {
+            sendMessage("/topic/minion-close-modal", {
                 playerId,
                 minionId: currentMinionId,
             });
@@ -593,7 +619,10 @@ export default function SelectMinions() {
             .filter(m => selectedIds.includes(m.id))
             .map(({ id, name, def, strategy }) => ({ id, name, def, strategy }));
 
-        sendMessage("/app/minion-config", {
+        console.log("🔥 Selected IDs:", selectedIds);
+        console.log("📦 Clean Minions:", cleanMinions);
+
+        sendMessage("/minion-config", {
             playerId,
             minions: cleanMinions,
         });
@@ -603,7 +632,7 @@ export default function SelectMinions() {
             selectedMinions: JSON.stringify(selectedMinionData)
         });
 
-        router.push(`/GamePage?${queryParams.toString()}`);
+        sendMessage("/navigate", "gamepage");
     };
 
     const handleMinionChange = (
@@ -621,9 +650,9 @@ export default function SelectMinions() {
 
         dispatch(updateMinion(updatedMinion));
 
-        sendMessage("/minion-config", {
+        sendMessage("/minion-update", {
             playerId,
-            minions: minionsFromRedux.map(m => m.id === id ? updatedMinion : m),
+            minions: [updatedMinion],
         });
     };
 
@@ -696,6 +725,7 @@ export default function SelectMinions() {
                                 <div className="flex items-center justify-between">
                                     <label className="text-lg font-bold lowercase">minion’s defense :</label>
                                     <input
+                                        className="border border-black rounded px-2 py-1 w-1/2 text-sm"
                                         type="number"
                                         value={customDefense}
                                         onChange={(e) => {

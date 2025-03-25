@@ -7,6 +7,9 @@ import { RootState } from "@/stores/store";
 import { useWebSocket } from "@/hooks/useWebsocket";
 import { usePlayerId } from "@/hooks/usePlayerId";
 import { setSelection } from "@/stores/slices/selectionStateSlice";
+import {confirmConfig, resetConfig, updateConfig} from "@/stores/slices/configSlice";
+import {resetPlayer} from "@/stores/slices/playerSlice";
+import {resetGame} from "@/stores/slices/gameSlice";
 
 const minions = [
     { id: 1, name: "pawn", image: "/image/minions/white-pawn.jpeg", color: "white" },
@@ -21,7 +24,8 @@ export default function SelectMinions() {
     const dispatch = useDispatch();
     const minionsFromRedux = useSelector((state: RootState) => state.miniontype);
     const stateFromRedux = useSelector((state: RootState) => state.selectionState);
-    const { sendMessage } = useWebSocket();
+    const { sendMessage, subscribe, unsubscribe, connect, isConnected } = useWebSocket();
+    const [players, setPlayers] = useState(0);
     const playerId = usePlayerId();
 
     const [showModal, setShowModal] = useState(false);
@@ -33,6 +37,49 @@ export default function SelectMinions() {
     const selectedMinions = stateFromRedux
         .filter(item => item.isSelected && item.id.startsWith("select "))
         .map(item => parseInt(item.id.replace("select ", "")));
+
+    useEffect(() => {
+        if (!playerId) return;
+        if (!isConnected()) connect();
+
+        const subCount = subscribe("/topic/player-count", (message) => {
+            const count = JSON.parse(message.body);
+            setPlayers(count);
+        });
+
+        // const subNav = subscribe("/topic/navigate", (message) => {
+        //     const action = message.body;
+        //     if (action === "start") {
+        //         dispatch(resetPlayer());
+        //         dispatch(resetGame());
+        //         dispatch(resetConfig());
+        //         window.location.href = "/";
+        //     } else if (action === "back") {
+        //         dispatch(resetPlayer());
+        //         dispatch(resetGame());
+        //         dispatch(resetConfig());
+        //         window.location.href = "/select-mode";
+        //     } else if (action === "next") {
+        //         window.location.href = "/Not-pvp-select-type";
+        //     } else if (action === "gamepage") {
+        //         window.location.href = "/GamePage";
+        //     }
+        // });
+        // 🔔 Subscribe: Navigation
+        const subNav = subscribe("/topic/navigate", (message) => {
+            const action = message.body;
+            if (action === "next") router.push("/select-type");
+            else if (action === "back") router.push("/select-mode");
+            else if (action === "start") router.push("/");
+            else if (action === "gamepage") router.push("/GamePage");
+        });
+
+        sendMessage("/join-select-minion-type", { playerId });
+        return () => {
+            unsubscribe(subCount);
+            unsubscribe(subNav);
+        };
+    }, [dispatch, playerId]);
 
     const toggleSelectMinion = (id: number) => {
         const idStr = `select ${id}`;
@@ -108,6 +155,9 @@ export default function SelectMinions() {
         });
 
         router.push(`/GamePage?${queryParams.toString()}`);
+
+        // sendMessage("/navigate", "gamepage");
+
     };
 
     // const handleMinionChange = (
