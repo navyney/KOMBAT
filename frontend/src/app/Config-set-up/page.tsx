@@ -35,6 +35,14 @@ export default function ConfigPage() {
         if (!playerId) return;
         if (!isConnected()) connect();
 
+        const subRole = subscribe("/topic/role-assigned", (message) => {
+            const { role, playerId: targetId } = JSON.parse(message.body);
+            if (targetId === playerId) {
+                localStorage.setItem("playerRole", role);
+                console.log(`🧾 Your role in ConfigPage: ${role.toUpperCase()}`);
+            }
+        });
+
         const subCount = subscribe("/topic/player-count", (message) => {
             const count = JSON.parse(message.body);
             setPlayers(count);
@@ -78,9 +86,12 @@ export default function ConfigPage() {
             dispatch(confirmConfig("reset"));
         });
 
-        sendMessage("/join-config-setup", { playerId });
+        if (playerId && isConnected()) {
+            sendMessage("/join-config-setup", { playerId });
+        }
 
         return () => {
+            unsubscribe(subRole);
             unsubscribe(subCount);
             unsubscribe(subUpdate);
             unsubscribe(subConfirm);

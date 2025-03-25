@@ -30,6 +30,7 @@ export default function StartPage() {
             const { role, playerId: targetId, disableButtons } = JSON.parse(message.body);
             if (targetId === playerId) {
                 localStorage.setItem("playerRole", role);
+                console.log("🎮 Player role:", role);
             }
         });
 

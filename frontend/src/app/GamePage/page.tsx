@@ -70,45 +70,35 @@ export default function GamePage() {
 
 
     useEffect(() => {
-        sendMessage("/minion/setup",{
-            playerId:String
-        });
-    }, []);
+        if (!isConnected()) connect();
 
-
-    useEffect(() => {
-        if (playerId && isConnected()) {
-            sendMessage("/request-current-config", {});
-        }
-
-        const subConfig = subscribe("/topic/config-update", (message) => {
-            const config = JSON.parse(message.body);
-            dispatch(updateConfig(config));
+        const subConfig = subscribe("/gamestate/config", (message) => {
+            const configData = JSON.parse(message.body);
+            console.log("📥 Received game config:", configData);
+            setGameConfig(configData);
+            setPlayerData({
+                1: {
+                    budget: configData.initialBudget,
+                    minions: 0,
+                    ownedHexes: 5,
+                },
+                2: {
+                    budget: configData.initialBudget,
+                    minions: 0,
+                    ownedHexes: 5,
+                },
+            });
         });
 
         return () => {
             unsubscribe(subConfig);
         };
-    }, [playerId, isConnected]);
-
-    useEffect(() => {
-        const savedConfig = localStorage.getItem("gameConfig");
-        if (savedConfig) {
-            const parsedConfig = JSON.parse(savedConfig);
-            setGameConfig(parsedConfig);
-
-            setPlayerData({
-                1: { budget: parsedConfig.initialBudget, minions: 0, ownedHexes: 5 },
-                2: { budget: parsedConfig.initialBudget, minions: 0, ownedHexes: 5 }
-            });
-        }
     }, []);
 
     useEffect(() => {
         if(!isConnected()) connect();
         const subExe = subscribe("/topic/executeMinion", (message) => {
             const minions = JSON.parse(message.body);
-
 
         });
 

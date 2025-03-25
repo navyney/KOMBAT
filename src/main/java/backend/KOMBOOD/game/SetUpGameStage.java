@@ -8,6 +8,7 @@ import backend.KOMBOOD.map.MapMap;
 import backend.KOMBOOD.strategy.Strategy;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class SetUpGameStage {
     MapMap gameMap;
@@ -30,6 +31,7 @@ public class SetUpGameStage {
         gameModeType = gameMode.getGameMode();
         gameState = new GameStateWithFrontEnd(player1, player2, gameMap, gameModeType);
         gameMap.createMap();
+        //gameState.setConfig(); bug ngae ๆ
         gameState.setup();
         gameState.setupMinion(minion,"move up");
     }
@@ -45,5 +47,5 @@ public class SetUpGameStage {
     public MapMap getGameMap() {
         return gameMap;
     }
-
+    public GameStateWithFrontEnd getGameState() {return gameState;}
 }

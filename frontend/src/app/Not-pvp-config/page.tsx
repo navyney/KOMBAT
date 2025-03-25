@@ -63,7 +63,9 @@ export default function NotPVPConfigPage() {
             window.location.href = "/select-mode";
         });
 
-        sendMessage("/join-config-setup", { playerId });
+        if (playerId && isConnected()) {
+            sendMessage("/join-config-setup", { playerId });
+        }
 
         return () => {
             unsubscribe(subCount);

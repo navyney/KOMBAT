@@ -8,6 +8,7 @@ import { useWebSocket } from "@/hooks/useWebsocket";
 import { usePlayerId } from "@/hooks/usePlayerId";
 import { setSelection } from "@/stores/slices/selectionStateSlice";
 
+
 const minions = [
     { id: 1, name: "pawn", image: "/image/minions/white-pawn.jpeg", color: "white" },
     { id: 2, name: "rook", image: "/image/minions/white-rook.jpeg", color: "white" },
@@ -21,7 +22,7 @@ export default function SelectMinions() {
     const dispatch = useDispatch();
     const minionsFromRedux = useSelector((state: RootState) => state.miniontype);
     const stateFromRedux = useSelector((state: RootState) => state.selectionState);
-    const { sendMessage } = useWebSocket();
+    const { sendMessage,connect,isConnected,unsubscribe,subscribe } = useWebSocket();
     const playerId = usePlayerId();
 
     const [showModal, setShowModal] = useState(false);
@@ -41,6 +42,14 @@ export default function SelectMinions() {
         const newIsSelected = !isCurrentlySelected;
         dispatch(setSelection({ id: idStr, isSelected: newIsSelected }));
     };
+
+    useEffect(() => {
+        if(!isConnected()) connect();
+    }, []);
+
+    useEffect(() => {
+        console.log("🧾 playerId:", playerId);
+    }, [playerId]);
 
     const openCustomizeModal = (minionId: number) => {
         setCurrentMinionId(minionId);
@@ -106,7 +115,9 @@ export default function SelectMinions() {
         const queryParams = new URLSearchParams({
             selectedMinions: JSON.stringify(selectedMinionData)
         });
-
+        sendMessage("/gameState/setup",{
+            playerId,
+        });
         router.push(`/GamePage?${queryParams.toString()}`);
     };
 

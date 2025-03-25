@@ -1,14 +1,12 @@
 package backend.WebSocketController;
 
 
+import backend.KOMBOOD.config.ConfigFile;
+import backend.KOMBOOD.game.*;
 import backend.WebSocketDTOs.MinionConfigMessage;
 import backend.KOMBOOD.entity.Player;
 import backend.KOMBOOD.error.EvalError;
 import backend.KOMBOOD.error.LexicalError;
-import backend.KOMBOOD.game.GameMode;
-import backend.KOMBOOD.game.GameModeType;
-import backend.KOMBOOD.game.GameState;
-import backend.KOMBOOD.game.SetUpGameStage;
 import backend.WebSocketDTOs.ActionOnHexGrid;
 import backend.WebSocketDTOs.WebSocketDTO;
 import lombok.Getter;
@@ -113,9 +111,11 @@ public class WebSocketController {
                     "playerId", playerId,
                     "disableButtons", false
             ));
-            messagingTemplate.convertAndSend("/topic/lock-mode", Map.of("selectedMode", selectedMode));
 
+
+            messagingTemplate.convertAndSend("/topic/lock-mode", Map.of("selectedMode", selectedMode));
             System.out.println("🎮 select-mode: " + playerId + " -> " + mode);
+            System.out.println("✅ Assigned role: player1");
 
             // ✅ Lock room immediately for PvB or BvB
             if (!"pvp".equals(mode)) {
@@ -137,7 +137,7 @@ public class WebSocketController {
             messagingTemplate.convertAndSend("/topic/lock-all", Map.of("locked", true));
 
             System.out.println("🎮 select-mode: " + playerId + " -> " + mode);
-
+            System.out.println("✅ Assigned role: player2");
 //         int count = 0;
 //         if (player1Id != null) count++;
 //         if (player2Id != null) count++;
@@ -240,6 +240,7 @@ public class WebSocketController {
     @MessageMapping("/config-update")
     public void handleConfigUpdate(@Payload WebSocketDTO config) {
         currentConfig = config;
+        Confi.update(config);
         System.out.println("📥 CONFIG RECEIVED FROM FRONTEND: " + config);
         messagingTemplate.convertAndSend("/topic/config-update", config);
         messagingTemplate.convertAndSend("/topic/config-reset-confirmed", config.getPlayerId());
@@ -293,6 +294,20 @@ public class WebSocketController {
         gameMode.setGameMode(GameModeType.DUEL);
         gameState = new SetUpGameStage(player1, player2, gameMode);
         gameState.setUP();
+        Confi configFile = new Confi(
+                currentConfig.getSpawnedCost(),
+                currentConfig.getHexPurchasedCost(),
+                currentConfig.getInitialBudget(),
+                currentConfig.getInitialHP(),
+                currentConfig.getTurnBudget(),
+                currentConfig.getMaxBudget(),
+                currentConfig.getInterestPercentage(),
+                currentConfig.getMaxTurn(),
+                currentConfig.getMaxSpawn(),
+                1 // moveCost
+        );
+        gameState.getGameState().setConfig(configFile);
+        messagingTemplate.convertAndSend("/gamestate/config", currentConfig);
         System.out.println("setup complete");
     }
 
@@ -311,6 +326,7 @@ public class WebSocketController {
             player.buyArea(row, col, gameState.getGameMap());
         }
         System.out.println("buy area complete");
+        gameState.getGameMap().printMap();
     }
 
     @MessageMapping("/minion-config")
@@ -413,24 +429,32 @@ public class WebSocketController {
             player.spawnMinion(player.getMinionByName(minionName), row, col);
         }
         System.out.println("spawn minion complete");
+        gameState.getGameMap().printMap();
     }
 
     @MessageMapping("/minion/endTurn")
     @SendTo("/topic/executeMinion")
     public void ExecuteMinion(ActionOnHexGrid action) throws EvalError {
         int curPlayer = action.getCurPlayer();
+        int current_turns = GameStateWithFrontEnd.getCurrent_turns();
         if (curPlayer == 1) {
             Player player = gameState.getPlayer1();
-            GameState.executeMinion(player);
-            int current_turns = GameState.getCurrent_turns();
             player.calculateInterest(current_turns);
+            GameStateWithFrontEnd.executeMinion(player);
+            player.setHasNOTBoughtareaThisTurn();
+            player.setHasNOTSpawnedMinionThisTurn();
+            gameState.getGameState().switchTurns();
         } else {
             Player player = gameState.getPlayer2();
-            GameState.executeMinion(player);
-            int current_turns = GameState.getCurrent_turns();
             player.calculateInterest(current_turns);
+            GameStateWithFrontEnd.executeMinion(player);
+            gameState.getGameState().switchTurns();
+            player.setHasNOTBoughtareaThisTurn();
+            player.setHasNOTSpawnedMinionThisTurn();
+            GameStateWithFrontEnd.setCurrent_turns(current_turns+1);
         }
         System.out.println("execute minion complete");
+        gameState.getGameMap().printMap();
         messagingTemplate.convertAndSend("/topic/executeMinion", curPlayer);
     }
         @MessageMapping("/request-current-config")

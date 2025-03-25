@@ -1,5 +1,6 @@
 package backend.KOMBOOD.game;
 
+import backend.KOMBOOD.config.Confi;
 import backend.KOMBOOD.config.ConfigFile;
 import backend.KOMBOOD.entity.Bot;
 import backend.KOMBOOD.entity.Minion;
@@ -47,11 +48,15 @@ public class GameStateWithFrontEnd { // player1 and player2 can play in terminal
 
     private GameModeType gameMode;
 
-    private List<MinionType> minionsShop = new ArrayList<MinionType>();
+    private List<MinionType> minionsAlltpye = new ArrayList<MinionType>();
 
     public static int getCurrent_turns() {
         return current_turns;
     }
+
+    public static void setCurrent_turns(int Ncurrent_turns) { current_turns = Ncurrent_turns; }
+
+
 
 //    private ConfigFile config; // use this later
 
@@ -66,18 +71,31 @@ public class GameStateWithFrontEnd { // player1 and player2 can play in terminal
         this.currentPlayer = player1;
         this.current_turns = 1;
         this.gameMode = gameMode;
+
     }
 
-    public void setConfig(ConfigFile config) { // maybe need to add config file here, not done
+//    public void setConfig() { // maybe need to add config file here, not done
+//        this.max_turns = Confi.max_turns;
+//        this.spawn_cost = Confi.spawn_cost;
+//        this.hex_purchase_cost = Confi.hex_purchase_cost;
+//        this.init_budget = Confi.init_budget;
+//        this.init_hp = Confi.init_hp;
+//        this.turn_budget = Confi.turn_budget;
+//        this.max_budget = Confi.max_budget;
+//        this.interest_pct = Confi.interest_pct;
+//        this.max_spawns = Confi.max_spawns;
+//    }
+
+    public void setConfig(Confi config) {
         this.max_turns = config.max_turns();
-        this.spawn_cost = config.spawn_cost();
-        this.hex_purchase_cost = config.hex_purchase_cost();
-        this.init_budget = config.init_budget();
-        this.init_hp = config.init_hp();
-        this.turn_budget = config.turn_budget();
-        this.max_budget = config.max_budget();
-        this.interest_pct = config.interest_pct();
-        this.max_spawns = config.max_spawns();
+        this.spawn_cost = config.spawnedCost();
+        this.hex_purchase_cost = config.hexPurchasedCost();
+        this.init_budget = config.initBudget();
+        this.init_hp = config.initHp();
+        this.turn_budget = config.turnCost();
+        this.max_budget = config.maxBudget();
+        this.interest_pct = config.interestPercentage();
+        this.max_spawns = config.maxSpawn();
     }
 
     public void setup() throws LexicalError, EvalError, IOException { // numOfMinion , Minion, Hex/Map, budget
@@ -136,17 +154,14 @@ public class GameStateWithFrontEnd { // player1 and player2 can play in terminal
 
 //            player1.setMinion(minion1, 1, 1);
 //            player2.setMinion(minion2,11,8);
-
     }
 
 
     // while playing
     public void switchTurns() {
         this.currentPlayer = this.currentPlayer.equals(player2) ? player1 : player2;
-        //this.current_turns++; // both player switch +1 turns
-        // budget += budget * ดอกเบี้ย
-
     }
+
 
     public boolean checkWinner() {
         if (player1.getNumofMinion() == 0) {
@@ -246,24 +261,16 @@ public class GameStateWithFrontEnd { // player1 and player2 can play in terminal
         }
     }
 
-    public static void executeMinion(ArrayList<Minion> minions) throws EvalError {
-        int totalCost = 0;
-        for (Minion minion : minions) {
-            // check ว่า minion ถูก spawn แล้วหรือยัง
+    public static void executeMinion(Player player) throws EvalError {
+        for (Minion minion : player.getAllSpawnedMinion()) {
             if (minion.isSpawned()) {
-                // for Debug
-                System.out.println("Executing strategy for minion: " + minion.getName() + " (" + minion.getRow() + "," + minion.getCol() + ")");
-
+                System.out.println("Executing strategy for minion: " + minion.getName());
                 Strategy strategy = minion.getType().getStrategy();
                 strategy.evaluator(minion);
-
-                totalCost += 1;
             } else {
-                System.out.println("Minion " + minion.getName() + " has not been spawned yet!");
+                System.out.println("Minion " + minion.getName() + " has not been spawned.");
             }
-        }
-        currentPlayer.deductActionCost(totalCost);
-    }
+    }}
 
     //public void gameloop () throws LexicalError, EvalError { // not done
 
@@ -311,7 +318,7 @@ public class GameStateWithFrontEnd { // player1 and player2 can play in terminal
             gameMap.printMap();
 
             // Execute Minions by Strategy
-            executeMinion(MinionOnMapMap);
+
             gameMap.printMap();
 
             // Check Winner after Player 2's turn

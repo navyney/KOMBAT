@@ -2,18 +2,31 @@ package backend.KOMBOOD.config;
 
 import backend.WebSocketController.WebSocketController;
 import backend.WebSocketDTOs.WebSocketDTO;
+import jakarta.validation.constraints.Min;
 
 public class Confi {
-    static int spawn_cost = WebSocketController.getCurrentConfigGame().getSpawnedCost();
-    static int hex_purchase_cost = WebSocketController.getCurrentConfigGame().getHexPurchasedCost();
-    static int init_budget = WebSocketController.getCurrentConfigGame().getInitialBudget();
-    static int init_hp = WebSocketController.getCurrentConfigGame().getInitialHP();
-    static int turn_budget = WebSocketController.getCurrentConfigGame().getTurnBudget();
-    static int max_budget = WebSocketController.getCurrentConfigGame().getMaxBudget();
-    static int interest_pct = WebSocketController.getCurrentConfigGame().getInterestPercentage();
-    static int max_turns = WebSocketController.getCurrentConfigGame().getMaxTurn();
-    static int max_spawns = WebSocketController.getCurrentConfigGame().getMaxSpawn();
-    static int move_cost = 1;
+//    public static int spawn_cost = WebSocketController.getCurrentConfigGame().getSpawnedCost();
+//    public static int hex_purchase_cost = WebSocketController.getCurrentConfigGame().getHexPurchasedCost();
+//    public static int init_budget = WebSocketController.getCurrentConfigGame().getInitialBudget();
+//    public static int init_hp = WebSocketController.getCurrentConfigGame().getInitialHP();
+//    public static int turn_budget = WebSocketController.getCurrentConfigGame().getTurnBudget();
+//    public static int max_budget = WebSocketController.getCurrentConfigGame().getMaxBudget();
+//    public static int interest_pct = WebSocketController.getCurrentConfigGame().getInterestPercentage();
+//    public static int max_turns = WebSocketController.getCurrentConfigGame().getMaxTurn();
+//    public static int max_spawns = WebSocketController.getCurrentConfigGame().getMaxSpawn();
+    public static int move_cost = 1;
+    public static int spawn_cost;
+    public static int hex_purchase_cost;
+    public static int init_budget;
+    public static int init_hp;
+    public static int turn_budget;
+    public static int max_budget;
+    public static int interest_pct;
+    public static int max_turns;
+    public static int max_spawns;
+
+    public Confi(@Min(0) int spawnedCost, @Min(0) int hexPurchasedCost, @Min(0) int initialBudget, @Min(0) int initialHP, @Min(0) int turnBudget, @Min(0) int maxBudget, @Min(0) int interestPercentage, @Min(0) int maxTurn, @Min(0) int maxSpawn, int i) {
+    }
 
     public static void getSpawnCost() {
         System.out.println("Spawn cost = " + spawn_cost);
@@ -44,5 +57,48 @@ public class Confi {
     }
     public static void getMoveCost() {
         System.out.println("Move cost = " + move_cost);
+    }
+
+    public static void update(WebSocketDTO config) {
+        spawn_cost = config.getSpawnedCost();
+        hex_purchase_cost = config.getHexPurchasedCost();
+        init_budget = config.getInitialBudget();
+        init_hp = config.getInitialHP();
+        turn_budget = config.getTurnBudget();
+        max_budget = config.getMaxBudget();
+        interest_pct = config.getInterestPercentage();
+        max_turns = config.getMaxTurn();
+        max_spawns = config.getMaxSpawn();
+    }
+    
+    public int spawnedCost() {
+        return spawn_cost;
+    }
+    public int hexPurchasedCost() {
+        return hex_purchase_cost;
+    }
+    public int initBudget() {
+        return init_budget;
+    }
+    public int initHp() {
+        return init_hp;
+    }   
+    public int maxBudget() {
+        return max_budget;
+    }
+    public int interestPercentage() {
+        return interest_pct;
+    }
+    public int max_turns() {
+        return max_turns;
+    }
+    public int maxSpawn() {
+        return max_spawns;
+    }
+    public int moveCost() {
+        return move_cost;
+    }
+    public int turnCost() {
+        return turn_budget;
     }
 }

@@ -27,6 +27,14 @@ export default function SelectModePage() {
     useEffect(() => {
         if (!playerId || !isConnected()) return;
 
+        const subRole = subscribe("/topic/role-assigned", (message) => {
+            const { role, playerId: targetId } = JSON.parse(message.body);
+            if (targetId === playerId) {
+                localStorage.setItem("playerRole", role);
+                console.log(`🎮 You are assigned as: ${role.toUpperCase()}`);
+            }
+        });
+
         const subLockMode = subscribe("/topic/lock-mode", (message) => {
             const { selectedMode } = JSON.parse(message.body);
             dispatch(setLockedMode(selectedMode));
@@ -48,6 +56,7 @@ export default function SelectModePage() {
         }, 100);
 
         return () => {
+            subRole?.unsubscribe();
             subLockMode?.unsubscribe();
             subLockAll?.unsubscribe();
             subReset?.unsubscribe();
@@ -56,7 +65,9 @@ export default function SelectModePage() {
 
     const handleModeSelect = (mode: string) => {
         if (!playerId) return;
-        sendMessage("/select-mode", { mode, playerId });
+        if (playerId && isConnected()) {
+            sendMessage("/select-mode", { mode, playerId });
+        }
 
         if (mode === "pvb" || mode === "bvb") {
             router.push("/Not-pvp-config");

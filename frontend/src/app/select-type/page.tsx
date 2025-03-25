@@ -443,10 +443,92 @@ export default function SelectMinions() {
         .filter(item => item.isSelected && item.id.startsWith("select "))
         .map(item => parseInt(item.id.replace("select ", "")));
 
+    // useEffect(() => {
+    //     if (!playerId) return;
+    //     sendMessage("/join-select-minion-type", { playerId });
+    //
+    //     const subToggle = subscribe("/topic/minion-select", (message) => {
+    //         const { id, isSelected, playerId: senderId } = JSON.parse(message.body);
+    //         if (senderId !== playerId) {
+    //             dispatch(setSelection({ id, isSelected }));
+    //         }
+    //     });
+    //
+    //     return () => unsubscribe(subToggle);
+    //
+    // }, [dispatch, playerId]);
+    //
+    // useEffect(() => {
+    //     const subNav = subscribe("/topic/navigate", (message) => {
+    //         const action = message.body;
+    //         if (action === "next") router.push("/select-type");
+    //         else if (action === "back") router.push("/select-mode");
+    //         else if (action === "start") router.push("/");
+    //         else if (action === "gamepage") router.push("/GamePage")
+    //     });
+    //     return () =>
+    //         unsubscribe(subNav)
+    // }, [dispatch, router, playerId]);
+    // useEffect(() => {
+    //     const subApply = subscribe("/topic/minion-customize-apply", (message) => {
+    //         const { id } = JSON.parse(message.body);
+    //
+    //     });
+    //
+    //     return () => unsubscribe(subApply);
+    // }, []);
+    //
+    // useEffect(() => {
+    //     const subClose = subscribe("/topic/minion-close-modal", (message) => {
+    //         const { minionId } = JSON.parse(message.body);
+    //
+    //         // ✅ ปิด modal ถ้าเป็น minion เดียวกัน
+    //         if (currentMinionId === minionId) {
+    //             setShowModal(false);
+    //         }
+    //     });
+    //
+    //     return () => unsubscribe(subClose);
+    // }, [currentMinionId]);
+    //
+    //
+    // useEffect(() => {
+    //     const subCustomize = subscribe("/topic/minion-customize", (message) => {
+    //         const { minionId, playerId: senderId } = JSON.parse(message.body);
+    //
+    //         setCurrentMinionId(minionId);
+    //         setShowModal(true);
+    //         setCustomizingPlayer(senderId); // ✅ เก็บว่าใครเป็นคนกด
+    //
+    //         const baseMinion = minions.find(m => m.id === minionId);
+    //         const reduxMinion = minionsFromRedux.find(m => m.id === minionId);
+    //
+    //         if (reduxMinion) {
+    //             setCustomName(reduxMinion.name);
+    //             setCustomDefense(reduxMinion.def);
+    //             setCustomStrategy(reduxMinion.strategy);
+    //         } else if (baseMinion) {
+    //             setCustomName(baseMinion.name);
+    //             setCustomDefense("");
+    //             setCustomStrategy("");
+    //         }
+    //     });
+    //
+    //     return () => unsubscribe(subCustomize);
+    // }, []);
+    useEffect(() => {
+        console.log("🧾 playerId:", playerId);
+    }, [playerId]);
+
     useEffect(() => {
         if (!playerId) return;
-        sendMessage("/join-select-minion-type", { playerId });
 
+        // ✅ Join minion type selection
+        if (playerId && isConnected()) {
+            sendMessage("/join-select-minion-type", { playerId });
+        }
+
+        // 🔔 Subscribe: Minion select toggle
         const subToggle = subscribe("/topic/minion-select", (message) => {
             const { id, isSelected, playerId: senderId } = JSON.parse(message.body);
             if (senderId !== playerId) {
@@ -454,40 +536,27 @@ export default function SelectMinions() {
             }
         });
 
-        return () => unsubscribe(subToggle);
-
-    }, [dispatch, playerId]);
-
-    useEffect(() => {
+        // 🔔 Subscribe: Minion customize apply
         const subApply = subscribe("/topic/minion-customize-apply", (message) => {
             const { id } = JSON.parse(message.body);
-
+            // currently unused, but you can add logic here if needed
         });
 
-        return () => unsubscribe(subApply);
-    }, []);
-
-    useEffect(() => {
+        // 🔔 Subscribe: Close modal when needed
         const subClose = subscribe("/topic/minion-close-modal", (message) => {
             const { minionId } = JSON.parse(message.body);
-
-            // ✅ ปิด modal ถ้าเป็น minion เดียวกัน
             if (currentMinionId === minionId) {
                 setShowModal(false);
             }
         });
 
-        return () => unsubscribe(subClose);
-    }, [currentMinionId]);
-
-
-    useEffect(() => {
+        // 🔔 Subscribe: Open customize modal
         const subCustomize = subscribe("/topic/minion-customize", (message) => {
             const { minionId, playerId: senderId } = JSON.parse(message.body);
 
             setCurrentMinionId(minionId);
             setShowModal(true);
-            setCustomizingPlayer(senderId); // ✅ เก็บว่าใครเป็นคนกด
+            setCustomizingPlayer(senderId);
 
             const baseMinion = minions.find(m => m.id === minionId);
             const reduxMinion = minionsFromRedux.find(m => m.id === minionId);
@@ -503,9 +572,25 @@ export default function SelectMinions() {
             }
         });
 
-        return () => unsubscribe(subCustomize);
-    }, []);
+        // 🔔 Subscribe: Navigation
+        const subNav = subscribe("/topic/navigate", (message) => {
+            const action = message.body;
+            if (action === "next") router.push("/select-type");
+            else if (action === "back") router.push("/select-mode");
+            else if (action === "start") router.push("/");
+            else if (action === "gamepage") router.push("/GamePage");
+        });
 
+        // 🧼 Cleanup
+        return () => {
+            unsubscribe(subToggle);
+            unsubscribe(subApply);
+            unsubscribe(subClose);
+            unsubscribe(subCustomize);
+            unsubscribe(subNav);
+        };
+
+    }, [dispatch, playerId, currentMinionId, router, minionsFromRedux]);
 
     const toggleSelectMinion = (id: number) => {
         const idStr = `select ${id}`;
@@ -602,8 +687,10 @@ export default function SelectMinions() {
         const queryParams = new URLSearchParams({
             selectedMinions: JSON.stringify(selectedMinionData)
         });
-
-        router.push(`/GamePage?${queryParams.toString()}`);
+        sendMessage("/gameState/setup",{
+            playerId,
+        });
+        sendMessage("/topic/navigate", "gamepage");
     };
 
     const handleMinionChange = (
