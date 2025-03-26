@@ -63,7 +63,9 @@ export default function NotPVPConfigPage() {
             window.location.href = "/select-mode";
         });
 
-        sendMessage("/join-config-setup", { playerId });
+        if (playerId && isConnected()) {
+            sendMessage("/join-config-setup", { playerId });
+        }
 
         return () => {
             unsubscribe(subCount);
@@ -97,7 +99,6 @@ export default function NotPVPConfigPage() {
                 maxSpawn: Number(updatedConfig.maxSpawn || 0),
                 playerId,
             };
-
             sendMessage("/config-update", sanitizedConfig);
             console.log("📤 Sent config:", sanitizedConfig);
         }
@@ -148,14 +149,6 @@ export default function NotPVPConfigPage() {
                 ))}
             </div>
 
-            {/*<div className='flex justify-between mt-4'>*/}
-            {/*    <div className='flex items-center gap-2'>*/}
-            {/*        <div*/}
-            {/*            className={`w-4 h-4 border-2 rounded ${youConfirmed ? 'bg-green-500 border-green-700' : 'bg-white'}`}/>*/}
-            {/*        <span className='text-sm text-black'>You</span>*/}
-            {/*    </div>*/}
-            {/*</div>*/}
-
             {error && <p className="text-red-500 text-center font-bold">{error}</p>}
 
             <div className="mt-4 flex justify-end">
@@ -180,12 +173,6 @@ export default function NotPVPConfigPage() {
                 />
             </div>
 
-            {/*<div*/}
-            {/*    onClick={youConfirmed ? handleNext : undefined}*/}
-            {/*    className={`absolute cursor-pointer bottom-10 right-20 transition-opacity ${*/}
-            {/*        youConfirmed? "hover:opacity-75" : "opacity-50 cursor-not-allowed"*/}
-            {/*    }`}*/}
-            {/*>*/}
             <div
                 onClick={handleNext}
                 className="absolute cursor-pointer bottom-10 right-20"

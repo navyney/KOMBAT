@@ -11,7 +11,8 @@ import backend.WebSocketDTOs.WebSocketDTO;
 
 import java.io.IOException;
 
-public class Main {
+public class
+Main {
 
 //    private static ConfigFile config = new ConfigFile(
 //            WebSocketController.getCurrentConfigGame().getSpawnedCost()

@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export interface CustomizeModalState {
-    id: string; // เช่น "customize 1"
+    id: string;
     isOpen: boolean;
 }
 
@@ -17,7 +17,6 @@ const customizeModalSlice = createSlice({
     name: "customizeModal",
     initialState,
     reducers: {
-        // ✅ toggle modal ตาม id
         toggleCustomize: (state, action: PayloadAction<string>) => {
             const item = state.find((modal) => modal.id === action.payload);
             if (item) {
@@ -25,7 +24,6 @@ const customizeModalSlice = createSlice({
             }
         },
 
-        // ✅ set เปิด/ปิด modal ตาม id
         setCustomize: (
             state,
             action: PayloadAction<{ id: string; isOpen: boolean }>
@@ -36,12 +34,10 @@ const customizeModalSlice = createSlice({
             }
         },
 
-        // ✅ set ใหม่ทั้ง array
         setAllCustomizes: (state, action: PayloadAction<CustomizeModalState[]>) => {
             return action.payload;
         },
 
-        // ✅ reset ทั้งหมด
         resetCustomize: () => initialState,
     },
 });

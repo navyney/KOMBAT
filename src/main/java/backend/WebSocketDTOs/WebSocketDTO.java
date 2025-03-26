@@ -58,4 +58,7 @@ public class WebSocketDTO implements Serializable {
                 '}';
     }
 
-}
+
+    }
+
+

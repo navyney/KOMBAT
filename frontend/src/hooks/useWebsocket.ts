@@ -77,10 +77,10 @@ export const useWebSocket = () => {
                 console.log("✅ Connected to WebSocket successfully");
                 stompClient?.publish({
                     destination: "/app/join-game",
-                    body: JSON.stringify({ playerId }), // ✅ fixed: send as JSON object
+                    body: JSON.stringify({ playerId }),
                 });
                 console.log("🌐 Connecting to WebSocket at:", serverUrl);
-                dispatch(setPlayerId(playerId)); // เมื่อ connect สำเร็จแล้ว
+                dispatch(setPlayerId(playerId)); // when connect successfully
             },
             onDisconnect: () => {
                 console.log("⛔️ Disconnected from WebSocket");

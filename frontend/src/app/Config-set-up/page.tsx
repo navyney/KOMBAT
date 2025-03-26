@@ -35,6 +35,14 @@ export default function ConfigPage() {
         if (!playerId) return;
         if (!isConnected()) connect();
 
+        const subRole = subscribe("/topic/role-assigned", (message) => {
+            const { role, playerId: targetId } = JSON.parse(message.body);
+            if (targetId === playerId) {
+                localStorage.setItem("playerRole", role);
+                console.log(`🧾 Your role in ConfigPage: ${role.toUpperCase()}`);
+            }
+        });
+
         const subCount = subscribe("/topic/player-count", (message) => {
             const count = JSON.parse(message.body);
             setPlayers(count);
@@ -50,23 +58,6 @@ export default function ConfigPage() {
             dispatch(confirmConfig(confirmId));
         });
 
-        // const subNav = subscribe("/topic/navigate", (message) => {
-        //     const action = message.body;
-        //     if (action === "next") window.location.href = "/select-type";
-        //     else if (action === "back") {
-        //         dispatch(resetPlayer());
-        //         dispatch(resetGame());
-        //         dispatch(resetConfig());
-        //         window.location.href = "/select-mode";
-        //     }
-        //     else if (action === "start") {
-        //         dispatch(resetPlayer());
-        //         dispatch(resetGame());
-        //         dispatch(resetConfig());
-        //         window.location.href = "/";
-        //     }
-        // });
-
         const subNav = subscribe("/topic/navigate", (message) => {
             const action = message.body;
             if (action === "next") router.push("/select-type");
@@ -78,9 +69,12 @@ export default function ConfigPage() {
             dispatch(confirmConfig("reset"));
         });
 
-        sendMessage("/join-config-setup", { playerId });
+        if (playerId && isConnected()) {
+            sendMessage("/join-config-setup", { playerId });
+        }
 
         return () => {
+            unsubscribe(subRole);
             unsubscribe(subCount);
             unsubscribe(subUpdate);
             unsubscribe(subConfirm);
@@ -88,20 +82,6 @@ export default function ConfigPage() {
             unsubscribe(subReset);
         };
     }, [dispatch, router, playerId]);
-
-    // const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //     const { name, value } = e.target;
-    //     const key = name as keyof typeof config;
-    //
-    //     if (value === "" || (!isNaN(Number(value)) && Number(value) >= 0)) {
-    //         const parsedValue = value === "" ? "" : parseFloat(value);
-    //         const updatedConfig = { ...config, [key]: parsedValue };
-    //
-    //         dispatch(updateConfig(updatedConfig));
-    //
-    //         sendMessage("/app/config-update", JSON.stringify({ ...updatedConfig, playerId }));
-    //     }
-    // };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -153,7 +133,6 @@ export default function ConfigPage() {
         dispatch(resetGame());
         dispatch(resetConfig());
         window.location.href = "/select-mode";
-        // sendMessage("/topic/navigate", "back");
     };
 
     return (

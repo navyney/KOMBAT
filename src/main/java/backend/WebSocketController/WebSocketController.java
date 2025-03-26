@@ -1,14 +1,12 @@
 package backend.WebSocketController;
 
 
+import backend.KOMBOOD.config.ConfigFile;
+import backend.KOMBOOD.game.*;
 import backend.WebSocketDTOs.MinionConfigMessage;
 import backend.KOMBOOD.entity.Player;
 import backend.KOMBOOD.error.EvalError;
 import backend.KOMBOOD.error.LexicalError;
-import backend.KOMBOOD.game.GameMode;
-import backend.KOMBOOD.game.GameModeType;
-import backend.KOMBOOD.game.GameState;
-import backend.KOMBOOD.game.SetUpGameStage;
 import backend.WebSocketDTOs.ActionOnHexGrid;
 import backend.WebSocketDTOs.WebSocketDTO;
 import lombok.Getter;
@@ -40,7 +38,6 @@ public class WebSocketController {
     private static WebSocketDTO currentConfig;
 
     @Getter
-    //private static final Set<String> sessionIds = new HashSet<>();
     private static final Set<String> sessionIds = ConcurrentHashMap.newKeySet();
     @Getter
     private static final AtomicInteger playerCount = new AtomicInteger(0);
@@ -51,7 +48,6 @@ public class WebSocketController {
     @Getter
     private static String selectedMode = null;
     @Getter
-    //private static final Map<String, String> sessionPlayerMap = new HashMap<>();
     private static final Map<String, String> sessionPlayerMap = new ConcurrentHashMap<>();
     @Getter
     private static SetUpGameStage gameState;
@@ -61,11 +57,11 @@ public class WebSocketController {
         String sessionId = accessor.getSessionId();
         String playerId = payload.get("playerId");
 
-        sessionIds.add(sessionId); // ใส่ซ้ำได้ เพราะใช้ Set
-        sessionPlayerMap.put(sessionId, playerId); // ✅ always map sessionId → playerId
+        // use set, so the same id won't be count yeyey
+        sessionIds.add(sessionId);
+        sessionPlayerMap.put(sessionId, playerId);
         System.out.println("✅ Player connected: " + playerId);
 
-        // Send current state to the new player
         if (selectedMode != null) {
             messagingTemplate.convertAndSendToUser(sessionId, "/topic/lock-mode", Map.of("selectedMode", selectedMode));
         }
@@ -78,7 +74,6 @@ public class WebSocketController {
                     "disableButtons", true
             ));
         } else if (player1Id != null) {
-            // หากมี player1 อยู่แล้ว แต่ยังไม่มี player2
             messagingTemplate.convertAndSendToUser(sessionId, "/topic/lock-mode", Map.of("selectedMode", selectedMode));
         }
     }
@@ -88,9 +83,9 @@ public class WebSocketController {
         String sessionId = accessor.getSessionId();
         String playerId = payload.get("playerId");
         String mode = payload.get("mode");
-        // 💡 Check if someone already selected pvb or bvb
+
         if (selectedMode != null && (selectedMode.equals("pvb") || selectedMode.equals("bvb"))) {
-            // ❌ Reject any new players
+
             if (player1Id != null && !player1Id.equals(playerId)) {
                 messagingTemplate.convertAndSendToUser(sessionId, "/topic/role-assigned", Map.of(
                         "role", "spectator",
@@ -103,7 +98,6 @@ public class WebSocketController {
             }
         }
 
-        // 🟢 Assign player1
         if (player1Id == null) {
             player1Id = playerId;
             selectedMode = mode;
@@ -113,11 +107,12 @@ public class WebSocketController {
                     "playerId", playerId,
                     "disableButtons", false
             ));
+
+
             messagingTemplate.convertAndSend("/topic/lock-mode", Map.of("selectedMode", selectedMode));
-
             System.out.println("🎮 select-mode: " + playerId + " -> " + mode);
+            System.out.println("✅ Assigned role: player1");
 
-            // ✅ Lock room immediately for PvB or BvB
             if (!"pvp".equals(mode)) {
                 messagingTemplate.convertAndSend("/topic/lock-all", Map.of("locked", true));
                 System.out.println("🔒 Room locked for 1-player mode");
@@ -125,7 +120,6 @@ public class WebSocketController {
             return;
         }
 
-        // 🟢 Assign player2 for PvP only
         if ("pvp".equals(selectedMode) && player2Id == null && !playerId.equals(player1Id)) {
             player2Id = playerId;
 
@@ -137,25 +131,17 @@ public class WebSocketController {
             messagingTemplate.convertAndSend("/topic/lock-all", Map.of("locked", true));
 
             System.out.println("🎮 select-mode: " + playerId + " -> " + mode);
-
-//         int count = 0;
-//         if (player1Id != null) count++;
-//         if (player2Id != null) count++;
-
-//         messagingTemplate.convertAndSend("/topic/player-count", count);
-//         System.out.println("👥 Updated player count: " + count);
-//         System.out.println("🧍 player1: " + player1Id + ", 🧍 player2: " + player2Id);
+            System.out.println("✅ Assigned role: player2");
             return;
         }
 
-        // ❌ Otherwise, assign as spectator
         messagingTemplate.convertAndSend("/topic/role-assigned", Map.of(
                 "role", "spectator",
                 "playerId", playerId,
                 "disableButtons", true
         ));
         messagingTemplate.convertAndSend("/topic/lock-all", Map.of("locked", true));
-        System.out.println("👀 Spectator rejected due to room full or invalid request");
+        System.out.println("👀 Spectator rejected due to room full");
     }
 
     @MessageMapping("/request-lock-status")
@@ -174,61 +160,16 @@ public class WebSocketController {
         }
     }
 
-//    @MessageMapping("/join-config-setup")
-//    public void handleJoinConfig(@Payload Map<String, String> payload, SimpMessageHeaderAccessor headerAccessor) {
-//        String sessionId = headerAccessor.getSessionId();
-//        String playerId = payload.get("playerId");
-////        if (!sessionIds.contains(sessionId)) {
-////            sessionIds.add(sessionId);
-////            sessionPlayerMap.put(sessionId, playerId);
-////            int count = playerCount.incrementAndGet();
-////            messagingTemplate.convertAndSend("/topic/player-count", Math.min(count, 2));
-////        }
-//
-//        if (!sessionPlayerMap.containsKey(sessionId)) {
-//            sessionIds.add(sessionId);
-//            sessionPlayerMap.put(sessionId, playerId);
-//        }
-//
-//        long count = sessionPlayerMap.values().stream().distinct().count();
-//        messagingTemplate.convertAndSend("/topic/player-count", Math.min((int) count, 2));
-//    }
-
-//    @MessageMapping("/join-config-setup")
-//    public void handleJoinConfig(@Payload Map<String, String> payload, SimpMessageHeaderAccessor headerAccessor) {
-//        String sessionId = headerAccessor.getSessionId();
-//        String playerId = payload.get("playerId");
-//
-//        // ตรวจสอบว่ามี sessionId นี้หรือยัง
-//        if (!sessionPlayerMap.containsKey(sessionId)) {
-//            sessionIds.add(sessionId); // สำหรับ tracking session
-//            sessionPlayerMap.put(sessionId, playerId); // ผูก sessionId กับ playerId
-//        }
-//
-//        // ✅ นับจำนวน playerId ที่ไม่ซ้ำกัน (distinct) จากทุก session
-//        long distinctPlayerCount = sessionPlayerMap.values().stream().distinct().count();
-//
-//        // ✅ จำกัดไว้ไม่ให้เกิน 2 คน
-//        int limitedCount = Math.min((int) distinctPlayerCount, 2);
-//
-//        // ส่งจำนวนผู้เล่นไปยัง frontend
-//        messagingTemplate.convertAndSend("/topic/player-count", limitedCount);
-//
-//        System.out.println("👥 Players in Config-set-up: " + distinctPlayerCount);
-//    }
-
     @MessageMapping("/join-config-setup")
     public void handleJoinConfig(@Payload Map<String, String> payload, SimpMessageHeaderAccessor headerAccessor) {
         String sessionId = headerAccessor.getSessionId();
         String playerId = payload.get("playerId");
 
-        // เก็บ sessionId กับ playerId เพื่อใช้งานอื่น (optional)
         if (!sessionPlayerMap.containsKey(sessionId)) {
             sessionIds.add(sessionId);
             sessionPlayerMap.put(sessionId, playerId);
         }
 
-        // ✅ นับจำนวน player จริง (ที่เลือก mode แล้ว)
         int count = 0;
         if (player1Id != null) count++;
         if (player2Id != null) count++;
@@ -240,6 +181,7 @@ public class WebSocketController {
     @MessageMapping("/config-update")
     public void handleConfigUpdate(@Payload WebSocketDTO config) {
         currentConfig = config;
+        Confi.update(config);
         System.out.println("📥 CONFIG RECEIVED FROM FRONTEND: " + config);
         messagingTemplate.convertAndSend("/topic/config-update", config);
         messagingTemplate.convertAndSend("/topic/config-reset-confirmed", config.getPlayerId());
@@ -293,6 +235,20 @@ public class WebSocketController {
         gameMode.setGameMode(GameModeType.DUEL);
         gameState = new SetUpGameStage(player1, player2, gameMode);
         gameState.setUP();
+        Confi configFile = new Confi(
+                currentConfig.getSpawnedCost(),
+                currentConfig.getHexPurchasedCost(),
+                currentConfig.getInitialBudget(),
+                currentConfig.getInitialHP(),
+                currentConfig.getTurnBudget(),
+                currentConfig.getMaxBudget(),
+                currentConfig.getInterestPercentage(),
+                currentConfig.getMaxTurn(),
+                currentConfig.getMaxSpawn(),
+                1 // moveCost
+        );
+        gameState.getGameState().setConfig(configFile);
+        messagingTemplate.convertAndSend("/gamestate/config", currentConfig);
         System.out.println("setup complete");
     }
 
@@ -311,6 +267,7 @@ public class WebSocketController {
             player.buyArea(row, col, gameState.getGameMap());
         }
         System.out.println("buy area complete");
+        gameState.getGameMap().printMap();
     }
 
     @MessageMapping("/minion-config")
@@ -318,10 +275,10 @@ public class WebSocketController {
         String playerId = message.getPlayerId();
         List<MinionType> minions = message.getMinions();
 
-        System.out.println("🧠 ได้รับ Minion config จาก playerId: " + playerId);
+        System.out.println("🧠 got Minion config from playerId: " + playerId);
 
         if (minions == null || minions.isEmpty()) {
-            System.out.println("⚠️ ไม่พบ Minions ที่ถูกส่งมา");
+            System.out.println("⚠️ Not found Minions that have send");
             return;
         }
 
@@ -341,13 +298,11 @@ public class WebSocketController {
         String sessionId = headerAccessor.getSessionId();
         String playerId = payload.get("playerId");
 
-        // เก็บ sessionId กับ playerId เพื่อใช้งานอื่น (optional)
         if (!sessionPlayerMap.containsKey(sessionId)) {
             sessionIds.add(sessionId);
             sessionPlayerMap.put(sessionId, playerId);
         }
 
-        // ✅ นับจำนวน player จริง (ที่เลือก mode แล้ว)
         int count = 0;
         if (player1Id != null) count++;
         if (player2Id != null) count++;
@@ -365,7 +320,6 @@ public class WebSocketController {
         System.out.println("🔘 [Toggle] Player: " + playerId + " toggled " + buttonId +
                 " -> isSelected: " + isSelected);
 
-        // ✅ ส่งให้ทุกคน
         messagingTemplate.convertAndSend("/topic/minion-select", payload);
     }
 
@@ -393,6 +347,27 @@ public class WebSocketController {
         messagingTemplate.convertAndSend("/topic/minion-close-modal", payload);
     }
 
+    @MessageMapping("/minion-update")
+    public void handleMinionUpdate(@Payload MinionConfigMessage message) {
+        String playerId = message.getPlayerId();
+        List<MinionType> updatedMinions = message.getMinions();
+
+        if (updatedMinions == null || updatedMinions.isEmpty()) {
+            System.out.println("⚠️ No data of minion that send to /minion-update");
+            return;
+        }
+
+        System.out.println("🛠️ update minion from playerId: " + playerId);
+        for (MinionType minion : updatedMinions) {
+            System.out.println(" Minion ID: " + minion.getId());
+            System.out.println("   Name     : " + minion.getName());
+            System.out.println("   DEF      : " + minion.getDef());
+            System.out.println("   Strategy : " + minion.getStrategy());
+        }
+
+        messagingTemplate.convertAndSend("/topic/minion-updated", message);
+    }
+
     public static WebSocketDTO getCurrentConfigGame() {
         return currentConfig;
     }
@@ -413,24 +388,32 @@ public class WebSocketController {
             player.spawnMinion(player.getMinionByName(minionName), row, col);
         }
         System.out.println("spawn minion complete");
+        gameState.getGameMap().printMap();
     }
 
     @MessageMapping("/minion/endTurn")
     @SendTo("/topic/executeMinion")
     public void ExecuteMinion(ActionOnHexGrid action) throws EvalError {
         int curPlayer = action.getCurPlayer();
+        int current_turns = GameStateWithFrontEnd.getCurrent_turns();
         if (curPlayer == 1) {
             Player player = gameState.getPlayer1();
-            GameState.executeMinion(player);
-            int current_turns = GameState.getCurrent_turns();
             player.calculateInterest(current_turns);
+            GameStateWithFrontEnd.executeMinion(player);
+            player.setHasNOTBoughtareaThisTurn();
+            player.setHasNOTSpawnedMinionThisTurn();
+            gameState.getGameState().switchTurns();
         } else {
             Player player = gameState.getPlayer2();
-            GameState.executeMinion(player);
-            int current_turns = GameState.getCurrent_turns();
             player.calculateInterest(current_turns);
+            GameStateWithFrontEnd.executeMinion(player);
+            gameState.getGameState().switchTurns();
+            player.setHasNOTBoughtareaThisTurn();
+            player.setHasNOTSpawnedMinionThisTurn();
+            GameStateWithFrontEnd.setCurrent_turns(current_turns+1);
         }
         System.out.println("execute minion complete");
+        gameState.getGameMap().printMap();
         messagingTemplate.convertAndSend("/topic/executeMinion", curPlayer);
     }
         @MessageMapping("/request-current-config")
@@ -448,9 +431,5 @@ public class WebSocketController {
             System.out.println("🔁 Game state has been fully reset.");
         }
 
-//        public static WebSocketDTO getCurrentConfigGame () {
-//            return currentConfig;
-//
-//        }
     }
 

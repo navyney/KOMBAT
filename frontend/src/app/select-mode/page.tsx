@@ -15,7 +15,7 @@ export default function SelectModePage() {
     const disableAll = useSelector((state: RootState) => state.game.disableAll);
     const lockedMode = useSelector((state: RootState) => state.game.lockedMode);
     const roomFull = useSelector((state: RootState) => state.game.roomFull);
-    const { connect, subscribe, sendMessage, isConnected } = useWebSocket();
+    const { connect, subscribe, sendMessage, isConnected, unsubscribe } = useWebSocket();
     const dispatch = useAppDispatch();
 
     useEffect(() => {
@@ -26,6 +26,14 @@ export default function SelectModePage() {
 
     useEffect(() => {
         if (!playerId || !isConnected()) return;
+
+        const subRole = subscribe("/topic/role-assigned", (message) => {
+            const { role, playerId: targetId } = JSON.parse(message.body);
+            if (targetId === playerId) {
+                localStorage.setItem("playerRole", role);
+                console.log(`🎮 You are assigned as: ${role.toUpperCase()}`);
+            }
+        });
 
         const subLockMode = subscribe("/topic/lock-mode", (message) => {
             const { selectedMode } = JSON.parse(message.body);
@@ -48,15 +56,18 @@ export default function SelectModePage() {
         }, 100);
 
         return () => {
-            subLockMode?.unsubscribe();
-            subLockAll?.unsubscribe();
-            subReset?.unsubscribe();
+            unsubscribe(subRole);
+            unsubscribe(subLockMode);
+            unsubscribe(subLockAll);
+            unsubscribe(subReset);
         };
     }, [playerId, isConnected]);
 
     const handleModeSelect = (mode: string) => {
         if (!playerId) return;
-        sendMessage("/select-mode", { mode, playerId });
+        if (playerId && isConnected()) {
+            sendMessage("/select-mode", { mode, playerId });
+        }
 
         if (mode === "pvb" || mode === "bvb") {
             router.push("/Not-pvp-config");

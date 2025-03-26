@@ -18,7 +18,7 @@ export default function StartPage() {
     const playerId = usePlayerId();
 
     useEffect(() => {
-        // แสดง playerId ที่ถูกสร้างไว้ตอนโหลด
+        // for debug player id
         console.log("🎮 Player ID:", playerId);
     }, [playerId]);
 
@@ -30,6 +30,7 @@ export default function StartPage() {
             const { role, playerId: targetId, disableButtons } = JSON.parse(message.body);
             if (targetId === playerId) {
                 localStorage.setItem("playerRole", role);
+                console.log("🎮 Player role:", role);
             }
         });
 
@@ -42,7 +43,6 @@ export default function StartPage() {
             localStorage.setItem("lockedMode", selectedMode);
         });
 
-        // ส่งเฉพาะเมื่อมี playerId ที่ถูกต้องแล้วเท่านั้น
         if (playerId) {
             console.log("📨 Sending request-lock-status with:", playerId);
             sendMessage("/request-lock-status", { playerId });
