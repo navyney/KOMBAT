@@ -182,6 +182,9 @@ public class WebSocketController {
     public void handleConfigUpdate(@Payload WebSocketDTO config) {
         currentConfig = config;
         Confi.update(config);
+//        ConfigFile configg = new ConfigFile(
+//                config.getSpawnedCost(),config.getHexPurchasedCost(),config.getInitialBudget(),config.getInitialHP(),config.getTurnBudget()
+//                ,config.getMaxBudget(),config.getInterestPercentage(),config.getMaxTurn(),config.getMaxSpawn(),1);
         System.out.println("📥 CONFIG RECEIVED FROM FRONTEND: " + config);
         messagingTemplate.convertAndSend("/topic/config-update", config);
         messagingTemplate.convertAndSend("/topic/config-reset-confirmed", config.getPlayerId());
@@ -201,6 +204,7 @@ public class WebSocketController {
         Confi.getMaxTurn();
         Confi.getMaxSpawn();
         Confi.getMoveCost();
+        //ConfigFile.getAllConFig();
     }
 
     @MessageMapping("/navigate")
