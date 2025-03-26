@@ -63,8 +63,7 @@ export const useWebSocket = () => {
         let playerId = localStorage.getItem("playerId");
 
         if (!playerId) {
-            // สร้าง playerId ใหม่ ถ้ายังไม่มี (เช่นใช้ UUID หรือ timestamp)
-            playerId = crypto.randomUUID(); // หรือ Date.now().toString()
+            playerId = crypto.randomUUID();
             localStorage.setItem("playerId", playerId);
         }
 
