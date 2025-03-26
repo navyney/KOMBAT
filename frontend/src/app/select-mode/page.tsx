@@ -15,7 +15,7 @@ export default function SelectModePage() {
     const disableAll = useSelector((state: RootState) => state.game.disableAll);
     const lockedMode = useSelector((state: RootState) => state.game.lockedMode);
     const roomFull = useSelector((state: RootState) => state.game.roomFull);
-    const { connect, subscribe, sendMessage, isConnected } = useWebSocket();
+    const { connect, subscribe, sendMessage, isConnected, unsubscribe } = useWebSocket();
     const dispatch = useAppDispatch();
 
     useEffect(() => {
@@ -56,10 +56,10 @@ export default function SelectModePage() {
         }, 100);
 
         return () => {
-            subRole?.unsubscribe();
-            subLockMode?.unsubscribe();
-            subLockAll?.unsubscribe();
-            subReset?.unsubscribe();
+            unsubscribe(subRole);
+            unsubscribe(subLockMode);
+            unsubscribe(subLockAll);
+            unsubscribe(subReset);
         };
     }, [playerId, isConnected]);
 

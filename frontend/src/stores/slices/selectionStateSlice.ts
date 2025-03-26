@@ -32,7 +32,6 @@ const selectionStateSlice = createSlice({
     name:"selectionState",
     initialState,
     reducers: {
-        // ✅ toggle ปุ่มตาม id
         toggleSelection: (state, action: PayloadAction<string>) => {
             const item = state.find(btn => btn.id === action.payload);
             if (item) {
@@ -40,7 +39,6 @@ const selectionStateSlice = createSlice({
             }
         },
 
-        // ✅ ตั้งค่าตรงๆให้ปุ่มใดปุ่มหนึ่ง
         setSelection: (
             state,
             action: PayloadAction<{ id: string; isSelected: boolean }>
@@ -51,12 +49,10 @@ const selectionStateSlice = createSlice({
             }
         },
 
-        // ✅ ตั้งค่าทั้งหมดจาก array ใหม่ (ใช้ตอนรับจาก backend)
         setAllSelections: (state, action: PayloadAction<selectionState[]>) => {
             return action.payload;
         },
 
-        // ✅ reset กลับค่าเริ่มต้น
         resetSelections: () => initialState,
     },
 });

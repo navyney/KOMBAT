@@ -5,15 +5,6 @@ import backend.WebSocketDTOs.WebSocketDTO;
 import jakarta.validation.constraints.Min;
 
 public class Confi {
-//    public static int spawn_cost = WebSocketController.getCurrentConfigGame().getSpawnedCost();
-//    public static int hex_purchase_cost = WebSocketController.getCurrentConfigGame().getHexPurchasedCost();
-//    public static int init_budget = WebSocketController.getCurrentConfigGame().getInitialBudget();
-//    public static int init_hp = WebSocketController.getCurrentConfigGame().getInitialHP();
-//    public static int turn_budget = WebSocketController.getCurrentConfigGame().getTurnBudget();
-//    public static int max_budget = WebSocketController.getCurrentConfigGame().getMaxBudget();
-//    public static int interest_pct = WebSocketController.getCurrentConfigGame().getInterestPercentage();
-//    public static int max_turns = WebSocketController.getCurrentConfigGame().getMaxTurn();
-//    public static int max_spawns = WebSocketController.getCurrentConfigGame().getMaxSpawn();
     public static int move_cost = 1;
     public static int spawn_cost;
     public static int hex_purchase_cost;
@@ -26,6 +17,7 @@ public class Confi {
     public static int max_spawns;
 
     public Confi(@Min(0) int spawnedCost, @Min(0) int hexPurchasedCost, @Min(0) int initialBudget, @Min(0) int initialHP, @Min(0) int turnBudget, @Min(0) int maxBudget, @Min(0) int interestPercentage, @Min(0) int maxTurn, @Min(0) int maxSpawn, int i) {
+
     }
 
     public static void getSpawnCost() {

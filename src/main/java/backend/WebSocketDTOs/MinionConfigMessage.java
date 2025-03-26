@@ -8,7 +8,7 @@ import java.util.List;
 @Getter
 @Setter
 public class MinionConfigMessage {
-    private String playerId;                  // ✅ มี playerId เหมือนใน WebSocketDTO
+    private String playerId;
     private List<MinionType> minions;
 
 }
