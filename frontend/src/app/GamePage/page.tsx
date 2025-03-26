@@ -9,7 +9,6 @@ import { useWebSocket } from "@/hooks/useWebsocket";
 import { usePlayerId } from "@/hooks/usePlayerId";
 import {useRouter} from "next/navigation";
 
-
 // สาธุขอให้ push ได้
 
 interface Minion {
@@ -27,9 +26,9 @@ export default function GamePage() {
     const [turn, setTurn] = useState(1);
     const [currentPlayer, setCurrentPlayer] = useState(1);
     const [winner, setWinner] = useState<number | null>(null);
-
     const playerId = usePlayerId();
     const dispatch = useAppDispatch();
+
     const [gameConfig, setGameConfig] = useState({
         spawnedCost: 0,
         hexPurchasedCost: 0,
@@ -58,6 +57,7 @@ export default function GamePage() {
     const [hasBought, setHasBought] = useState(false);
     const [hasSpawned, setHasSpawned] = useState(false);
     const [selectedMinions, setSelectedMinions] = useState<number[]>([]);
+
     const [selectedMinionType, setSelectedMinionType] = useState<Record<number, string | null>>({
         1: null,
         2: null,
@@ -67,7 +67,6 @@ export default function GamePage() {
     const [boardMinions, setBoardMinions] = useState<{ id: number, type: string, player: number }[]>([]);
     const [allyNeighbors, setAllyNeighbors] = useState<number[]>([]);
     const [opponentNeighbors, setOpponentNeighbors] = useState<number[]>([]);
-
 
     useEffect(() => {
         if (!isConnected()) connect();
@@ -93,6 +92,7 @@ export default function GamePage() {
         return () => {
             unsubscribe(subConfig);
         };
+
     }, []);
 
     useEffect(() => {

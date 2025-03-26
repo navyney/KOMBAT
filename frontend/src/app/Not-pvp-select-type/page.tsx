@@ -27,7 +27,6 @@ export default function SelectMinions() {
     const { sendMessage, subscribe, unsubscribe, connect, isConnected } = useWebSocket();
     const [players, setPlayers] = useState(0);
     const playerId = usePlayerId();
-
     const [showModal, setShowModal] = useState(false);
     const [customName, setCustomName] = useState("");
     const [customDefense, setCustomDefense] = useState<number | "">("");
@@ -66,7 +65,7 @@ export default function SelectMinions() {
         //         window.location.href = "/GamePage";
         //     }
         // });
-        // 🔔 Subscribe: Navigation
+
         const subNav = subscribe("/topic/navigate", (message) => {
             const action = message.body;
             if (action === "next") router.push("/select-type");
@@ -129,7 +128,7 @@ export default function SelectMinions() {
 
             sendMessage("/minion-config", {
                 playerId,
-                minions: [updatedMinion], // ✅ ส่งเฉพาะตัวที่กำลัง customize และถูก select เท่านั้น
+                minions: [updatedMinion],
             });
         }
 
@@ -198,7 +197,6 @@ export default function SelectMinions() {
         };
 
         dispatch(updateMinion(updatedMinion));
-        // ❌ ไม่ต้องส่ง message ไปหา backend ที่นี่
     };
 
     const isReadyToStart = selectedMinions.length > 0;

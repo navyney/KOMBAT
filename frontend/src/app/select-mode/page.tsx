@@ -47,7 +47,7 @@ export default function SelectModePage() {
         });
 
         const subReset = subscribe("/topic/mode-reset", () => {
-            dispatch(resetGame()); // or setLockedMode(null), setDisableAll(false) แล้วแต่ Redux ของพี่
+            dispatch(resetGame());
             console.log("🔃 Game mode reset received");
         });
 

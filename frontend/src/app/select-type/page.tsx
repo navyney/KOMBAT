@@ -23,14 +23,12 @@ export default function SelectMinions() {
     const stateFromRedux = useSelector((state: RootState) => state.selectionState);
     const { connect, sendMessage, isConnected, subscribe, unsubscribe } = useWebSocket();
     const playerId = usePlayerId();
-
     const [showModal, setShowModal] = useState(false);
     const [customName, setCustomName] = useState("");
     const [customDefense, setCustomDefense] = useState<number | "">("");
     const [customStrategy, setCustomStrategy] = useState("");
     const [currentMinionId, setCurrentMinionId] = useState<number | null>(null);
     const [customizingPlayer, setCustomizingPlayer] = useState<string | null>(null);
-
 
     const selectedMinions = stateFromRedux
         .filter(item => item.isSelected && item.id.startsWith("select "))
@@ -40,10 +38,6 @@ export default function SelectMinions() {
         if (!playerId) return;
         if (!isConnected()) connect();
 
-        // ✅ Join minion type selection
-
-
-        // 🔔 Subscribe: Minion select toggle
         const subToggle = subscribe("/topic/minion-select", (message) => {
             const { id, isSelected, playerId: senderId } = JSON.parse(message.body);
             if (senderId !== playerId) {
@@ -51,13 +45,10 @@ export default function SelectMinions() {
             }
         });
 
-        // 🔔 Subscribe: Minion customize apply
         const subApply = subscribe("/topic/minion-customize-apply", (message) => {
             const { id } = JSON.parse(message.body);
-            // currently unused, but you can add logic here if needed
         });
 
-        // 🔔 Subscribe: Close modal when needed
         const subClose = subscribe("/topic/minion-close-modal", (message) => {
             const { minionId } = JSON.parse(message.body);
             if (currentMinionId === minionId) {
@@ -65,7 +56,6 @@ export default function SelectMinions() {
             }
         });
 
-        // 🔔 Subscribe: Open customize modal
         const subCustomize = subscribe("/topic/minion-customize", (message) => {
             const { minionId, playerId: senderId } = JSON.parse(message.body);
 
@@ -87,7 +77,6 @@ export default function SelectMinions() {
             }
         });
 
-        // 🔔 Subscribe: Navigation
         const subNav = subscribe("/topic/navigate", (message) => {
             const action = message.body;
             if (action === "next") router.push("/select-type");
@@ -98,7 +87,7 @@ export default function SelectMinions() {
 
         const subMinionUpdated = subscribe("/topic/minion-updated", (message) => {
             const { playerId: senderId, minions } = JSON.parse(message.body);
-            if (senderId === playerId) return; // ✅ ข้ามตัวเอง
+            if (senderId === playerId) return;
 
             for (const minion of minions) {
                 dispatch(updateMinion(minion));
@@ -107,7 +96,7 @@ export default function SelectMinions() {
 
         const subUpdated = subscribe("/topic/minion-updated", (message) => {
             const { minions, playerId: senderId } = JSON.parse(message.body);
-            if (senderId === playerId) return; // อย่าอัปเดตตัวเองซ้ำ
+            if (senderId === playerId) return;
 
             minions.forEach((minion: MinionType) => {
                 dispatch(updateMinion(minion));
@@ -116,7 +105,6 @@ export default function SelectMinions() {
 
         sendMessage("/join-select-minion-type", { playerId });
 
-        // 🧼 Cleanup
         return () => {
             unsubscribe(subToggle);
             unsubscribe(subApply);
@@ -197,14 +185,13 @@ export default function SelectMinions() {
 
             dispatch(updateMinion(updatedMinion));
 
-            // ✅ Broadcast ไปยังทุกคนว่า modal นี้ปิดได้แล้ว
             sendMessage("/topic/minion-close-modal", {
                 playerId,
                 minionId: currentMinionId,
             });
         }
 
-        setShowModal(false); // ✅ ปิดของตัวเองทันที
+        setShowModal(false);
     };
 
 

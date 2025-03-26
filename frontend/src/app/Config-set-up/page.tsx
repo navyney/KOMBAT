@@ -15,10 +15,8 @@ export default function ConfigPage() {
     const router = useRouter();
     const dispatch = useAppDispatch();
     const { subscribe, sendMessage, connect, isConnected, unsubscribe } = useWebSocket();
-
     const config = useAppSelector((state) => state.config.config || {});
     const confirmedPlayers = useAppSelector((state) => state.config.confirmedPlayers);
-
     const [error, setError] = useState<string | null>(null);
     const [players, setPlayers] = useState(0);
     const playerId = usePlayerId();
@@ -27,6 +25,7 @@ export default function ConfigPage() {
         Object.values(confirmedPlayers ?? {}).every((val) => val);
 
     const youConfirmed = playerId && confirmedPlayers[playerId];
+
     const opponentConfirmed = Object.entries(confirmedPlayers).some(
         ([id, confirmed]) => id !== playerId && confirmed
     );
@@ -81,6 +80,7 @@ export default function ConfigPage() {
             unsubscribe(subNav);
             unsubscribe(subReset);
         };
+
     }, [dispatch, router, playerId]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -138,7 +138,6 @@ export default function ConfigPage() {
     return (
         <main className="flex flex-col items-center justify-center min-h-screen bg-cover bg-center w-full h-full p-8"
               style={{ backgroundImage: "url('/image/config.png')" }}>
-
             <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg mt-16 space-y-4 space-x-5">
                 <h1 className="text-xl font-bold text-center text-black">Set Up Your Game Configuration</h1>
                 <p className="text-center text-gray-600">Players Connected: {players} / 2</p>
