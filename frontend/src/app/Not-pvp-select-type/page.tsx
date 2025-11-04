@@ -142,8 +142,8 @@ export default function SelectMinions() {
             .filter(m => selectedIds.includes(m.id))
             .map(({ id, name, def, strategy }) => ({ id, name, def, strategy }));
 
-        console.log("🔥 Selected IDs:", selectedIds);
-        console.log("📦 Clean Minions:", cleanMinions);
+        console.log("-----Selected IDs:", selectedIds);
+        console.log("-----Clean Minions:", cleanMinions);
 
         sendMessage("/minion-config", {
             playerId,
