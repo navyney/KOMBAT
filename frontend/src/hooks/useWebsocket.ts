@@ -18,7 +18,7 @@ export const useWebSocket = () => {
         if (stompClient && stompClient.connected) {
             const subscription = stompClient.subscribe(destination, callback);
             activeSubscriptions.push(subscription);
-            console.log(`📡 Subscribed to ${destination}`);
+            console.log(`-Subscribed to ${destination}`);
             return subscription;
         } else {
             console.warn("-Cannot subscribe: WebSocket is not connected.-");
