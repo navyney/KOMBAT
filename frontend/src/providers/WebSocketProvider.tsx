@@ -24,7 +24,7 @@ const WebSocketProvider: React.FC<Props> = ({ children }) => {
     useEffect(() => {
         if (!playerId) return;
         if (!isConnected()) {
-            console.log("🌐 Attempting to connect WebSocket...");
+            console.log("...Attempting to connect WebSocket...");
             connect();
         }
     }, [playerId]);
@@ -59,7 +59,7 @@ const WebSocketProvider: React.FC<Props> = ({ children }) => {
                 sessionStorage.setItem("playerRole", role);
                 dispatch(setRole(role));
                 dispatch(setDisableAll(disableButtons));
-                console.log("🎮 Role assigned:", role);
+                console.log("---Role assigned:", role);
             }
         });
 
@@ -68,7 +68,7 @@ const WebSocketProvider: React.FC<Props> = ({ children }) => {
             // setLockedMode(selectedMode);
             // sessionStorage.setItem("lockedMode", selectedMode);
             dispatch(setLockedMode(selectedMode));
-            console.log("🔒 Locked mode set:", selectedMode)
+            console.log("---Locked mode set:", selectedMode)
         });
 
         const subLockAll = subscribe("/topic/lock-all", () => {
@@ -78,7 +78,7 @@ const WebSocketProvider: React.FC<Props> = ({ children }) => {
             dispatch(setDisableAll(true));
             dispatch(setFull(true));
             //dispatch(setLockedMode(null))
-            console.log("🔒 Room full - all controls disabled");
+            console.log("---Room full - all controls disabled");
         });
 
         const subNav = subscribe("/topic/navigate", (message) => {
