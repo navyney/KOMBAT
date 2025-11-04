@@ -21,7 +21,7 @@ export const useWebSocket = () => {
             console.log(`📡 Subscribed to ${destination}`);
             return subscription;
         } else {
-            console.warn("🔴 Cannot subscribe: WebSocket is not connected.");
+            console.warn("-Cannot subscribe: WebSocket is not connected.-");
         }
     };
 
@@ -29,9 +29,9 @@ export const useWebSocket = () => {
         if (subscription && stompClient && stompClient.connected) {
             subscription.unsubscribe();
             activeSubscriptions = activeSubscriptions.filter(s => s.id !== subscription.id);
-            console.log(`📴 Unsubscribed from ${subscription.id}`);
+            console.log(`Unsubscribed from ${subscription.id}`);
         } else {
-            console.warn("🔴 Cannot unsubscribe: Invalid subscription or WebSocket not connected.");
+            console.warn("-Cannot unsubscribe: Invalid subscription or WebSocket not connected.-");
         }
     };
 
@@ -43,16 +43,16 @@ export const useWebSocket = () => {
                 destination: dest,
                 body: typeof message === "string" ? message : JSON.stringify(message),
             });
-            console.log("📤 Sending message to", dest, "payload:", message);
+            console.log("Sending message to", dest, "payload:", message);
         } else {
-            console.warn("🔴 Cannot send message: WebSocket is not connected.");
+            console.warn("-Cannot send message: WebSocket is not connected.-");
         }
     };
 
 
     const connect = () => {
         if (stompClient && stompClient.connected) {
-            console.log("🟡 WebSocket already connected");
+            console.log("WebSocket already connected");
             return;
         }
 
@@ -73,16 +73,16 @@ export const useWebSocket = () => {
             reconnectDelay: 5000,
 
             onConnect: () => {
-                console.log("✅ Connected to WebSocket successfully");
+                console.log("---Connected to WebSocket successfully---");
                 stompClient?.publish({
                     destination: "/app/join-game",
                     body: JSON.stringify({ playerId }),
                 });
-                console.log("🌐 Connecting to WebSocket at:", serverUrl);
+                console.log("--Connecting to WebSocket at:", serverUrl);
                 dispatch(setPlayerId(playerId)); // when connect successfully
             },
             onDisconnect: () => {
-                console.log("⛔️ Disconnected from WebSocket");
+                console.log("---Disconnected from WebSocket---");
             },
         });
 
@@ -94,9 +94,9 @@ export const useWebSocket = () => {
             activeSubscriptions.forEach(sub => sub.unsubscribe());
             activeSubscriptions = [];
             stompClient.deactivate();
-            console.log("⛔️ WebSocket manually disconnected");
+            console.log("--WebSocket manually disconnected--");
         } else {
-            console.warn("🔴 Cannot disconnect: WebSocket not connected.");
+            console.warn("-Cannot disconnect: WebSocket not connected.-");
         }
     };
 
